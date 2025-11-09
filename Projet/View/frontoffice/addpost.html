@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Déclarer une Aide Sociale</title>
+</head>
+<body>
+  <div class="container">
+  <div class="sidebar">
+  <button onclick="window.location.href='addpost.html'">Ajouter un Post</button>
+  <button onclick="window.location.href='addpostupdate.html'">Ajouter un Post Résolu</button>
+</div>
+
+<div class="main-content">
+
+<form>
+
+  <center>
+    <h1>Déclarer un Besoin d’Aide Sociale</h1>
+
+    <form action="" method="post">
+      
+      <p>
+        <label>Titre de la publication : 
+          <input type="text" name="titre" placeholder="Ex : Aide pour une école sans mur" required>
+        </label>
+      </p>
+
+      <p>
+        <label>Type d’aide demandée : 
+          <select name="type" required>
+            <option value="">-- Sélectionner --</option>
+            <option value="vetements">Vêtements</option>
+            <option value="materiel_scolaire">Matériel scolaire</option>
+            <option value="aide_financiere">Aide financière</option>
+            <option value="construction">Construction / Réparation</option>
+            <option value="autre">Autre</option>
+          </select>
+        </label>
+      </p>
+
+      <p>
+        <label>Région concernée : 
+          <select name="region" required>
+            <option value="">-- Sélectionner la région --</option>
+            <option value="Ariana">Ariana</option>
+            <option value="Béja">Béja</option>
+            <option value="Ben Arous">Ben Arous</option>
+            <option value="Bizerte">Bizerte</option>
+            <option value="Gabès">Gabès</option>
+            <option value="Gafsa">Gafsa</option>
+            <option value="Jendouba">Jendouba</option>
+            <option value="Kairouan">Kairouan</option>
+            <option value="Kasserine">Kasserine</option>
+            <option value="Kébili">Kébili</option>
+            <option value="Le Kef">Le Kef</option>
+            <option value="Mahdia">Mahdia</option>
+            <option value="Manouba">Manouba</option>
+            <option value="Médenine">Médenine</option>
+            <option value="Monastir">Monastir</option>
+            <option value="Nabeul">Nabeul</option>
+            <option value="Sfax">Sfax</option>
+            <option value="Sidi Bouzid">Sidi Bouzid</option>
+            <option value="Siliana">Siliana</option>
+            <option value="Sousse">Sousse</option>
+            <option value="Tataouine">Tataouine</option>
+            <option value="Tozeur">Tozeur</option>
+            <option value="Tunis">Tunis</option>
+            <option value="Zaghouan">Zaghouan</option>
+          </select>
+        </label>
+      </p>
+
+      <p>
+        <label>Description du problème :<br>
+          <textarea name="description" rows="5" cols="40" placeholder="Décris le besoin ou le problème..." required></textarea>
+        </label>
+      </p>
+
+      <p>
+        Type de besoin :
+        <label><input type="radio" name="categorie" value="materiel"> Matériel</label>
+        <label><input type="radio" name="categorie" value="financier"> Financier</label>
+      </p>
+
+      <p>
+        <label>Personne à contacter : 
+          <input type="text" name="contact" placeholder="Nom ou organisation" required>
+        </label>
+      </p>
+
+      <p>
+        <label>Numéro de téléphone : 
+          <input type="tel" name="telephone" placeholder="Ex : 55 555 555" required>
+        </label>
+      </p>
+
+      <p>
+        <label>Adresse e-mail : 
+          <input type="email" name="email" placeholder="Ex : exemple@gmail.com" required>
+        </label>
+      </p>
+
+      <p>
+        <button type="submit">Publier la demande</button>
+      </p>
+
+    </form>
+  </center>
+  <script src="addpost.js"></script>
+  <link rel="stylesheet" href="addpost.css">
+</form>
+</div>
+</div>
+</body>
+</html>

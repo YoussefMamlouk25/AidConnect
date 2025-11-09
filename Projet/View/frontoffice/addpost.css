@@ -1,0 +1,147 @@
+/* ================== Styles globaux ================== */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 20px;
+}
+
+/* ================== Titre ================== */
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+/* ================== Formulaire ================== */
+form {
+  max-width: 650px;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 30px 35px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+/* ================== Paragraphes et labels ================== */
+p {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* ================== Champs de saisie ================== */
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 14px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* ================== Bouton ================== */
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0069d9;
+}
+
+/* ================== Messages sous les champs ================== */
+span {
+  font-size: 13px;
+  margin-top: 3px;
+  display: block;
+}
+
+/* ================== Champs radio ================== */
+input[type="radio"] {
+  margin-right: 5px;
+}
+
+/* ================== Responsive ================== */
+@media (max-width: 700px) {
+  form {
+    padding: 20px;
+  }
+  input, select, textarea, button {
+    font-size: 14px;
+  }
+}
+
+/* ================== Conteneur global ================== */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.container {
+  display: flex;         /* sidebar et main-content côte à côte */
+  min-height: 100vh;
+}
+
+/* ================== Sidebar ================== */
+.sidebar {
+  width: 200px;          /* largeur fixe à gauche */
+  height: 100vh;         /* pleine hauteur */
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+  border-radius: 0 15px 15px 0; /* coins droits arrondis */
+}
+
+.sidebar button {
+  width: 100%;           /* boutons plein largeur */
+  margin: 0;
+  border: none;
+  border-radius: 0; 
+  padding: 15px 0;
+  font-size: 14px;
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+}
+
+.sidebar button:hover {
+  background-color: #0056b3;
+}
+
+/* ================== Contenu principal ================== */
+.main-content {
+  flex: 1;                 /* occupe tout l'espace restant */
+  display: flex;
+  justify-content: center;  /* centre horizontalement */
+  align-items: center;      /* centre verticalement */
+  background-color: #f2f2f2;
+  padding: 20px;
+}
