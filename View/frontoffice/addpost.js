@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
   form.contact.placeholder = "Nom ou organisation";
   form.telephone.placeholder = "Ex : 55 555 555";
   form.email.placeholder = "Ex : exemple@gmail.com";
+  form.datePublication.placeholder = "Sélectionnez une date";
 
   // --- Fonction pour afficher un message d'erreur ou de succès ---
   function showMessage(input, msg, color) {
@@ -82,7 +83,43 @@ document.addEventListener("DOMContentLoaded", function() {
     else
       showMessage(emailInput, "Email valide", "green");
   });
-
+/*
+  // 🔹 Date de publication
+  const dateInput = form.datePublication;
+  dateInput.addEventListener("change", () => {
+    if (!dateInput.value) {
+      showMessage(dateInput, "Veuillez sélectionner une date de publication.", "red");
+    } else {
+      const selectedDate = new Date(dateInput.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate > today) {
+        showMessage(dateInput, "La date ne peut pas être dans le futur.", "red");
+      } else {
+        showMessage(dateInput, "Date valide", "green");
+      }
+    }
+  });
+/*
+  // 🔹 Photo
+  const photoInput = form.photo;
+  photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (!allowedTypes.includes(file.type)) {
+        showMessage(photoInput, "Type de fichier non autorisé. Utilisez JPG, PNG ou GIF.", "red");
+      } else if (file.size > maxSize) {
+        showMessage(photoInput, "La taille du fichier ne doit pas dépasser 5MB.", "red");
+      } else {
+        showMessage(photoInput, "Photo valide", "green");
+      }
+    } else {
+      showMessage(photoInput, "Aucune photo sélectionnée", "orange");
+    }
+  });
+*/
   // ---------------- Validation finale lors du submit ----------------
   form.addEventListener("submit", function(e) {
     let valid = true;
@@ -130,11 +167,39 @@ document.addEventListener("DOMContentLoaded", function() {
       valid = false;
     }
 
+    // Date de publication
+    if (!dateInput.value) {
+      showMessage(dateInput, "Veuillez sélectionner une date de publication.", "red");
+      valid = false;
+    } else {
+      const selectedDate = new Date(dateInput.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate > today) {
+        showMessage(dateInput, "La date ne peut pas être dans le futur.", "red");
+        valid = false;
+      }
+    }
+
     // Personne à contacter
     const contactInput = form.contact;
     if (contactInput.value.trim().length < 3) {
       showMessage(contactInput, "Veuillez indiquer un nom ou une organisation valide.", "red");
       valid = false;
+    }
+
+    // Photo (optionnel, mais si sélectionnée, vérifier)
+    const file = photoInput.files[0];
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (!allowedTypes.includes(file.type)) {
+        showMessage(photoInput, "Type de fichier non autorisé. Utilisez JPG, PNG ou GIF.", "red");
+        valid = false;
+      } else if (file.size > maxSize) {
+        showMessage(photoInput, "La taille du fichier ne doit pas dépasser 5MB.", "red");
+        valid = false;
+      }
     }
 
     if (!valid) {

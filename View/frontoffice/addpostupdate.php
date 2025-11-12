@@ -1,3 +1,37 @@
+<?php
+include '../../Controller/postupdatecontroller.php';
+include_once '../../Model/postupdate.php';
+
+$postUpdateC = new PostUpdateController();
+
+if(isset($_POST['titre']) &&
+  isset($_POST['description']) &&
+  isset($_POST['ville']) &&
+  isset($_POST['intervention']) &&
+  isset($_POST['joursReponse']) &&
+  isset($_POST['joursResolution'])) {
+    if(!empty($_POST['titre']) &&
+      !empty($_POST['description']) &&
+      !empty($_POST['ville']) &&
+      !empty($_POST['intervention']) &&
+      !empty($_POST['joursReponse']) &&
+      !empty($_POST['joursResolution'])) {
+        $postUpdate = new PostUpdate(
+            $_POST['titre'],
+            $_POST['description'],
+            $_POST['photo'] ?? null,
+            $_POST['ville'],
+            $_POST['intervention'],
+            $_POST['joursReponse'],
+            $_POST['joursResolution']
+        );
+        $postUpdateC->addPostUpdate($postUpdate);
+        header('Location: showpostupdate.php');
+        exit();
+    }
+}
+
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,35 +41,36 @@
 </head>
 <body>
 
-<header>
-  <nav>
-    <a href="#" class="logo">AidConnect</a>
-    <div class="nav-links">
-      <button onclick="window.location.href='addpost.html'">Ajouter un Post</button>
-      <button onclick="window.location.href='addpostupdate.html'">Ajouter un Post Résolu</button>
-    </div>
-  </nav>
-</header>
-
-<main>
+  <main>
   <h1>Publier un Problème Résolu</h1>
 
   <form action="" method="post">
     <p>
       <label>Titre du post résolu :
-        <input type="text" name="titre" placeholder="Ex : Réparation école terminée" required>
+        <input type="text" name="titre" placeholder="Ex : Réparation école terminée" >
       </label>
     </p>
 
     <p>
       <label>Description du problème résolu :<br>
-        <textarea name="description" rows="5" placeholder="Décris comment le problème a été résolu..." required></textarea>
+        <textarea name="description" rows="5" placeholder="Décris comment le problème a été résolu..." ></textarea>
+      </label>
+    </p>
+
+    <p>
+      <label>Ajouter une photo :
+        <div class="photo-upload">
+          <input type="file" name="photo" id="photo" accept="image/*" style="display: none;">
+          <label for="photo" class="photo-icon">
+            📷 Ajouter une photo
+          </label>
+        </div>
       </label>
     </p>
 
     <p>
       <label>Emplacement (ville) :
-        <select name="ville" required>
+        <select name="ville" >
           <option value="">-- Sélectionner la ville --</option>
           <option value="Ariana">Ariana</option>
           <option value="Béja">Béja</option>
@@ -67,25 +102,19 @@
 
     <p>
       <label>Intervention réalisée par :
-        <input type="text" name="intervention" placeholder="Nom ou organisation" required>
-      </label>
-    </p>
-
-    <p>
-      <label>Date de résolution :
-        <input type="date" name="dateResolu" required>
+        <input type="text" name="intervention" placeholder="Nom ou organisation" >
       </label>
     </p>
 
     <p>
       <label>Temps pour répondre (jours) :
-        <input type="number" name="joursReponse" min="0" required>
+        <input type="number" name="joursReponse" min="0" >
       </label>
     </p>
 
     <p>
       <label>Temps pour résoudre (jours) :
-        <input type="number" name="joursResolution" min="0" required>
+        <input type="number" name="joursResolution" min="0" >
       </label>
     </p>
 

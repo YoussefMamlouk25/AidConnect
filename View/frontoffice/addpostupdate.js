@@ -81,6 +81,25 @@ document.addEventListener("DOMContentLoaded", function() {
       showMessage(joursResolutionInput, "Valeur valide", "green");
   });
 
+  // 🔹 Photo
+  const photoInput = form.photo;
+  photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (!allowedTypes.includes(file.type)) {
+        showMessage(photoInput, "Type de fichier non autorisé. Utilisez JPG, PNG ou GIF.", "red");
+      } else if (file.size > maxSize) {
+        showMessage(photoInput, "La taille du fichier ne doit pas dépasser 5MB.", "red");
+      } else {
+        showMessage(photoInput, "Photo valide", "green");
+      }
+    } else {
+      showMessage(photoInput, "Aucune photo sélectionnée", "orange");
+    }
+  });
+
   // ---------------- Validation finale lors du submit ----------------
   form.addEventListener("submit", function(e) {
     let valid = true;
@@ -121,6 +140,20 @@ document.addEventListener("DOMContentLoaded", function() {
     if (isNaN(valResolution) || valResolution < 1) {
       showMessage(joursResolutionInput, "Veuillez entrer un nombre de jours valide (minimum 1).", "red");
       valid = false;
+    }
+
+    // Photo (optionnel, mais si sélectionnée, vérifier)
+    const file = photoInput.files[0];
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (!allowedTypes.includes(file.type)) {
+        showMessage(photoInput, "Type de fichier non autorisé. Utilisez JPG, PNG ou GIF.", "red");
+        valid = false;
+      } else if (file.size > maxSize) {
+        showMessage(photoInput, "La taille du fichier ne doit pas dépasser 5MB.", "red");
+        valid = false;
+      }
     }
 
     if (!valid) {
