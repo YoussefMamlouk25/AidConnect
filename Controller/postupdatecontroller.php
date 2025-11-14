@@ -4,54 +4,83 @@ require_once __DIR__ . '/../Model/postupdate.php';
 
 class PostUpdateController {
     public function addPostUpdate(PostUpdate $postUpdate) {
-        $sql = "INSERT INTO postupdate VALUES (NULL, :titre, :description, :photo, :ville, :intervention, :joursReponse, :joursResolution)";
+        $sql = "INSERT INTO update_post 
+                (id_post, id_user, texte, media, realiser, temp_reponse, temp_resolue)
+                VALUES (:id_post, :id_user, :texte, :media, :realiser, :temp_reponse, :temp_resolue)";
         $bd = Config::getConnexion();
 
         try {
             $query = $bd->prepare($sql);
-            $query->execute([
-                            ':titre' => $postUpdate->getTitre(),
-                            ':description' => $postUpdate->getDescription(),
-                            ':photo' => $postUpdate->getPhoto(),
-                            ':ville' => $postUpdate->getVille(),
-                            ':intervention' => $postUpdate->getIntervention(),
-                            ':joursReponse' => $postUpdate->getJoursReponse(),
-                            ':joursResolution' => $postUpdate->getJoursResolution()]);
-             
+            
+            // Gérer media : si null, utiliser chaîne vide
+            $media = $postUpdate->getMedia();
+            if ($media === null) {
+                $media = '';
+            }
+            
+            $result = $query->execute([
+                ':id_post' => $postUpdate->getIdPost(),
+                ':id_user' => $postUpdate->getIdUser(),
+                ':texte' => $postUpdate->getTexte(),
+                ':media' => $media,
+                ':realiser' => $postUpdate->getRealiser(),
+                ':temp_reponse' => $postUpdate->getTempReponse(),
+                ':temp_resolue' => $postUpdate->getTempResolue()
+            ]);
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Erreur PDO lors de l'ajout du post update : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo "Erreur SQL : " . $e->getMessage() . "<br>";
+            }
+            return false;
         } catch (Exception $e) {
-            echo 'Erreur : ' . $e->getMessage();
+            error_log("Erreur lors de l'ajout du post update : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo "Erreur : " . $e->getMessage() . "<br>";
+            }
+            return false;
         }
-       
-
     }
 
     public function getAllPostUpdates() {
-        $sql = "SELECT * FROM postupdate";
+        $sql = "SELECT up.*, p.titre, p.nom, p.region 
+                FROM update_post up
+                INNER JOIN post p ON up.id_post = p.id_post
+                ORDER BY up.id_update_post DESC";
         $bd = Config::getConnexion();
         try {
             $list = $bd->query($sql);
             return $list;
         } catch (Exception $e) {
-            echo 'Erreur : ' . $e->getMessage();
+            error_log("Erreur lors de la récupération des posts update : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo 'Erreur : ' . $e->getMessage();
+            }
             return [];
         }
     }
     
     public function deletePostUpdate($id) {
-        $sql = "DELETE FROM postupdate WHERE id = :id";
+        $sql = "DELETE FROM update_post WHERE id_update_post = :id";
         $bd = Config::getConnexion();
         try {
             $rep = $bd->prepare($sql);
             $rep->bindValue(':id', $id);
             $rep->execute();
+            return true;
         } catch (Exception $e) {
-            echo 'Erreur : ' . $e->getMessage();
+            error_log("Erreur lors de la suppression du post update : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo 'Erreur : ' . $e->getMessage();
+            }
+            return false;
         }
-        
     }
 
     public function getPostUpdateById($id) {
-        $sql = "SELECT * FROM postupdate WHERE id = :id";
+        $sql = "SELECT * FROM update_post WHERE id_update_post = :id";
         $bd = Config::getConnexion();
         try {
             $query = $bd->prepare($sql);
@@ -59,40 +88,62 @@ class PostUpdateController {
             $query->execute();
             return $query->fetch(); // retourne une seule ligne (le postupdate)
         } catch (Exception $e) {
-            echo 'Erreur : ' . $e->getMessage();
+            error_log("Erreur lors de la récupération du post update : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo 'Erreur : ' . $e->getMessage();
+            }
             return false;
         }
     }
 
     public function updatePostUpdate(PostUpdate $postUpdate, $id) {
-        $sql = "UPDATE postupdate 
-                SET titre = :titre, 
-                    description = :description, 
-                    photo = :photo, 
-                    ville = :ville, 
-                    intervention = :intervention, 
-                    joursReponse = :joursReponse, 
-                    joursResolution = :joursResolution 
-                WHERE id = :id";
+        $sql = "UPDATE update_post 
+                SET id_post = :id_post,
+                    id_user = :id_user,
+                    texte = :texte, 
+                    media = :media, 
+                    realiser = :realiser, 
+                    temp_reponse = :temp_reponse, 
+                    temp_resolue = :temp_resolue 
+                WHERE id_update_post = :id";
 
         $bd = Config::getConnexion();
 
         try {
             $query = $bd->prepare($sql);
-            $query->execute([
-                ':titre' => $postUpdate->getTitre(),
-                ':description' => $postUpdate->getDescription(),
-                ':photo' => $postUpdate->getPhoto(),
-                ':ville' => $postUpdate->getVille(),
-                ':intervention' => $postUpdate->getIntervention(),
-                ':joursReponse' => $postUpdate->getJoursReponse(),
-                ':joursResolution' => $postUpdate->getJoursResolution(),
+            
+            // Gérer media : si null, utiliser chaîne vide
+            $media = $postUpdate->getMedia();
+            if ($media === null) {
+                $media = '';
+            }
+            
+            $result = $query->execute([
+                ':id_post' => $postUpdate->getIdPost(),
+                ':id_user' => $postUpdate->getIdUser(),
+                ':texte' => $postUpdate->getTexte(),
+                ':media' => $media,
+                ':realiser' => $postUpdate->getRealiser(),
+                ':temp_reponse' => $postUpdate->getTempReponse(),
+                ':temp_resolue' => $postUpdate->getTempResolue(),
                 ':id' => $id
             ]);
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Erreur PDO lors de la mise à jour du post update : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo "Erreur SQL : " . $e->getMessage() . "<br>";
+            }
+            return false;
         } catch (Exception $e) {
-            echo 'Erreur : ' . $e->getMessage();
+            error_log("Erreur lors de la mise à jour du post update : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo 'Erreur : ' . $e->getMessage();
+            }
+            return false;
         }
     }
-
-
 }
+
+?>

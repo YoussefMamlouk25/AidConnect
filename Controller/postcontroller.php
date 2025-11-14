@@ -23,6 +23,12 @@ class PostController {
             $dateCreation = date('Y-m-d');
         }
         
+        // Gérer media : si null, utiliser chaîne vide
+        $media = $post->getMedia();
+        if ($media === null) {
+            $media = '';
+        }
+        
         $result = $query->execute([
             ':id_user' => $id_user, // peut être null
             ':nom' => $post->getNom(),
@@ -32,7 +38,7 @@ class PostController {
             ':region' => $post->getRegion(),
             ':description' => $post->getDescription(),
             ':date_creation' => $dateCreation,
-            ':media' => $post->getMedia()
+            ':media' => $media
         ]);
         
         return $result;
@@ -118,6 +124,12 @@ class PostController {
                 $dateCreation = date('Y-m-d');
             }
             
+            // Gérer media : si null, utiliser chaîne vide
+            $media = $post->getMedia();
+            if ($media === null) {
+                $media = '';
+            }
+            
             $query = $bd->prepare($sql);
             $result = $query->execute([
                 ':titre' => $post->getTitre(),
@@ -126,7 +138,7 @@ class PostController {
                 ':email' => $post->getEmail(),
                 ':region' => $post->getRegion(),
                 ':description' => $post->getDescription(),
-                ':media' => $post->getMedia(),
+                ':media' => $media,
                 ':date_creation' => $dateCreation,
                 ':id' => $id
             ]);

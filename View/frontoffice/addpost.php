@@ -27,7 +27,7 @@ if (
         !empty($_POST['description'])
     ) {
         // Gestion de l'image
-        $media = null;
+        $media = ''; // Chaîne vide au lieu de null si pas de photo
         if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = '../../public/uploads/';
             // Créer le dossier s'il n'existe pas
@@ -69,19 +69,21 @@ if (
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Ajouter un Post</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AidConnect - Ajouter un Post</title>
     <link rel="stylesheet" href="addpost.css">
 </head>
 <body>
-    <h1>Ajouter un Post</h1>
-    
-    <?php if (isset($error)): ?>
-        <div style="color: red; padding: 10px; background: #ffe6e6; border: 1px solid red; margin-bottom: 20px;">
-            <?php echo htmlspecialchars($error); ?>
-        </div>
-    <?php endif; ?>
+    <main>
+        <h1>Ajouter un Post</h1>
+        
+        <?php if (isset($error)): ?>
+            <div class="error-message">
+                <?php echo htmlspecialchars($error); ?>
+            </div>
+        <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
         <p>
             <label>Titre :
                 <input type="text" name="titre">
@@ -96,49 +98,46 @@ if (
 
         <p>
             <label>Numéro de téléphone :
-                <input type="tel" name="numero" pattern="[0-9]{8,15}" placeholder="Ex: 12345678">
+                <input type="tel" name="numero" >
             </label>
         </p>
 
         <p>
             <label>Email :
-                <input type="email" name="email" placeholder="exemple@domaine.com">
+                <input type="email" name="email" >
             </label>
         </p>
 
         <p>
-            
-    <label>Région :
-        <select name="region">
-            <option value="">-- Sélectionner --</option>
-            <option value="Ariana">Ariana</option>
-            <option value="Béja">Béja</option>
-            <option value="Ben Arous">Ben Arous</option>
-            <option value="Bizerte">Bizerte</option>
-            <option value="Gabes">Gabes</option>
-            <option value="Gafsa">Gafsa</option>
-            <option value="Jendouba">Jendouba</option>
-            <option value="Kairouan">Kairouan</option>
-            <option value="Kasserine">Kasserine</option>
-            <option value="Kébili">Kébili</option>
-            <option value="Le Kef">Le Kef</option>
-            <option value="Mahdia">Mahdia</option>
-            <option value="Manouba">Manouba</option>
-            <option value="Médenine">Médenine</option>
-            <option value="Monastir">Monastir</option>
-            <option value="Nabeul">Nabeul</option>
-            <option value="Sfax">Sfax</option>
-            <option value="Sidi Bouzid">Sidi Bouzid</option>
-            <option value="Siliana">Siliana</option>
-            <option value="Sousse">Sousse</option>
-            <option value="Tataouine">Tataouine</option>
-            <option value="Tozeur">Tozeur</option>
-            <option value="Tunis">Tunis</option>
-            <option value="Zaghouan">Zaghouan</option>
-        </select>
-    </label>
-
-
+            <label>Région :
+                <select name="region">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="Ariana">Ariana</option>
+                    <option value="Béja">Béja</option>
+                    <option value="Ben Arous">Ben Arous</option>
+                    <option value="Bizerte">Bizerte</option>
+                    <option value="Gabes">Gabes</option>
+                    <option value="Gafsa">Gafsa</option>
+                    <option value="Jendouba">Jendouba</option>
+                    <option value="Kairouan">Kairouan</option>
+                    <option value="Kasserine">Kasserine</option>
+                    <option value="Kébili">Kébili</option>
+                    <option value="Le Kef">Le Kef</option>
+                    <option value="Mahdia">Mahdia</option>
+                    <option value="Manouba">Manouba</option>
+                    <option value="Médenine">Médenine</option>
+                    <option value="Monastir">Monastir</option>
+                    <option value="Nabeul">Nabeul</option>
+                    <option value="Sfax">Sfax</option>
+                    <option value="Sidi Bouzid">Sidi Bouzid</option>
+                    <option value="Siliana">Siliana</option>
+                    <option value="Sousse">Sousse</option>
+                    <option value="Tataouine">Tataouine</option>
+                    <option value="Tozeur">Tozeur</option>
+                    <option value="Tunis">Tunis</option>
+                    <option value="Zaghouan">Zaghouan</option>
+                </select>
+            </label>
         </p>
 
         <p>
@@ -149,7 +148,12 @@ if (
 
         <p>
             <label>Photo :
-                <input type="file" name="media" accept="image/*">
+                <div class="photo-upload">
+                    <input type="file" name="media" id="media" accept="image/*" class="file-input-hidden">
+                    <label for="media" class="photo-icon">
+                        📷 Ajouter une photo
+                    </label>
+                </div>
             </label>
         </p>
 
@@ -162,8 +166,8 @@ if (
         <p>
             <button type="submit">Publier</button>
         </p>
-    </form>
-
+        </form>
+    </main>
     
     <script src="addpost.js"></script>
 </body>

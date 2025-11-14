@@ -169,6 +169,39 @@ body {
     margin-bottom: 0;
 }
 
+.status-resolved {
+    background-color: #42b72a;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.post-resolution-info {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e4e6eb;
+    background-color: #f0f9ff;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.resolution-item {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.resolution-item:last-child {
+    margin-bottom: 0;
+}
+
+.resolution-item strong {
+    color: #1877f2;
+    margin-right: 8px;
+}
+
 .contact-item strong {
     color: #1c1e21;
     margin-right: 8px;
@@ -203,6 +236,15 @@ body {
 
 .btn-edit:hover {
     background-color: #d8dadf;
+}
+
+.btn-resolve {
+    background-color: #42b72a;
+    color: white;
+}
+
+.btn-resolve:hover {
+    background-color: #36a420;
 }
 
 .btn-delete {

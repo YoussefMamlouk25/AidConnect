@@ -1,8 +1,8 @@
 /* ===== GLOBAL ===== */
 body {
   font-family: "Poppins", sans-serif;
-  background: #ffffff; /* fond blanc */
-  color: #000000; /* texte noir */
+  background: #ffffff;
+  color: #000000;
   line-height: 1.6;
   margin: 0;
   padding: 0;
@@ -13,7 +13,7 @@ header {
   position: fixed;
   top: 0;
   width: 100%;
-  background: #ffffff; /* fond blanc */
+  background: #ffffff;
   border-bottom: 1px solid #ddd;
   z-index: 1000;
   padding: 10px 0;
@@ -30,28 +30,29 @@ nav {
 
 /* ===== LOGO ===== */
 .logo {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: #52a0f2; /* rouge simple */
+  color: #0f5fcc;
   text-decoration: none;
 }
 
-/* ===== BOUTONS DU HEADER ===== */
+/* ===== NAV BUTTONS ===== */
 .nav-links button {
   padding: 8px 16px;
   margin-left: 10px;
   border-radius: 25px;
   border: none;
-  background: #0f5fcc; /* rouge simple */
-  color: #ffffff; /* texte blanc */
+  background: #0f5fcc;
+  color: #ffffff;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s;
 }
 
 .nav-links button:hover {
-  background: #0f5fcc; /* rouge légèrement plus foncé au survol */
+  background: #0d4fb0;
   transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 50, 255, 0.25);
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -61,79 +62,122 @@ main {
   padding: 0 20px;
 }
 
-/* ===== TITRE ===== */
 h1 {
   text-align: center;
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
-  color: #0f5fcc; /* rouge simple */
+  color: #0f5fcc;
 }
 
 /* ===== FORMULAIRE ===== */
 form {
-  background: #ffffff;
+  background: #f9f9f9;
   padding: 2rem;
   border-radius: 15px;
   border: 1px solid #ddd;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
 }
 
-/* ===== CHAMPS ===== */
+/* ===== CHAMPS FORM ===== */
 input, select, textarea {
   width: 100%;
   padding: 0.8rem;
   margin-bottom: 1rem;
   border: 1px solid #ccc;
   border-radius: 10px;
-  background: #f9f9f9;
+  background: #ffffff;
   color: #000000;
   font-size: 1rem;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
 }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: #0f5fcc;
-  box-shadow: 0 0 10px rgba(15, 95, 204, 0.2);
 }
 
-/* ===== BOUTON FORMULAIRE ===== */
-form button {
-  width: 100%;
-  padding: 0.8rem;
-  border-radius: 30px;
-  background: #0f5fcc; /* rouge simple */
-  color: #ffffff;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.3s;
+/* Message d'erreurs JS */
+input + span,
+select + span,
+textarea + span {
+  display: block;
+  margin-top: -5px;
+  margin-bottom: 10px;
+  font-size: 13px;
 }
 
-form button:hover {
-  background: #0f5fcc; /* rouge foncé au survol */
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
 }
 
-/* ===== PHOTO UPLOAD ===== */
+/* ===== FILE UPLOAD ===== */
 .photo-upload {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .photo-icon {
   display: inline-block;
-  padding: 0.8rem;
+  padding: 0.8rem 1.2rem;
   background: #0f5fcc;
   color: #ffffff;
   border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
   transition: 0.3s;
-  border: 1px solid #0f5fcc;
 }
 
 .photo-icon:hover {
-  background: #0f5fcc;
+  background: #0d4fb0;
   transform: translateY(-2px);
+}
+
+/* ===== SUBMIT BUTTON ===== */
+form button {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 30px;
+  background: #0f5fcc;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s;
+}
+
+form button:hover {
+  background: #0d4fb0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 50, 255, 0.25);
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-message {
+  color: red;
+  padding: 10px;
+  background: #ffe6e6;
+  border: 1px solid red;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+/* ===== FILE INPUT HIDDEN ===== */
+.file-input-hidden {
+  display: none;
+}
+
+/* ===== VALIDATION MESSAGES ===== */
+.validation-message {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s;
 }
 
 /* ===== RESPONSIVE ===== */

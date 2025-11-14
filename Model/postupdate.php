@@ -1,55 +1,54 @@
 <?php
 
 class PostUpdate {
-    private $id;
-    private $titre;
-    private $description;
-    private $photo;
-    private $ville;
-    private $intervention;
-    private $joursReponse;
-    private $joursResolution;
+    private $id_update_post;
+    private $id_post;
+    private $id_user;
+    private $texte;
+    private $media;
+    private $realiser;
+    private $temp_reponse;
+    private $temp_resolue;
 
     public function __construct(
-        $id,
-        $titre,
-        $description,
-        $photo,
-        $ville,
-        $intervention,
-        $joursReponse,
-        $joursResolution
+        $id_post,
+        $texte,
+        $id_update_post = null,
+        $id_user = null,
+        $media = '',
+        $realiser = '',
+        $temp_reponse = '',
+        $temp_resolue = ''
     ) {
-        $this->id = $id;
-        $this->titre = $titre;
-        $this->description = $description;
-        $this->photo = $photo;
-        $this->ville = $ville;
-        $this->intervention = $intervention;
-        $this->joursReponse = $joursReponse;
-        $this->joursResolution = $joursResolution;
+        $this->id_update_post = $id_update_post;
+        $this->id_post = $id_post;
+        $this->id_user = $id_user;
+        $this->texte = $texte;
+        $this->media = $media;
+        $this->realiser = $realiser;
+        $this->temp_reponse = $temp_reponse;
+        $this->temp_resolue = $temp_resolue;
     }
 
     // --- Getters ---
-    public function getId() { return $this->id; }
-    public function getTitre() { return $this->titre; }
-    public function getDescription() { return $this->description; }
-    public function getPhoto() { return $this->photo; }
-    public function getVille() { return $this->ville; }
-    public function getIntervention() { return $this->intervention; }
-    public function getJoursReponse() { return $this->joursReponse; }
-    public function getJoursResolution() { return $this->joursResolution; }
+    public function getIdUpdatePost() { return $this->id_update_post; }
+    public function getIdPost() { return $this->id_post; }
+    public function getIdUser() { return $this->id_user; }
+    public function getTexte() { return $this->texte; }
+    public function getMedia() { return $this->media; }
+    public function getRealiser() { return $this->realiser; }
+    public function getTempReponse() { return $this->temp_reponse; }
+    public function getTempResolue() { return $this->temp_resolue; }
 
     // --- Setters ---
-    public function setId($id) { $this->id = $id; }
-    public function setTitre($titre) { $this->titre = $titre; }
-    public function setDescription($description) { $this->description = $description; }
-    public function setPhoto($photo) { $this->photo = $photo; }
-    public function setVille($ville) { $this->ville = $ville; }
-    public function setIntervention($intervention) { $this->intervention = $intervention; }
-    public function setJoursReponse($joursReponse) { $this->joursReponse = $joursReponse; }
-    public function setJoursResolution($joursResolution) { $this->joursResolution = $joursResolution; }
+    public function setIdUpdatePost($id_update_post) { $this->id_update_post = $id_update_post; }
+    public function setIdPost($id_post) { $this->id_post = $id_post; }
+    public function setIdUser($id_user) { $this->id_user = $id_user; }
+    public function setTexte($texte) { $this->texte = $texte; }
+    public function setMedia($media) { $this->media = $media; }
+    public function setRealiser($realiser) { $this->realiser = $realiser; }
+    public function setTempReponse($temp_reponse) { $this->temp_reponse = $temp_reponse; }
+    public function setTempResolue($temp_resolue) { $this->temp_resolue = $temp_resolue; }
 }
 
 ?>
-

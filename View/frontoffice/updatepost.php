@@ -44,7 +44,7 @@ if (!$postData) {
             !empty($_POST['description'])
         ) {
             // Gestion de l'image
-            $media = $postData['media']; // Garder l'ancienne image par défaut
+            $media = !empty($postData['media']) ? $postData['media'] : ''; // Garder l'ancienne image par défaut ou chaîne vide
             if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
                 $uploadDir = '../../public/uploads/';
                 // Créer le dossier s'il n'existe pas
