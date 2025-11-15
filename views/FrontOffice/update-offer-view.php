@@ -51,7 +51,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
       <?php if ($id_offer > 0 && $offerData): ?>
         <div class="card mb-4 border-primary">
           <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="fas fa-gift me-2"></i>Original Offer</h5>
+            <h5 class="mb-0">Original Offer</h5>
           </div>
           <div class="card-body">
             <p><strong>Name:</strong> <?php echo e($offerData['nom']); ?></p>
@@ -59,7 +59,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             <p><strong>Type:</strong> <?php echo e($offerData['type_don']); ?></p>
             <p><strong>Description:</strong> <?php echo nl2br(e($offerData['description'])); ?></p>
             <a href="update-offer-form.php?id_offer=<?php echo $id_offer; ?>" class="btn btn-sm btn-success mt-2">
-              <i class="fas fa-reply me-1"></i>Reply to This Offer
+              Reply to This Offer
             </a>
           </div>
         </div>
@@ -68,7 +68,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
       <h5 class="mb-3 text-center">Replies & Updates</h5>
       <?php if ($deleted): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-          <i class="fas fa-check-circle me-2"></i>Reply deleted successfully!
+          Reply deleted successfully!
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <?php endif; ?>
@@ -89,27 +89,27 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
               <div class="post-header">
                 <div class="post-avatar" style="background: linear-gradient(45deg, <?php echo $is_creator_update ? '#667eea 0%, #764ba2 100%' : '#28a745 0%, #20c997 100%'; ?>);">
                   <?php if ($is_creator_update): ?>
-                    <i class="fas fa-sync-alt"></i>
+                    U
                   <?php else: ?>
-                    <i class="fas fa-reply"></i>
+                    R
                   <?php endif; ?>
                 </div>
                 <div>
                   <strong class="text-dark">
                     <?php if ($is_creator_update): ?>
-                      <i class="fas fa-crown text-warning me-1"></i>Offer Update #<?php echo e($update['id_update_offer']); ?>
+                      Offer Update #<?php echo e($update['id_update_offer']); ?>
                     <?php else: ?>
                       Reply #<?php echo e($update['id_update_offer']); ?>
                     <?php endif; ?>
                   </strong><br>
                   <small class="text-muted">
                     <?php if ($update['id_user'] !== null && $update['id_user'] > 0): ?>
-                      <i class="fas fa-user"></i> User ID: <?php echo e($update['id_user']); ?>
+                      User ID: <?php echo e($update['id_user']); ?>
                     <?php else: ?>
-                      <i class="fas fa-user-secret"></i> Anonymous
+                      Anonymous
                     <?php endif; ?>
                     <?php if ($update['id_offer']): ?>
-                      • <i class="fas fa-link"></i> Offer ID: <?php echo e($update['id_offer']); ?>
+                      • Offer ID: <?php echo e($update['id_offer']); ?>
                     <?php endif; ?>
                   </small>
                 </div>
@@ -131,8 +131,8 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                 <?php endif; ?>
               </div>
               <div class="post-footer">
-                <a href="update-offer-edit.php?id=<?= (int)$update['id_update_offer'] ?>" class="post-action text-decoration-none"><i class="fas fa-edit"></i> Edit</a>
-                <a href="update-offer-delete.php?id=<?= (int)$update['id_update_offer'] ?>" class="post-action text-decoration-none"><i class="fas fa-trash"></i> Delete</a>
+                <a href="update-offer-edit.php?id=<?= (int)$update['id_update_offer'] ?>" class="post-action text-decoration-none">Edit</a>
+                <a href="update-offer-delete.php?id=<?= (int)$update['id_update_offer'] ?>" class="post-action text-decoration-none">Delete</a>
               </div>
             </div>
           <?php endforeach; ?>

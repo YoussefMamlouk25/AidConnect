@@ -52,7 +52,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
       <h5 class="mb-3 text-center">Volunteer Posts</h5>
       <?php if ($deleted): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-          <i class="fas fa-check-circle me-2"></i>Volunteer deleted successfully!
+          Volunteer deleted successfully!
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <?php endif; ?>
@@ -71,12 +71,12 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                 </div>
                 <div>
                   <strong class="text-dark"><?= e($offer['nom']) ?></strong><br>
-                  <small class="text-muted"><i class="fas fa-envelope"></i> <?= e($offer['email']) ?> • <i class="fas fa-hands-helping"></i> Volunteer</small>
+                  <small class="text-muted"><?= e($offer['email']) ?> • Volunteer</small>
                 </div>
               </div>
               <div class="post-content">
-                <p><i class="fas fa-gift"></i> <strong>Type de don:</strong> <?= e($offer['type_don']) ?></p>
-                <p><i class="fas fa-phone"></i> <strong>Numéro:</strong> <?= e($offer['num']) ?></p>
+                <p><strong>Type de don:</strong> <?= e($offer['type_don']) ?></p>
+                <p><strong>Numéro:</strong> <?= e($offer['num']) ?></p>
                 <p><?= nl2br(e($offer['description'])) ?></p>
                 <?php if (!empty($offer['media'])): ?>
                   <div class="post-media">
@@ -93,20 +93,20 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                 <?php endif; ?>
               </div>
               <div class="post-footer">
-                <div class="post-action" onclick="alert('Liked!')"><i class="fas fa-thumbs-up"></i> Like <span class="like-count">0</span></div>
+                <div class="post-action" onclick="alert('Liked!')">Like <span class="like-count">0</span></div>
                 <?php if ($offer['is_creator']): ?>
-                  <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none"><i class="fas fa-sync-alt"></i> Update</a>
+                  <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none">Update</a>
                 <?php else: ?>
-                  <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none"><i class="fas fa-reply"></i> Reply</a>
+                  <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none">Reply</a>
                 <?php endif; ?>
                 <a href="update-offer-view.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none">
-                  <i class="fas fa-comments"></i> Updates 
+                  Updates 
                   <?php if ($offer['updates_count'] > 0): ?>
                     <span class="badge bg-primary"><?= $offer['updates_count'] ?></span>
                   <?php endif; ?>
                 </a>
-                <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none"><i class="fas fa-edit"></i> Edit</a>
-                <a href="volunteer-delete.php?id=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none"><i class="fas fa-trash"></i> Delete</a>
+                <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none">Edit</a>
+                <a href="volunteer-delete.php?id=<?= (int)$offer['id_offer'] ?>" class="post-action text-decoration-none">Delete</a>
               </div>
             </div>
           <?php endforeach; ?>

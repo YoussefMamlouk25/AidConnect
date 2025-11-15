@@ -9,11 +9,6 @@ require_once __DIR__ . '/../../Controller/updateoffercontroller.php';
 
 $updateOfferC = new UpdateOfferController();
 
-// CSRF token
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 // Get the update ID from URL
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -34,27 +29,23 @@ $error = null;
 
 // Handle form submission for deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
-    if (isset($_POST['csrf_token']) && hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        // Delete the media file if it exists
-        if (!empty($updateData['media'])) {
-            $mediaPath = __DIR__ . '/../../public/uploads/' . $updateData['media'];
-            if (file_exists($mediaPath)) {
-                @unlink($mediaPath);
-            }
+    // Delete the media file if it exists
+    if (!empty($updateData['media'])) {
+        $mediaPath = __DIR__ . '/../../public/uploads/' . $updateData['media'];
+        if (file_exists($mediaPath)) {
+            @unlink($mediaPath);
         }
-        
-        // Delete the update from database
-        $result = $updateOfferC->deleteUpdateOffer($id);
-        
-        if ($result) {
-            $redirectUrl = $updateData['id_offer'] ? 'update-offer-view.php?id_offer=' . $updateData['id_offer'] . '&deleted=1' : 'update-offer-view.php?deleted=1';
-            header('Location: ' . $redirectUrl);
-            exit();
-        } else {
-            $error = "Erreur lors de la suppression. Veuillez réessayer.";
-        }
+    }
+    
+    // Delete the update from database
+    $result = $updateOfferC->deleteUpdateOffer($id);
+    
+    if ($result) {
+        $redirectUrl = $updateData['id_offer'] ? 'update-offer-view.php?id_offer=' . $updateData['id_offer'] . '&deleted=1' : 'update-offer-view.php?deleted=1';
+        header('Location: ' . $redirectUrl);
+        exit();
     } else {
-        $error = "Token de sécurité invalide. Veuillez réessayer.";
+        $error = "Erreur lors de la suppression. Veuillez réessayer.";
     }
 }
 
@@ -148,7 +139,6 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                 </div>
 
                 <form method="POST" id="deleteForm">
-                  <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
                   <input type="hidden" name="confirm_delete" value="1">
                   
                   <div class="d-grid gap-2 mt-4">

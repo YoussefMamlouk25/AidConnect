@@ -9,11 +9,6 @@ require_once __DIR__ . '/../../Controller/offercontroller.php';
 
 $offerC = new OfferController();
 
-// CSRF token
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 // Get the offer ID from URL
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -35,26 +30,22 @@ $success = null;
 
 // Handle form submission for deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
-    if (isset($_POST['csrf_token']) && hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        // Delete the media file if it exists
-        if (!empty($offerData['media'])) {
-            $mediaPath = __DIR__ . '/../../public/uploads/' . $offerData['media'];
-            if (file_exists($mediaPath)) {
-                @unlink($mediaPath);
-            }
+    // Delete the media file if it exists
+    if (!empty($offerData['media'])) {
+        $mediaPath = __DIR__ . '/../../public/uploads/' . $offerData['media'];
+        if (file_exists($mediaPath)) {
+            @unlink($mediaPath);
         }
-        
-        // Delete the offer from database
-        $result = $offerC->deleteOffer($id);
-        
-        if ($result) {
-            header('Location: volunteer-view.php?deleted=1');
-            exit();
-        } else {
-            $error = "Erreur lors de la suppression de l'offre. Veuillez réessayer.";
-        }
+    }
+    
+    // Delete the offer from database
+    $result = $offerC->deleteOffer($id);
+    
+    if ($result) {
+        header('Location: volunteer-view.php?deleted=1');
+        exit();
     } else {
-        $error = "Token de sécurité invalide. Veuillez réessayer.";
+        $error = "Erreur lors de la suppression de l'offre. Veuillez réessayer.";
     }
 }
 
