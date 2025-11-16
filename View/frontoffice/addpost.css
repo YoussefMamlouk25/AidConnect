@@ -120,6 +120,10 @@ label {
   gap: 10px;
 }
 
+.file-input-hidden {
+  display: none;
+}
+
 .photo-icon {
   display: inline-block;
   padding: 0.8rem 1.2rem;
@@ -156,6 +160,26 @@ form button:hover {
   box-shadow: 0 6px 18px rgba(0, 50, 255, 0.25);
 }
 
+.btn-cancel {
+  display: inline-block;
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 0.5rem;
+  border-radius: 30px;
+  background: #6c757d;
+  color: #ffffff;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.btn-cancel:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
 /* ===== ERROR MESSAGE ===== */
 .error-message {
   color: red;
@@ -166,9 +190,30 @@ form button:hover {
   border-radius: 8px;
 }
 
-/* ===== FILE INPUT HIDDEN ===== */
-.file-input-hidden {
-  display: none;
+/* Styles pour les messages d'erreur et l'aperçu de la photo actuelle */
+.form-error {
+  color: red;
+  padding: 10px;
+  background: #ffe6e6;
+  border: 1px solid red;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.current-media {
+  margin: 10px 0;
+}
+.current-media img {
+  width: 150px;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 6px;
+}
+.current-media small {
+  display: block;
+  margin-top: 6px;
+  color: #666;
 }
 
 /* ===== VALIDATION MESSAGES ===== */

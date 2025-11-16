@@ -117,6 +117,7 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
     <meta charset="UTF-8">
     <title>Modifier un Post</title>
     <link rel="stylesheet" href="addpost.css">
+    <link rel="stylesheet" href="showpost.css">
 </head>
 <body>
     <h1>Modifier un Post</h1>
@@ -208,6 +209,8 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
         <p>
             <label>Nouvelle photo (laisser vide pour conserver l'actuelle) :
                 <input type="file" name="media" accept="image/*">
+              
+                 
             </label>
         </p>
 
@@ -218,8 +221,11 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
         </p>
 
         <p>
-            <button type="submit">Mettre à jour</button>
-            <a href="showPosts.php" style="margin-left: 10px; padding: 10px 20px; background-color: #ccc; color: black; text-decoration: none; border-radius: 5px;">Annuler</a>
+            <button type="submit" class="btn-update">Mettre à jour</button>
+        </p>
+
+        <p>
+            <a href="showPosts.php" class="btn-cancel">Annuler</a>
         </p>
     </form>
 

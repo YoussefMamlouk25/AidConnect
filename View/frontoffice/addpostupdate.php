@@ -124,7 +124,9 @@ if (!$postData) {
             <label>Ajouter une photo :
                 <div class="photo-upload">
                     <input type="file" name="photo" id="photo" accept="image/*" class="file-input-hidden">
-                    
+                    <label for="media" class="photo-icon">
+                        📷 Ajouter une photo
+                    </label>
                 </div>
             </label>
         </p>
