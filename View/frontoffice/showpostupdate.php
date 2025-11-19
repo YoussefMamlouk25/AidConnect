@@ -107,8 +107,11 @@ function getInitials($name) {
                         </div>
 
                         <div class="post-actions">
-                            <a href="updatepostupdate.php?id=<?php echo $idUpdatePost; ?>" class="btn-action btn-edit">✏️ Modifier</a>
-                            <a href="deletepostupdate.php?id=<?php echo $idUpdatePost; ?>" class="btn-action btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce post résolu ?');">🗑️ Supprimer</a>
+                            <form method="POST" action="updatepostupdate.php" class="action-form">
+                                <input type="hidden" name="id" value="<?php echo $idUpdatePost; ?>">
+                                <button type="submit" class="btn-action btn-edit">✏️ Modifier</button>
+                            </form>
+                            <a href="deletepostupdate.php?id=<?php echo $idUpdatePost; ?>" class="btn-action btn-delete" >🗑️ Supprimer</a>
                         </div>
                     </div>
                     <?php

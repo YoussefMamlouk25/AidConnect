@@ -123,7 +123,7 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
     <h1>Modifier un Post</h1>
     
     <?php if (!empty($error)): ?>
-        <div style="color: red; padding: 10px; background: #ffe6e6; border: 1px solid red; margin-bottom: 20px;">
+        <div >
             <?php echo $error; ?>
         </div>
     <?php endif; ?>

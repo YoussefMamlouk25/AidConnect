@@ -14,12 +14,15 @@ $postController = new PostController();
 $error = '';
 
 // Récupérer l'id de l'enregistrement update_post à modifier
-if (!isset($_GET['id']) || empty($_GET['id'])) {
+$id = null;
+if (isset($_GET['id']) && !empty($_GET['id'])) {
+    $id = (int)$_GET['id'];
+} elseif (isset($_POST['id']) && !empty($_POST['id'])) {
+    $id = (int)$_POST['id'];
+} else {
     header('Location: showpostupdate.php');
     exit();
 }
-
-$id = (int)$_GET['id'];
 
 // Charger les données de l'update_post
 $postUpdateData = $postUpdateC->getPostUpdateById($id);
@@ -116,6 +119,7 @@ $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateDa
     <?php endif; ?>
 
     <form action="" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<?php echo $id; ?>">
         <p>
             <label>Description de la résolution :<br>
                 <textarea name="texte" rows="5"><?php echo $texte; ?></textarea>
@@ -172,6 +176,6 @@ $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateDa
     </form>
   </main>
 
-  <script src="addpostupdate.js"></script>
+  <script src="jsentiter2.js"></script>
 </body>
 </html>

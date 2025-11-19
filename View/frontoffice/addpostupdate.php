@@ -29,61 +29,49 @@ if (!$postData) {
     // S'assurer que l'id_post existe bien dans la table post
     // $id_post sera utilisé pour la table update_post
     // Traitement du formulaire
-    if (isset($_POST['texte']) && 
-        isset($_POST['intervention']) && 
-        isset($_POST['joursReponse']) && 
+    if (isset($_POST['texte']) &&
+        isset($_POST['intervention']) &&
+        isset($_POST['joursReponse']) &&
         isset($_POST['joursResolution'])) {
-        
-        if (!empty($_POST['texte']) && 
-            !empty($_POST['intervention']) && 
-            !empty($_POST['joursReponse']) && 
-            !empty($_POST['joursResolution'])) {
-            
-            // Gestion de l'image
-            $media = '';
-            if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = '../../public/uploads/';
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                $mediaName = basename($_FILES['photo']['name']);
-                $media = $mediaName;
-                move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $mediaName);
+
+        // Gestion de l'image
+        $media = '';
+        if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = '../../public/uploads/';
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
             }
-            
-            // Récupérer id_user depuis la session si disponible
-            $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : null;
-            
-            // realiser : stocke directement la valeur du champ "Intervention réalisée par"
-            // Cette valeur sera enregistrée dans la colonne realiser de la table update_post
-            $realiser = !empty($_POST['intervention']) ? $_POST['intervention'] : '';
-            
-            // Le texte de la résolution
-            $texte = $_POST['texte'];
-            
-            // Créer l'objet PostUpdate avec l'id_post de la table post
-            // Cet id_post sera stocké dans la colonne id_post de la table update_post
-            $postUpdate = new PostUpdate(
-                $id_post, // id_post de la table post (clé étrangère vers post.id_post) - REQUIS
-                $texte, // texte de la résolution - REQUIS
-                null, // id_update_post (auto-increment) - OPTIONNEL
-                $id_user, // id_user - OPTIONNEL
-                $media, // media - OPTIONNEL
-                $realiser, // realiser - OPTIONNEL
-                $_POST['joursReponse'], // temp_reponse - OPTIONNEL
-                $_POST['joursResolution'] // temp_resolue - OPTIONNEL
-            );
-            
-            // Insérer dans update_post avec l'id_post de la table post
-            $result = $postUpdateC->addPostUpdate($postUpdate);
-            if ($result) {
-                header('Location: showpostupdate.php');
-                exit();
-            } else {
-                $error = "Erreur lors de l'ajout du post résolu.";
-            }
+            $mediaName = basename($_FILES['photo']['name']);
+            $media = $mediaName;
+            move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $mediaName);
+        }
+
+        $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : null;
+
+        // realiser : stocke directement la valeur du champ "Intervention réalisée par"
+        $realiser = !empty($_POST['intervention']) ? $_POST['intervention'] : '';
+
+        $texte = $_POST['texte'];
+
+        // Créer l'objet
+        $postUpdate = new PostUpdate(
+            $id_post,
+            $texte,
+            null,
+            $id_user,
+            $media,
+            $realiser,
+            $_POST['joursReponse'],
+            $_POST['joursResolution']
+        );
+
+        // Insérer dans update_post avec l'id_post de la table post
+        $result = $postUpdateC->addPostUpdate($postUpdate);
+        if ($result) {
+            header('Location: showpostupdate.php');
+            exit();
         } else {
-            $error = "Veuillez remplir tous les champs obligatoires.";
+            $error = "Erreur lors de l'ajout du post résolu.";
         }
     }
 }
@@ -100,12 +88,7 @@ if (!$postData) {
   <main>
     <h1>Marquer le Post comme Résolu</h1>
     
-    <?php if (!empty($error)): ?>
-        <div class="error-message">
-            <?php echo htmlspecialchars($error); ?>
-        </div>
-    <?php endif; ?>
-    
+ 
     <?php if ($postData): ?>
         <div class="post-info">
             <h2>Post concerné : <?php echo htmlspecialchars($postData['titre']); ?></h2>
@@ -123,10 +106,11 @@ if (!$postData) {
         <p>
             <label>Ajouter une photo :
                 <div class="photo-upload">
-                    <input type="file" name="photo" id="photo" accept="image/*" class="file-input-hidden">
-                    <label for="media" class="photo-icon">
-                        📷 Ajouter une photo
-                    </label>
+                 <input type="file" name="photo" id="photo" accept="image/*" class="file-input-hidden">
+
+                <label for="photo" class="photo-icon">
+                    📷 Ajouter une photo
+                </label>
                 </div>
             </label>
         </p>
@@ -157,6 +141,6 @@ if (!$postData) {
     </form>
   </main>
 
-  <script src="addpostupdate.js"></script>
+  <script src="./jsentiter2.js"></script>
 </body>
 </html>

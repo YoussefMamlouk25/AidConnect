@@ -1,0 +1,252 @@
+/* ===== GLOBAL ===== */
+body {
+  font-family: "Poppins", sans-serif;
+  background: #ffffff;
+  color: #000000;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== HEADER ===== */
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #ddd;
+  z-index: 1000;
+  padding: 10px 0;
+}
+
+nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* ===== LOGO ===== */
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0f5fcc;
+  text-decoration: none;
+}
+
+/* ===== NAV BUTTONS ===== */
+.nav-links button {
+  padding: 8px 16px;
+  margin-left: 10px;
+  border-radius: 25px;
+  border: none;
+  background: #0f5fcc;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.nav-links button:hover {
+  background: #0d4fb0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 50, 255, 0.25);
+}
+
+/* ===== MAIN CONTENT ===== */
+main {
+  max-width: 700px;
+  margin: 120px auto 50px;
+  padding: 0 20px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #0f5fcc;
+}
+
+/* ===== FORMULAIRE ===== */
+form {
+  background: #f9f9f9;
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+}
+
+/* If a page puts the <form> directly under <body> (updatepost.php), center it like the <main> layout */
+body > form {
+  max-width: 700px;
+  margin: 120px auto 50px;
+  padding: 2rem; /* keep same spacing as form inside main */
+  background: #f9f9f9;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+}
+
+/* ===== CHAMPS FORM ===== */
+input, select, textarea {
+  width: 100%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #0f5fcc;
+}
+
+/* Message d'erreurs JS */
+input + span,
+select + span,
+textarea + span {
+  display: block;
+  margin-top: -5px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* ===== FILE UPLOAD ===== */
+.photo-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.photo-icon {
+  display: inline-block;
+  padding: 0.8rem 1.2rem;
+  background: #0f5fcc;
+  color: #ffffff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.photo-icon:hover {
+  background: #0d4fb0;
+  transform: translateY(-2px);
+}
+
+/* ===== SUBMIT BUTTON ===== */
+form button {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 30px;
+  background: #0f5fcc;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s;
+}
+
+form button:hover {
+  background: #0d4fb0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 50, 255, 0.25);
+}
+
+.btn-cancel {
+  display: inline-block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #ccc;
+  color: black;
+  text-decoration: none;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-cancel:hover {
+  background-color: #bfbfbf;
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-message {
+  color: red;
+  padding: 10px;
+  background: #ffe6e6;
+  border: 1px solid red;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+/* Styles pour les messages d'erreur et l'aperçu de la photo actuelle */
+.form-error {
+  color: red;
+  padding: 10px;
+  background: #ffe6e6;
+  border: 1px solid red;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.current-media {
+  margin: 10px 0;
+}
+.current-media img {
+  width: 150px;
+  height: 150px;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 6px;
+  object-fit: cover;
+  display: block;
+}
+.current-media small {
+  display: block;
+  margin-top: 6px;
+  color: #666;
+}
+
+/* ===== VALIDATION MESSAGES ===== */
+.validation-message {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  main {
+    margin-top: 140px;
+    padding: 0 15px;
+  }
+
+  .nav-links button {
+    margin-left: 5px;
+    padding: 6px 12px;
+  }
+}

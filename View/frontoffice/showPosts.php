@@ -122,7 +122,7 @@ function formatDate($date) {
                         <div class="post-actions">
                             <a href="addpostupdate.php?id_post=<?php echo $idPost; ?>" class="btn-action btn-resolve">✅ Résoudre</a>
                             <a href="updatepost.php?id=<?php echo $idPost; ?>" class="btn-action btn-edit">✏️ Modifier</a>
-                            <a href="deletepost.php?id=<?php echo $idPost; ?>" class="btn-action btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce post ?');">🗑️ Supprimer</a>
+                            <a href="deletepost.php?id=<?php echo $idPost; ?>" class="btn-action btn-delete"  >🗑️ Supprimer</a>
                         </div>
                     </div>
                     <?php

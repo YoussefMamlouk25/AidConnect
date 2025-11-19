@@ -1,0 +1,191 @@
+
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+/* LAYOUT */
+.layout {
+    display: flex;
+    height: 100vh;
+    background: #f5f7ff;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 240px;
+    background: #ffffff;
+    border-right: 1px solid #e2e6f3;
+    padding: 25px 15px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    box-shadow: 0 0 12px rgba(0,0,0,0.05);
+}
+
+.sidebar h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0057d8;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* BUTTONS */
+.sidebar-link {
+    background: #f1f4ff;
+    border: 1px solid #d6defb;
+    color: #1f2d40;
+    padding: 12px;
+    border-radius: 10px;
+    text-decoration: none;
+
+    font-size: 16px;
+    font-weight: 600;
+    transition: 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.sidebar-link:hover {
+    background: #e5ebff;
+    border-color: #b8c6ff;
+    transform: translateX(4px);
+}
+
+.sidebar-link.active {
+    background: #0057d8;
+    color: white;
+    border-color: #0057d8;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.main-content h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1b2a49;
+    margin-bottom: 15px;
+}
+
+.main-content p {
+    font-size: 16px;
+    color: #4b5568;
+}
+
+/* TABLES (Matching your backoffice style) */
+.table-container {
+    margin-top: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+thead {
+    background: #eef3ff;
+}
+
+th {
+    text-align: left;
+    padding: 14px 10px;
+    color: #003a9c;
+    font-weight: 700;
+    border-bottom: 2px solid #dbe3ff;
+}
+
+td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f2fa;
+}
+
+tr:hover {
+    background: #f7f9ff;
+}
+
+/* ACTION BUTTONS */
+.btn-action {
+    padding: 7px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    transition: 0.20s;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background: #ffc233;
+    color: #000;
+}
+
+.btn-edit:hover {
+    background: #e0aa29;
+}
+
+.btn-delete {
+    background: #ff4b4b;
+}
+
+.btn-delete:hover {
+    background: #cc0000;
+}
+
+.btn-resolve {
+    background: #1dbf73;
+}
+
+.btn-resolve:hover {
+    background: #159458;
+}
+
+/* SCROLLBARS */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c5cbea;
+    border-radius: 8px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 800px) {
+    .layout {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 15px;
+    }
+    .sidebar-link {
+        flex: none;
+        white-space: nowrap;
+    }
+}

@@ -1,0 +1,206 @@
+/* ===== GLOBAL ===== */
+body {
+  font-family: "Poppins", sans-serif;
+  background: #ffffff; /* fond blanc */
+  color: #000000; /* texte noir */
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== HEADER ===== */
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #ddd;
+  z-index: 1000;
+  padding: 10px 0;
+}
+
+nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* ===== LOGO / TITRE AIDCONNECT ===== */
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #52a0f2; /* rouge vif pour le titre */
+  text-decoration: none;
+}
+
+/* ===== BOUTONS DU HEADER ===== */
+.nav-links button {
+  padding: 8px 16px;
+  margin-left: 10px;
+  border-radius: 25px;
+  border: none;
+  background: #0f5fcc;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.nav-links button:hover {
+  background: #0f5fcc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 0, 0, 0.25);
+}
+
+/* ===== MAIN CONTENT ===== */
+main {
+  max-width: 700px;
+  margin: 120px auto 50px;
+  padding: 0 20px;
+}
+
+/* ===== TITRE PRINCIPAL ===== */
+h1 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #0f5fcc; /* rouge pour le titre principal */
+}
+
+/* ===== FORMULAIRE ===== */
+form {
+  background: #f9f9f9;
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+}
+
+/* ===== CHAMPS ===== */
+input, select, textarea {
+  width: 100%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 1rem;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #0f5fcc;
+}
+
+/* ===== BOUTON FORMULAIRE ===== */
+form button {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 30px;
+  background: #0f5fcc;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+form button:hover {
+  background: #0f5fcc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 0, 0, 0.25);
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-message {
+  color: red;
+  padding: 10px;
+  background: #ffe6e6;
+  border: 1px solid red;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+/* ===== POST INFO ===== */
+.post-info {
+  background: #e8f4f8;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #0f5fcc;
+}
+
+.post-info h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #0f5fcc;
+}
+
+.post-info p {
+  margin: 0;
+  color: #333;
+}
+
+/* ===== PHOTO UPLOAD ===== */
+.photo-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.photo-icon {
+  display: inline-block;
+  padding: 0.8rem 1.2rem;
+  background: #0f5fcc;
+  color: #ffffff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.photo-icon:hover {
+  background: #0d4fb0;
+  transform: translateY(-2px);
+}
+
+/* ===== CANCEL BUTTON ===== */
+.btn-cancel {
+  display: inline-block;
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 0.5rem;
+  border-radius: 30px;
+  background: #6c757d;
+  color: #ffffff;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.btn-cancel:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  main {
+    margin-top: 140px;
+    padding: 0 15px;
+  }
+
+  .nav-links button {
+    margin-left: 5px;
+    padding: 6px 12px;
+  }
+}
