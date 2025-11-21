@@ -106,8 +106,8 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
         <h3>AidConnect</h3>
         <nav>
             <button class="sidebar-link" onclick="window.location.href='dashboard.php'">🏠 Dashboard</button>
-            <button class="sidebar-link" onclick="window.location.href='showoffer_fragment.php'">🏷️ Offres</button>
-            <button class="sidebar-link" onclick="window.location.href='showupdateoffer_fragment.php'">✏️ Updates Offres</button>
+            <button class="sidebar-link" onclick="window.location.href='showoffer.php'">🏷️ Offres</button>
+            <button class="sidebar-link" onclick="window.location.href='showupdateoffer.php'">✏️ Updates Offres</button>
         </nav>
     </aside>
     <main class="main-content">
@@ -145,7 +145,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">Mettre à jour</button>
-                    <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent==='function'){ loadContent('showupdateoffer_fragment.php?embed=1'); return false; }">Annuler</a>
+                    <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent==='function'){ loadContent('showupdateoffer.php?embed=1'); return false; }">Annuler</a>
                 </div>
             </form>
         </div>

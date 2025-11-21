@@ -28,8 +28,8 @@ if (!$embed):
         <h3>AidConnect</h3>
         <nav>
             <button class="sidebar-link" onclick="window.location.href='dashboard.php'">🏠 Dashboard</button>
-            <button class="sidebar-link" onclick="window.location.href='showoffer_fragment.php'">🏷️ Offres</button>
-            <button class="sidebar-link" onclick="window.location.href='showupdateoffer_fragment.php'">🔁 Updates Offres</button>
+            <button class="sidebar-link" onclick="window.location.href='showoffer.php'">🏷️ Offres</button>
+            <button class="sidebar-link" onclick="window.location.href='showupdateoffer.php'">🔁 Updates Offres</button>
         </nav>
     </aside>
     <div class="main-content">

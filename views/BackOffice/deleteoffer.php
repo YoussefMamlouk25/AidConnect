@@ -67,15 +67,15 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             <h3>AidConnect</h3>
             <nav>
                 <button class="sidebar-link" onclick="window.location.href='dashboard.php'">🏠 Dashboard</button>
-                <button class="sidebar-link" onclick="window.location.href='showoffer_fragment.php'">🏷️ Offres</button>
-                <button class="sidebar-link" onclick="window.location.href='showupdateoffer_fragment.php'">✏️ Updates Offres</button>
+                <button class="sidebar-link" onclick="window.location.href='showoffer.php'">🏷️ Offres</button>
+                <button class="sidebar-link" onclick="window.location.href='showupdateoffer.php'">✏️ Updates Offres</button>
             </nav>
         </aside>
         <main class="main-content">
 <?php endif; ?>
     <div class="fragment-delete-offer">
         <div class="mb-4">
-            <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer_fragment.php'); return false; }">
+            <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer.php'); return false; }">
                 <i class="fas fa-arrow-left me-2"></i>Retour aux Offres
             </a>
         </div>
@@ -139,7 +139,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                     <button type="submit" class="btn btn-danger">
                         <i class="fas fa-trash me-2"></i>Confirmer la Suppression
                     </button>
-                    <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer_fragment.php'); return false; }">
+                    <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer.php'); return false; }">
                         <i class="fas fa-times me-2"></i>Annuler
                     </a>
                 </div>

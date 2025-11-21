@@ -98,7 +98,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
     <main class="main-content">
 <div class="fragment-offer-edit">
     <div class="mb-4">
-        <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer_fragment.php'); return false; }">
+        <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer.php'); return false; }">
             Retour aux Offres
         </a>
     </div>
@@ -165,7 +165,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">Mettre à jour</button>
-                    <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer_fragment.php'); return false; }">Annuler</a>
+                    <a href="dashboard.php" class="btn btn-secondary" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer.php'); return false; }">Annuler</a>
                 </div>
             </form>
         </div>

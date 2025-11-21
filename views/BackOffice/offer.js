@@ -21,7 +21,7 @@
           } else {
             document.open(); document.write(html); document.close();
           }
-          loadContent('showoffer_fragment.php');
+          loadContent('showoffer.php');
         })
         .catch(function (err) {
           console.error('AJAX submit error', err);
@@ -42,7 +42,7 @@
       var fd = new FormData(form);
       fetch(action, { method: 'POST', body: fd })
         .then(function () {
-          loadContent('showoffer_fragment.php');
+          loadContent('showoffer.php');
         })
         .catch(function (err) {
           console.error('Delete AJAX error', err);

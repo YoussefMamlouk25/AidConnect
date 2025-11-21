@@ -34,12 +34,12 @@
             </button>
 
             <!-- OFFER MODULE -->
-            <button class="sidebar-link" onclick="loadContent('showoffer_fragment.php')">
+            <button class="sidebar-link" onclick="loadContent('showoffer.php')">
                 🏷️ Offres
             </button>
 
             <!-- UPDATE OFFER RESPONSES -->
-            <button class="sidebar-link" onclick="loadContent('showupdateoffer_fragment.php?embed=1')">
+            <button class="sidebar-link" onclick="loadContent('showupdateoffer.php?embed=1')">
                 ✏️ Updates Offres
             </button>
 

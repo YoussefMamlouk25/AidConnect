@@ -19,7 +19,7 @@
               initUpdateOfferFragments();
             }
           }
-          loadContent('showupdateoffer_fragment.php?embed=1');
+          loadContent('showupdateoffer.php?embed=1');
         })
         .catch(function (err) {
           console.error('Erreur mise à jour updateOffer', err);
@@ -47,7 +47,7 @@
               initUpdateOfferFragments();
             }
           }
-          loadContent('showupdateoffer_fragment.php?embed=1');
+          loadContent('showupdateoffer.php?embed=1');
         })
         .catch(function (err) {
           console.error('Erreur suppression updateOffer', err);
