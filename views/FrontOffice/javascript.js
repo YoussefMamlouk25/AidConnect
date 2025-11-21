@@ -55,127 +55,151 @@ document.addEventListener('DOMContentLoaded', () => {
   // Volunteer registration form logic
   (function initVolunteerForm() {
     const form = document.getElementById('volunteerForm');
-    if (!form) return;
-
-    const submitBtn = document.getElementById('submitBtn');
-    const spinner = submitBtn ? submitBtn.querySelector('.spinner-border') : null;
-    const nom = document.getElementById('nom');
-    const numero = document.getElementById('numero');
-    const email = document.getElementById('email');
-    const type_don = document.getElementById('type_don');
-    const description = document.getElementById('description');
-    const media = document.getElementById('media');
-
-    if (!submitBtn || !spinner || !nom || !numero || !email || !type_don || !description || !media) {
+    if (!form) {
+      console.log('Form not found');
       return;
     }
 
+    const fields = {
+      nom: document.getElementById('nom'),
+      numero: document.getElementById('numero'),
+      email: document.getElementById('email'),
+      type_don: document.getElementById('type_don'),
+      description: document.getElementById('description'),
+      media: document.getElementById('media')
+    };
+
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = submitBtn?.querySelector('.spinner-border');
+
+    // Check if all elements exist
+    if (!Object.values(fields).every(f => f) || !submitBtn) {
+      console.log('Missing form elements:', fields, submitBtn);
+      return;
+    }
+
+    // Validation patterns
+    const phonePattern = /^[0-9]{8,15}$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Validation rules
+    const rules = {
+      nom: (value) => ({
+        isValid: !!value.trim(),
+        message: 'Le nom est requis.'
+      }),
+      numero: (value) => {
+        if (!value.trim()) return { isValid: false, message: 'Le numéro est requis.' };
+        if (!phonePattern.test(value.trim())) return { isValid: false, message: 'Le numéro doit contenir 8 à 15 chiffres.' };
+        return { isValid: true, message: '' };
+      },
+      email: (value) => {
+        if (!value.trim()) return { isValid: false, message: 'L\'email est requis.' };
+        if (!emailPattern.test(value.trim())) return { isValid: false, message: 'Adresse email invalide.' };
+        return { isValid: true, message: '' };
+      },
+      type_don: (value) => ({
+        isValid: !!value.trim(),
+        message: 'Veuillez sélectionner un type de don.'
+      }),
+      description: (value) => ({
+        isValid: !!value.trim(),
+        message: 'La description est requise.'
+      })
+    };
+
+    // Show error for a field
+    function showError(fieldName, message) {
+      const field = fields[fieldName];
+      const errorElement = document.getElementById(fieldName + 'Error');
+
+      field.classList.add('is-invalid');
+      if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+      }
+    }
+
+    // Clear error for a field
+    function clearError(fieldName) {
+      const field = fields[fieldName];
+      const errorElement = document.getElementById(fieldName + 'Error');
+
+      field.classList.remove('is-invalid');
+      if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.style.display = 'none';
+      }
+    }
+
+    // Validate field
+    function validateField(fieldName) {
+      const field = fields[fieldName];
+      const rule = rules[fieldName];
+      
+      if (!rule) return true;
+
+      const { isValid, message } = rule(field.value);
+
+      if (isValid) {
+        clearError(fieldName);
+        return true;
+      } else {
+        showError(fieldName, message);
+        return false;
+      }
+    }
+
+    // Check form validity
     function checkFormValidity() {
-      const isValid =
-        nom.value.trim() &&
-        numero.value.trim() &&
-        email.value.trim() &&
-        type_don.value.trim() &&
-        description.value.trim();
+      const isValid = Object.keys(rules).every(fieldName => {
+        const { isValid } = rules[fieldName](fields[fieldName].value);
+        return isValid;
+      });
       submitBtn.disabled = !isValid;
     }
 
-    submitBtn.disabled = false;
+    // Add listeners for real-time validation
+    fields.nom.addEventListener('input', () => {
+      validateField('nom');
+      checkFormValidity();
+    });
 
-    nom.addEventListener('input', checkFormValidity);
-    numero.addEventListener('input', checkFormValidity);
-    email.addEventListener('input', checkFormValidity);
-    type_don.addEventListener('change', checkFormValidity);
-    description.addEventListener('input', checkFormValidity);
-    media.addEventListener('change', checkFormValidity);
+    fields.numero.addEventListener('input', () => {
+      validateField('numero');
+      checkFormValidity();
+    });
 
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
+    fields.email.addEventListener('input', () => {
+      validateField('email');
+      checkFormValidity();
+    });
 
-      let isValid = true;
+    fields.type_don.addEventListener('change', () => {
+      validateField('type_don');
+      checkFormValidity();
+    });
 
-      // Validate nom
-      const nomErrorIcon = nom.parentElement.querySelector('.error-icon');
-      const nomSuccessIcon = nom.parentElement.querySelector('.success-icon');
-      if (!nom.value.trim()) {
-        nom.classList.add('is-invalid');
-        if (nomErrorIcon) nomErrorIcon.style.display = 'block';
-        if (nomSuccessIcon) nomSuccessIcon.style.display = 'none';
-        isValid = false;
-      } else {
-        nom.classList.remove('is-invalid');
-        if (nomErrorIcon) nomErrorIcon.style.display = 'none';
-        if (nomSuccessIcon) nomSuccessIcon.style.display = 'block';
-      }
+    fields.description.addEventListener('input', () => {
+      validateField('description');
+      checkFormValidity();
+    });
 
-      // Validate numero with pattern (8-15 digits)
-      const phonePattern = /^[0-9]{8,15}$/;
-      const numeroErrorIcon = numero.parentElement.querySelector('.error-icon');
-      const numeroSuccessIcon = numero.parentElement.querySelector('.success-icon');
-      if (!numero.value.trim() || !phonePattern.test(numero.value.trim())) {
-        numero.classList.add('is-invalid');
-        if (numeroErrorIcon) numeroErrorIcon.style.display = 'block';
-        if (numeroSuccessIcon) numeroSuccessIcon.style.display = 'none';
-        isValid = false;
-      } else {
-        numero.classList.remove('is-invalid');
-        if (numeroErrorIcon) numeroErrorIcon.style.display = 'none';
-        if (numeroSuccessIcon) numeroSuccessIcon.style.display = 'block';
-      }
+    // Initial state
+    submitBtn.disabled = true;
 
-      // Validate email with pattern
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const emailErrorIcon = email.parentElement.querySelector('.error-icon');
-      const emailSuccessIcon = email.parentElement.querySelector('.success-icon');
-      if (!email.value.trim() || !emailPattern.test(email.value.trim())) {
-        email.classList.add('is-invalid');
-        if (emailErrorIcon) emailErrorIcon.style.display = 'block';
-        if (emailSuccessIcon) emailSuccessIcon.style.display = 'none';
-        isValid = false;
-      } else {
-        email.classList.remove('is-invalid');
-        if (emailErrorIcon) emailErrorIcon.style.display = 'none';
-        if (emailSuccessIcon) emailSuccessIcon.style.display = 'block';
-      }
+    // Form submit handler
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
 
-      // Validate type_don
-      const typeDonErrorIcon = type_don.parentElement.querySelector('.error-icon');
-      const typeDonSuccessIcon = type_don.parentElement.querySelector('.success-icon');
-      if (!type_don.value.trim()) {
-        type_don.classList.add('is-invalid');
-        if (typeDonErrorIcon) typeDonErrorIcon.style.display = 'block';
-        if (typeDonSuccessIcon) typeDonSuccessIcon.style.display = 'none';
-        isValid = false;
-      } else {
-        type_don.classList.remove('is-invalid');
-        if (typeDonErrorIcon) typeDonErrorIcon.style.display = 'none';
-        if (typeDonSuccessIcon) typeDonSuccessIcon.style.display = 'block';
-      }
+      // Validate all fields
+      const allValid = Object.keys(rules).every(fieldName => validateField(fieldName));
 
-      // Validate description
-      const descriptionErrorIcon = description.parentElement.querySelector('.error-icon');
-      const descriptionSuccessIcon = description.parentElement.querySelector('.success-icon');
-      if (!description.value.trim()) {
-        description.classList.add('is-invalid');
-        if (descriptionErrorIcon) descriptionErrorIcon.style.display = 'block';
-        if (descriptionSuccessIcon) descriptionSuccessIcon.style.display = 'none';
-        isValid = false;
-      } else {
-        description.classList.remove('is-invalid');
-        if (descriptionErrorIcon) descriptionErrorIcon.style.display = 'none';
-        if (descriptionSuccessIcon) descriptionSuccessIcon.style.display = 'block';
-      }
-
-      if (isValid) {
-        spinner.classList.remove('d-none');
+      if (allValid) {
+        if (spinner) spinner.classList.remove('d-none');
         submitBtn.disabled = true;
-
-        // Let the form submit naturally to PHP
         form.submit();
       }
-
-      form.classList.add('was-validated');
     });
   })();
 
@@ -533,5 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderUpdates();
   })();
+  
 });
 

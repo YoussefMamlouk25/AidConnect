@@ -1,13 +1,13 @@
 <?php
 class Offer {
     private $id_offer;   // AUTO_INCREMENT
-    private $id_user;    // int(11)
+    private $id_user;    // int
     private $description;// text
-    private $media;      // varchar(255)
-    private $nom;        // varchar(100)
-    private $num;        // varchar(40)
-    private $email;      // varchar(120)
-    private $type_don;   // varchar(100)
+    private $media;      // varchar
+    private $nom;        // varchar
+    private $num;        // varchar
+    private $email;      // varchar
+    private $type_don;   // varchar
 
     public function __construct(
         $id_user = null,

@@ -9,7 +9,6 @@ require_once __DIR__ . '/../../Controller/offercontroller.php';
 
 $offerC = new OfferController();
 
-// Get the offer ID from URL
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id <= 0) {
@@ -17,7 +16,6 @@ if ($id <= 0) {
     exit();
 }
 
-// Fetch the offer to edit
 $offerData = $offerC->getOfferById($id);
 
 if (!$offerData) {
@@ -28,7 +26,6 @@ if (!$offerData) {
 $error = null;
 $success = null;
 
-// Handle form submission
 if (
     isset($_POST['nom']) &&
     isset($_POST['numero']) &&
@@ -49,16 +46,16 @@ if (
         $type_don = trim($_POST['type_don']);
         $description = trim($_POST['description']);
 
-        // Validation
+        
         if (!preg_match('/^[0-9]{8,15}$/', $numero)) {
             $error = "Le numéro doit contenir 8 à 15 chiffres.";
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = "Adresse email invalide.";
-        } elseif (!in_array($type_don, ['cash','card','online'], true)) {
+        } elseif (!in_array($type_don, ['money','food','clothing','medicines','equipment','services'], true)) {
             $error = "Type de don invalide.";
         } else {
-            // Handle media upload
-            $media = $offerData['media']; // Keep existing media by default
+            
+            $media = $offerData['media']; 
             
             if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
                 $uploadDir = __DIR__ . '/../../public/uploads/';
@@ -66,7 +63,7 @@ if (
                     mkdir($uploadDir, 0777, true);
                 }
                 
-                // Delete old media file if it exists
+                
                 if (!empty($offerData['media'])) {
                     $oldMediaPath = $uploadDir . $offerData['media'];
                     if (file_exists($oldMediaPath)) {
@@ -86,7 +83,7 @@ if (
             }
 
             if (!isset($error)) {
-                // Create Offer object with updated data
+               
                 $offer = new Offer(
                     isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : $offerData['id_user'],
                     $description,
@@ -98,7 +95,6 @@ if (
                     $id
                 );
                 
-                // Update the offer
                 $result = $offerC->updateOffer($offer, $id);
                 
                 if ($result) {
@@ -114,7 +110,6 @@ if (
     }
 }
 
-// Use POST data if available (for form persistence on error), otherwise use database data
 $nom = isset($_POST['nom']) ? htmlspecialchars($_POST['nom']) : htmlspecialchars($offerData['nom']);
 $numero = isset($_POST['numero']) ? htmlspecialchars($_POST['numero']) : htmlspecialchars($offerData['num']);
 $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : htmlspecialchars($offerData['email']);
@@ -219,9 +214,12 @@ $currentMedia = $offerData['media'];
                   <div class="input-group">
                     <select class="form-control" id="type_don" name="type_don" required>
                       <option value="">-- Choisissez --</option>
-                      <option value="cash" <?php echo ($type_don === 'cash') ? 'selected' : ''; ?>>Cash</option>
-                      <option value="card" <?php echo ($type_don === 'card') ? 'selected' : ''; ?>>Card</option>
-                      <option value="online" <?php echo ($type_don === 'online') ? 'selected' : ''; ?>>Online</option>
+                      <option value="money" <?php echo ($type_don === 'money') ? 'selected' : ''; ?>>Argent</option>
+                      <option value="food" <?php echo ($type_don === 'food') ? 'selected' : ''; ?>>Nourriture</option>
+                      <option value="clothing" <?php echo ($type_don === 'clothing') ? 'selected' : ''; ?>>Vêtements</option>
+                      <option value="medicines" <?php echo ($type_don === 'medicines') ? 'selected' : ''; ?>>Médicaments</option>
+                      <option value="equipment" <?php echo ($type_don === 'equipment') ? 'selected' : ''; ?>>Matériel</option>
+                      <option value="services" <?php echo ($type_don === 'services') ? 'selected' : ''; ?>>Services</option>
                     </select>
                     <span class="input-group-text">
                       <i class="fas fa-check-circle text-success success-icon"></i>

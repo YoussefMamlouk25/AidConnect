@@ -4,6 +4,11 @@ require_once __DIR__ . '/../Model/offer.php';
 
 class OfferController
 {
+    public static function escape($value)
+    {
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
+
     public function addOffer(Offer $offer)
     {
         $sql = "INSERT INTO offer
@@ -102,4 +107,48 @@ class OfferController
             return false;
         }
     }
+
+    // Fonction pour obtenir les initiales d'un nom
+    public function getInitials($name) {
+        $words = explode(' ', trim($name));
+        $initials = '';
+        foreach ($words as $word) {
+            if (!empty($word)) {
+                $initials .= strtoupper(substr($word, 0, 1));
+            }
+        }
+        return substr($initials, 0, 2);
+    }
+
+    // Fonction pour formater la date
+    public function formatDate($date) {
+        if (empty($date)) return '';
+        $dateObj = new DateTime($date);
+        $now = new DateTime();
+        $diff = $now->diff($dateObj);
+
+        if ($diff->days == 0) {
+            return "Aujourd'hui";
+        } elseif ($diff->days == 1) {
+            return "Hier";
+        } elseif ($diff->days < 7) {
+            return "Il y a " . $diff->days . " jours";
+        } else {
+            return $dateObj->format('d/m/Y');
+        }
+    }
+
+    // Fonction pour obtenir le libellé du type de don
+    public function getTypeDonLabel($type) {
+        $types = [
+            'money' => 'Argent',
+            'food' => 'Nourriture',
+            'clothing' => 'Vêtements',
+            'medicines' => 'Médicaments',
+            'equipment' => 'Matériel',
+            'services' => 'Services'
+        ];
+        return isset($types[$type]) ? $types[$type] : $type;
+    }
+
 }

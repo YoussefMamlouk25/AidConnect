@@ -11,7 +11,6 @@ require_once __DIR__ . '/../../Controller/offercontroller.php';
 $updateOfferC = new UpdateOfferController();
 $offerC = new OfferController();
 
-// Get the offer ID from URL
 $id_offer = isset($_GET['id_offer']) ? (int)$_GET['id_offer'] : 0;
 
 if ($id_offer <= 0) {
@@ -19,7 +18,6 @@ if ($id_offer <= 0) {
     exit();
 }
 
-// Fetch the offer to reply to
 $offerData = $offerC->getOfferById($id_offer);
 
 if (!$offerData) {
@@ -27,14 +25,10 @@ if (!$offerData) {
     exit();
 }
 
-// Get user ID (optional - can be null for anonymous replies)
 $id_user = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : 0;
 
-// Check if current user is the offer creator
 $is_offer_creator = ($id_user > 0 && $offerData['id_user'] == $id_user);
 
-// Check if user has already replied to this offer (only if logged in and NOT the creator)
-// Offer creators can post multiple updates
 $hasReplied = false;
 if ($id_user > 0 && !$is_offer_creator) {
     if ($updateOfferC->checkUserHasReplied($id_offer, $id_user)) {
@@ -45,22 +39,19 @@ if ($id_user > 0 && !$is_offer_creator) {
 
 $error = isset($error) ? $error : null;
 
-// Handle form submission
 if (
     isset($_POST['texte']) &&
     !$hasReplied
 ) {
     if (!empty($_POST['texte'])) {
         $texte = trim($_POST['texte']);
-        
-        // Add prefix based on whether it's an update or reply
+
         if ($is_offer_creator) {
             $texte = '📝 Update: ' . $texte;
         } else {
             $texte = '✅ Volunteering: ' . $texte;
         }
 
-        // Handle media upload (optional)
         $media = null;
         if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = __DIR__ . '/../../public/uploads/';
@@ -78,15 +69,13 @@ if (
         }
 
         if (!isset($error)) {
-            // Use offer creator's ID if they're posting, otherwise use current user ID or NULL for anonymous
-            // NULL is required because of foreign key constraint (must be valid user ID or NULL)
+            
             if ($is_offer_creator) {
                 $userId = $offerData['id_user'] ? (int)$offerData['id_user'] : null;
             } else {
                 $userId = $id_user > 0 ? $id_user : null;
             }
-            
-            // Ensure texte is not empty
+
             if (empty(trim($texte))) {
                 $error = "Le texte ne peut pas être vide.";
             } else {
@@ -119,7 +108,6 @@ if (
     }
 }
 
-function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
 <html lang="en">
@@ -165,23 +153,22 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                 <?php else: ?>
                   <h4 class="mb-3 text-primary">Reply to Offer</h4>
                 <?php endif; ?>
-                
-                <!-- Show Original Offer -->
+
                 <div class="card mb-4 border-primary">
                   <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="fas fa-gift me-2"></i>Original Offer</h5>
                   </div>
                   <div class="card-body">
-                    <p><strong>Name:</strong> <?php echo e($offerData['nom']); ?></p>
-                    <p><strong>Email:</strong> <?php echo e($offerData['email']); ?></p>
-                    <p><strong>Type:</strong> <?php echo e($offerData['type_don']); ?></p>
-                    <p><strong>Description:</strong> <?php echo nl2br(e($offerData['description'])); ?></p>
+                    <p><strong>Name:</strong> <?php echo OfferController::escape($offerData['nom']); ?></p>
+                    <p><strong>Email:</strong> <?php echo OfferController::escape($offerData['email']); ?></p>
+                    <p><strong>Type:</strong> <?php echo OfferController::escape($offerData['type_don']); ?></p>
+                    <p><strong>Description:</strong> <?php echo nl2br(OfferController::escape($offerData['description'])); ?></p>
                   </div>
                 </div>
 
                 <?php if (isset($error)): ?>
                     <div class="alert alert-danger" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i><?php echo e($error); ?>
+                        <i class="fas fa-exclamation-circle me-2"></i><?php echo OfferController::escape($error); ?>
                     </div>
                 <?php endif; ?>
 

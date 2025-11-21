@@ -6,6 +6,7 @@ session_start();
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/updateoffer.php';
 require_once __DIR__ . '/../../Controller/updateoffercontroller.php';
+require_once __DIR__ . '/../../Controller/offercontroller.php';
 
 $updateOfferC = new UpdateOfferController();
 
@@ -87,7 +88,6 @@ if (isset($_POST['texte'])) {
 $texte = isset($_POST['texte']) ? htmlspecialchars($_POST['texte']) : htmlspecialchars($updateData['texte']);
 $currentMedia = $updateData['media'];
 
-function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
 <html lang="en">
@@ -133,7 +133,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 
                 <?php if (isset($error)): ?>
                     <div class="alert alert-danger" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i><?php echo e($error); ?>
+                        <i class="fas fa-exclamation-circle me-2"></i><?php echo OfferController::escape($error); ?>
                     </div>
                 <?php endif; ?>
 
@@ -155,9 +155,9 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                         $mediaUrl = '../../public/uploads/' . $currentMedia;
                         $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
                         if (in_array($ext, ['mp4','mov','webm'])) {
-                          echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
+                          echo '<div class="mt-2"><video src="' . OfferController::escape($mediaUrl) . '" controls class="media-preview-video"></video></div>';
                         } else {
-                          echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
+                          echo '<div class="mt-2"><img src="' . OfferController::escape($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
                         }
                       ?>
                     </div>

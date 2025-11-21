@@ -27,13 +27,14 @@ if (
         $numero = trim($_POST['numero']);
         $email = trim($_POST['email']);
         $type_don = trim($_POST['type_don']);
-        $description= trim($_POST['description']);
+        $description = trim($_POST['description']);
 
+        // Server-side validation (kept simple and consistent with JS)
         if (!preg_match('/^[0-9]{8,15}$/', $numero)) {
             $error = "Le numéro doit contenir 8 à 15 chiffres.";
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = "Adresse email invalide.";
-        } elseif (!in_array($type_don, ['cash','card','online'], true)) {
+        } elseif (!in_array($type_don, ['money','food','clothing','medicines','equipment','services'], true)) {
             $error = "Type de don invalide.";
         } else {
             // Upload media (optional)
@@ -55,14 +56,14 @@ if (
 
             if (!isset($error)) {
                 $offer = new Offer(
-                    isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : null, // id_user (nullable if not logged)
-                    $description,  // description
-                    $media,        // media
-                    $nom,          // nom
-                    $numero,       // num
-                    $email,        // email
-                    $type_don,     // type_don
-                    null           // id_offer
+                    isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : null, // id_user
+                    $description, // description
+                    $media,       // media
+                    $nom,         // nom
+                    $numero,      // num
+                    $email,       // email
+                    $type_don,    // type_don
+                    null          // id_offer
                 );
                 $result = $offerC->addOffer($offer);
                 if ($result) {
@@ -80,140 +81,112 @@ if (
 ?>
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AidConnect | Register New Volunteer</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AidConnect – Register New Volunteer</title>
+  <link rel="stylesheet" href="assets/css/libs.min.css" />
+  <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0" />
+  <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" />
+  <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css" />
+  <link rel="stylesheet" href="assets/css/custom.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="volunteer-form-body">
+  <header class="header bg-white shadow-sm">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <div class="col-4">
+          <a href="#" class="d-flex align-items-center">
+            <img src="assets/images/logo.png" alt="AidConnect Logo" class="logo-img" />
+            <h4 class="mb-0 text-primary ms-2">AidConnect</h4>
+          </a>
+        </div>
+        <div class="col-4 text-center">
+          <button class="btn btn-outline-primary" onclick="window.location.href='volunteer-form.php'">Volunteer</button>
+        </div>
+      </div>
+    </div>
+  </header>
 
-    <link rel="stylesheet" href="assets/css/libs.min.css">
-    <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0">
-    <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
-    <link rel="stylesheet" href="assets/css/custom.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="javascript.js"></script>
-  </head>
+  <div class="wrapper">
+    <section class="sign-up-page">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-6 pt-5 pb-5 d-flex align-items-center justify-content-center">
+            <form method="POST" enctype="multipart/form-data"
+                  class="sign-in-from bg-white p-4 rounded shadow-lg volunteer-form-container"
+                  id="volunteerForm" novalidate>
+              <p class="text-muted">Enter your details to register as a volunteer.</p>
 
-  <body class="volunteer-form-body">
+              <?php if (isset($error)): ?>
+                <div class="alert alert-danger" role="alert">
+                  <?php echo htmlspecialchars($error); ?>
+                </div>
+              <?php endif; ?>
 
-    <header class="header bg-white shadow-sm">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-4">
-            <a href="#" class="d-flex align-items-center">
-              <img src="assets/images/logo.png" alt="AidConnect Logo" class="logo-img">
-              <h4 class="mb-0 text-primary ms-2">AidConnect</h4>
-            </a>
-          </div>
-          <div class="col-4 text-center">
-            <button class="btn btn-outline-primary" onclick="window.location.href='volunteer-form.php'">Volunteer</button>
+              <div class="form-group mb-3">
+                <label for="nom" class="fw-bold">Nom</label>
+                <input type="text" class="form-control" id="nom" name="nom" />
+                <div class="invalid-feedback d-block" id="nomError" style="display: none;"></div>
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="numero" class="fw-bold">Numéro</label>
+                <input type="tel" class="form-control" id="numero" name="numero" />
+                <div class="invalid-feedback d-block" id="numeroError" style="display: none;"></div>
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="email" class="fw-bold">Email</label>
+                <input type="email" class="form-control" id="email" name="email" />
+                <div class="invalid-feedback d-block" id="emailError" style="display: none;"></div>
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="type_don" class="fw-bold">Type Don</label>
+                <select class="form-control" id="type_don" name="type_don">
+                  <option value="">-- Choisissez --</option>
+                  <option value="money">Argent</option>
+                  <option value="food">Nourriture</option>
+                  <option value="clothing">Vêtements</option>
+                  <option value="medicines">Médicaments</option>
+                  <option value="equipment">Matériel</option>
+                  <option value="services">Services</option>
+                </select>
+                <div class="invalid-feedback d-block" id="type_donError" style="display: none;"></div>
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="description" class="fw-bold">Description</label>
+                <div class="input-group">
+                  <textarea class="form-control" id="description" name="description"></textarea>
+                </div>
+                <div class="invalid-feedback d-block" id="descriptionError" style="display: none;"></div>
+              </div>
+
+              <div class="form-group mb-4">
+                <label for="media" class="fw-bold">Media (optionnel)</label>
+                <input type="file" class="form-control" id="media" name="media" />
+                <div class="invalid-feedback d-block" id="mediaError" style="display: none;"></div>
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                  <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  Enregistrer
+                </button>
+              </div>
+
+              <div class="text-center mt-3">
+                <a href="volunteer-view.php" class="text-primary">View Registered Volunteers</a>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </header>
-
-    <div class="wrapper">
-      <section class="sign-up-page">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-md-6 pt-5 pb-5 d-flex align-items-center justify-content-center">
-
-              <!-- FIXED: method POST + enctype -->
-              <form method="POST" enctype="multipart/form-data"
-                    class="sign-in-from bg-white p-4 rounded shadow-lg volunteer-form-container"
-                    id="volunteerForm">
-
-                <p class="text-muted">Enter your details to register as a volunteer.</p>
-
-                <?php if (isset($error)): ?>
-                    <div class="alert alert-danger" role="alert">
-                        <?php echo htmlspecialchars($error); ?>
-                    </div>
-                <?php endif; ?>
-
-                <div class="form-group mb-3">
-                  <label for="nom" class="fw-bold">Nom</label>
-                  <div class="input-group">
-                    <input type="text" class="form-control" id="nom" name="nom">
-                    <span class="input-group-text">
-                      <i class="fas fa-check-circle text-success success-icon"></i>
-                      <i class="fas fa-exclamation-circle text-danger error-icon"></i>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="form-group mb-3">
-                  <label for="numero" class="fw-bold">Numéro</label>
-                  <div class="input-group">
-                    <input type="tel" class="form-control" id="numero" name="numero">
-                    <span class="input-group-text">
-                      <i class="fas fa-check-circle text-success success-icon"></i>
-                      <i class="fas fa-exclamation-circle text-danger error-icon"></i>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="form-group mb-3">
-                  <label for="email" class="fw-bold">Email</label>
-                  <div class="input-group">
-                    <input type="email" class="form-control" id="email" name="email">
-                    <span class="input-group-text">
-                      <i class="fas fa-check-circle text-success success-icon"></i>
-                      <i class="fas fa-exclamation-circle text-danger error-icon"></i>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="form-group mb-3">
-                  <label for="type_don" class="fw-bold">Type Don</label>
-                  <div class="input-group">
-                    <select class="form-control" id="type_don" name="type_don">
-                      <option value="">-- Choisissez --</option>
-                      <option value="cash">Cash</option>
-                      <option value="card">Card</option>
-                      <option value="online">Online</option>
-                    </select>
-                    <span class="input-group-text">
-                      <i class="fas fa-check-circle text-success success-icon"></i>
-                      <i class="fas fa-exclamation-circle text-danger error-icon"></i>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="form-group mb-3">
-                  <label for="description" class="fw-bold">Description</label>
-                  <div class="input-group">
-                    <textarea class="form-control" id="description" name="description"></textarea>
-                    <span class="input-group-text">
-                      <i class="fas fa-check-circle text-success success-icon"></i>
-                      <i class="fas fa-exclamation-circle text-danger error-icon"></i>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="form-group mb-4">
-                  <label for="media" class="fw-bold">Media</label>
-                  <input type="file" class="form-control" id="media" name="media">
-                </div>
-
-                <div class="d-grid">
-                  <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    Enregistrer
-                  </button>
-                </div>
-
-                <div class="text-center mt-3">
-                  <a href="volunteer-view.php" class="text-primary">View Registered Volunteers</a>
-                </div>
-
-              </form>
-
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-  </body>
+    </section>
+  </div>
+  <script src="form.js"></script>
+</body>
 </html>

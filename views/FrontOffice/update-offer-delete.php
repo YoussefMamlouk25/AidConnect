@@ -6,10 +6,10 @@ session_start();
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/updateoffer.php';
 require_once __DIR__ . '/../../Controller/updateoffercontroller.php';
+require_once __DIR__ . '/../../Controller/offercontroller.php';
 
 $updateOfferC = new UpdateOfferController();
 
-// Get the update ID from URL
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id <= 0) {
@@ -17,7 +17,6 @@ if ($id <= 0) {
     exit();
 }
 
-// Fetch the update to delete
 $updateData = $updateOfferC->getUpdateOfferById($id);
 
 if (!$updateData) {
@@ -27,7 +26,6 @@ if (!$updateData) {
 
 $error = null;
 
-// Handle form submission for deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     // Delete the media file if it exists
     if (!empty($updateData['media'])) {
@@ -36,8 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
             @unlink($mediaPath);
         }
     }
-    
-    // Delete the update from database
+
     $result = $updateOfferC->deleteUpdateOffer($id);
     
     if ($result) {
@@ -49,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     }
 }
 
-function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
 <html lang="en">
@@ -93,7 +89,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 
                 <?php if (isset($error)): ?>
                     <div class="alert alert-danger" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i><?php echo e($error); ?>
+                        <i class="fas fa-exclamation-circle me-2"></i><?php echo OfferController::escape($error); ?>
                     </div>
                 <?php endif; ?>
 
@@ -107,16 +103,16 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                   <div class="row">
                     <div class="col-12 mb-2">
                       <strong><i class="fas fa-comment me-2"></i>Reply Text:</strong>
-                      <p class="mb-0"><?php echo nl2br(e($updateData['texte'])); ?></p>
+                      <p class="mb-0"><?php echo nl2br(OfferController::escape($updateData['texte'])); ?></p>
                     </div>
                     <div class="col-md-6 mb-2">
                       <strong><i class="fas fa-user me-2"></i>User ID:</strong>
-                      <p class="mb-0"><?php echo e($updateData['id_user']); ?></p>
+                      <p class="mb-0"><?php echo OfferController::escape($updateData['id_user']); ?></p>
                     </div>
                     <?php if ($updateData['id_offer']): ?>
                       <div class="col-md-6 mb-2">
                         <strong><i class="fas fa-link me-2"></i>Offer ID:</strong>
-                        <p class="mb-0"><?php echo e($updateData['id_offer']); ?></p>
+                        <p class="mb-0"><?php echo OfferController::escape($updateData['id_offer']); ?></p>
                       </div>
                     <?php endif; ?>
                     <?php if (!empty($updateData['media'])): ?>
@@ -127,9 +123,9 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                             $mediaUrl = '../../public/uploads/' . $updateData['media'];
                             $ext = strtolower(pathinfo($updateData['media'], PATHINFO_EXTENSION));
                             if (in_array($ext, ['mp4','mov','webm'])) {
-                              echo '<video src="'.e($mediaUrl).'" controls class="media-preview-video"></video>';
+                              echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="media-preview-video"></video>';
                             } else {
-                              echo '<img src="'.e($mediaUrl).'" alt="Reply media" class="media-preview">';
+                              echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Reply media" class="media-preview">';
                             }
                           ?>
                         </div>

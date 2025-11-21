@@ -20,8 +20,6 @@ if ($id_offer > 0) {
 
 // Check if deletion was successful
 $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
-
-function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
 <html lang="en">
@@ -54,10 +52,10 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             <h5 class="mb-0">Original Offer</h5>
           </div>
           <div class="card-body">
-            <p><strong>Name:</strong> <?php echo e($offerData['nom']); ?></p>
-            <p><strong>Email:</strong> <?php echo e($offerData['email']); ?></p>
-            <p><strong>Type:</strong> <?php echo e($offerData['type_don']); ?></p>
-            <p><strong>Description:</strong> <?php echo nl2br(e($offerData['description'])); ?></p>
+            <p><strong>Name:</strong> <?php echo OfferController::escape($offerData['nom']); ?></p>
+            <p><strong>Email:</strong> <?php echo OfferController::escape($offerData['email']); ?></p>
+            <p><strong>Type:</strong> <?php echo OfferController::escape($offerData['type_don']); ?></p>
+            <p><strong>Description:</strong> <?php echo nl2br(OfferController::escape($offerData['description'])); ?></p>
             <a href="update-offer-form.php?id_offer=<?php echo $id_offer; ?>" class="btn btn-sm btn-success mt-2">
               Reply to This Offer
             </a>
@@ -97,34 +95,34 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                 <div>
                   <strong class="text-dark">
                     <?php if ($is_creator_update): ?>
-                      Offer Update #<?php echo e($update['id_update_offer']); ?>
+                      Offer Update #<?php echo OfferController::escape($update['id_update_offer']); ?>
                     <?php else: ?>
-                      Reply #<?php echo e($update['id_update_offer']); ?>
+                      Reply #<?php echo OfferController::escape($update['id_update_offer']); ?>
                     <?php endif; ?>
                   </strong><br>
                   <small class="text-muted">
                     <?php if ($update['id_user'] !== null && $update['id_user'] > 0): ?>
-                      User ID: <?php echo e($update['id_user']); ?>
+                      User ID: <?php echo OfferController::escape($update['id_user']); ?>
                     <?php else: ?>
                       Anonymous
                     <?php endif; ?>
                     <?php if ($update['id_offer']): ?>
-                      • Offer ID: <?php echo e($update['id_offer']); ?>
+                      • Offer ID: <?php echo OfferController::escape($update['id_offer']); ?>
                     <?php endif; ?>
                   </small>
                 </div>
               </div>
               <div class="post-content">
-                <p><?php echo nl2br(e($update['texte'])); ?></p>
+                <p><?php echo nl2br(OfferController::escape($update['texte'])); ?></p>
                 <?php if (!empty($update['media'])): ?>
                   <div class="post-media">
                     <?php
                       $mediaUrl = '../../public/uploads/' . $update['media'];
                       $ext = strtolower(pathinfo($update['media'], PATHINFO_EXTENSION));
                       if (in_array($ext, ['mp4','mov','webm'])) {
-                        echo '<video src="'.e($mediaUrl).'" controls></video>';
+                        echo '<video src="'.OfferController::escape($mediaUrl).'" controls></video>';
                       } else {
-                        echo '<img src="'.e($mediaUrl).'" alt="Reply media">';
+                        echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Reply media">';
                       }
                     ?>
                   </div>

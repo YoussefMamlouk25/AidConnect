@@ -49,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     }
 }
 
-function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
 <html lang="en">
@@ -93,7 +92,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 
                 <?php if (isset($error)): ?>
                     <div class="alert alert-danger" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i><?php echo e($error); ?>
+                        <i class="fas fa-exclamation-circle me-2"></i><?php echo OfferController::escape($error); ?>
                     </div>
                 <?php endif; ?>
 
@@ -107,23 +106,23 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                   <div class="row">
                     <div class="col-md-6 mb-2">
                       <strong><i class="fas fa-user me-2"></i>Name:</strong>
-                      <p class="mb-0"><?php echo e($offerData['nom']); ?></p>
+                      <p class="mb-0"><?php echo OfferController::escape($offerData['nom']); ?></p>
                     </div>
                     <div class="col-md-6 mb-2">
                       <strong><i class="fas fa-envelope me-2"></i>Email:</strong>
-                      <p class="mb-0"><?php echo e($offerData['email']); ?></p>
+                      <p class="mb-0"><?php echo OfferController::escape($offerData['email']); ?></p>
                     </div>
                     <div class="col-md-6 mb-2">
                       <strong><i class="fas fa-phone me-2"></i>Phone:</strong>
-                      <p class="mb-0"><?php echo e($offerData['num']); ?></p>
+                      <p class="mb-0"><?php echo OfferController::escape($offerData['num']); ?></p>
                     </div>
                     <div class="col-md-6 mb-2">
                       <strong><i class="fas fa-gift me-2"></i>Donation Type:</strong>
-                      <p class="mb-0"><?php echo e($offerData['type_don']); ?></p>
+                      <p class="mb-0"><?php echo OfferController::escape($offerData['type_don']); ?></p>
                     </div>
                     <div class="col-12 mb-2">
                       <strong><i class="fas fa-align-left me-2"></i>Description:</strong>
-                      <p class="mb-0"><?php echo nl2br(e($offerData['description'])); ?></p>
+                      <p class="mb-0"><?php echo nl2br(OfferController::escape($offerData['description'])); ?></p>
                     </div>
                     <?php if (!empty($offerData['media'])): ?>
                       <div class="col-12 mb-2">
@@ -133,9 +132,9 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                             $mediaUrl = '../../public/uploads/' . $offerData['media'];
                             $ext = strtolower(pathinfo($offerData['media'], PATHINFO_EXTENSION));
                             if (in_array($ext, ['mp4','mov','webm'])) {
-                              echo '<video src="'.e($mediaUrl).'" controls class="media-preview-video"></video>';
+                              echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="media-preview-video"></video>';
                             } else {
-                              echo '<img src="'.e($mediaUrl).'" alt="Volunteer media" class="media-preview">';
+                              echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media" class="media-preview">';
                             }
                           ?>
                         </div>
@@ -145,7 +144,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                 </div>
 
                 <form method="POST" id="deleteForm">
-                  <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                  <input type="hidden" name="csrf_token" value="<?php echo isset($_SESSION['csrf_token']) ? OfferController::escape($_SESSION['csrf_token']) : ''; ?>">
                   <input type="hidden" name="confirm_delete" value="1">
                   
                   <div class="d-grid gap-2 mt-4">

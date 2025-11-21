@@ -1,10 +1,10 @@
 <?php
 class UpdateOffer {
     private $id_update_offer;   // AUTO_INCREMENT
-    private $id_offer;          // int(11) - Foreign key to offer table
-    private $id_user;           // int(11) - NOT NULL
+    private $id_offer;          // int
+    private $id_user;           // int
     private $texte;             // text
-    private $media;             // varchar(255)
+    private $media;             // varchar
 
     public function __construct(
         $id_offer = null,
@@ -15,7 +15,6 @@ class UpdateOffer {
     ) {
         $this->id_update_offer = $id_update_offer;
         $this->id_offer = $id_offer !== null ? (int)$id_offer : null;
-        // Allow id_user to be null for anonymous users (foreign key constraint)
         $this->id_user = ($id_user !== null && $id_user !== '' && $id_user > 0) ? (int)$id_user : null;
         $this->texte = $texte;
         $this->media = $media;
