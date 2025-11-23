@@ -57,28 +57,48 @@ if (
             
             $media = $offerData['media']; 
             
-            if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
+            if (isset($_FILES['media'])) {
                 $uploadDir = __DIR__ . '/../../public/uploads/';
                 if (!file_exists($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
                 }
                 
-                
                 if (!empty($offerData['media'])) {
-                    $oldMediaPath = $uploadDir . $offerData['media'];
-                    if (file_exists($oldMediaPath)) {
-                        @unlink($oldMediaPath);
+                    $oldMediaFiles = json_decode($offerData['media'], true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($oldMediaFiles)) {
+                        foreach ($oldMediaFiles as $oldMediaFile) {
+                            $oldMediaPath = $uploadDir . $oldMediaFile;
+                            if (file_exists($oldMediaPath)) {
+                                @unlink($oldMediaPath);
+                            }
+                        }
+                    } else {
+                        $oldMediaPath = $uploadDir . $offerData['media'];
+                        if (file_exists($oldMediaPath)) {
+                            @unlink($oldMediaPath);
+                        }
                     }
                 }
-                
-                $original = basename($_FILES['media']['name']);
-                $mediaName = time() . '_' . $original;
-                $targetPath = $uploadDir . $mediaName;
-                
-                if (move_uploaded_file($_FILES['media']['tmp_name'], $targetPath)) {
-                    $media = $mediaName;
-                } else {
-                    $error = "Erreur lors du téléchargement du fichier.";
+
+                $uploadedMedia = [];
+                $errors = [];
+                foreach ($_FILES['media']['tmp_name'] as $key => $tmpName) {
+                    if ($_FILES['media']['error'][$key] === UPLOAD_ERR_OK) {
+                        $original = basename($_FILES['media']['name'][$key]);
+                        $mediaName = time() . '_' . $key . '_' . $original;
+                        $targetPath = $uploadDir . $mediaName;
+                        if (move_uploaded_file($tmpName, $targetPath)) {
+                            $uploadedMedia[] = $mediaName;
+                        } else {
+                            $errors[] = "Erreur lors du téléchargement du fichier: " . $original;
+                        }
+                    }
+                }
+                if (count($errors) > 0) {
+                    $error = implode("\n", $errors);
+                }
+                if (count($uploadedMedia) > 0) {
+                    $media = json_encode($uploadedMedia);
                 }
             }
 
@@ -241,20 +261,33 @@ $currentMedia = $offerData['media'];
 
                 <div class="form-group mb-4">
                   <label for="media" class="fw-bold">Media</label>
-                  <input type="file" class="form-control" id="media" name="media" accept="image/*,video/*">
+                  <input type="file" class="form-control" id="media" name="media[]" accept="image/*,video/*" multiple>
                   <small class="text-muted d-block mt-2">
-                    Leave empty to keep current media. Upload a new file to replace it.
+                    Leave empty to keep current media. Upload new files to replace them.
                   </small>
                   <?php if (!empty($currentMedia)): ?>
                     <div class="mt-3">
                       <label class="text-muted small">Current Media:</label>
                       <?php
-                        $mediaUrl = '../../public/uploads/' . $currentMedia;
-                        $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
-                        if (in_array($ext, ['mp4','mov','webm'])) {
-                          echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
+                        $mediaFiles = json_decode($currentMedia, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+                          foreach ($mediaFiles as $mediaFile) {
+                            $mediaUrl = '../../public/uploads/' . $mediaFile;
+                            $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                            if (in_array($ext, ['mp4','mov','webm'])) {
+                              echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
+                            } else {
+                              echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
+                            }
+                          }
                         } else {
-                          echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
+                          $mediaUrl = '../../public/uploads/' . $currentMedia;
+                          $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
+                          if (in_array($ext, ['mp4','mov','webm'])) {
+                            echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
+                          } else {
+                            echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
+                          }
                         }
                       ?>
                     </div>
@@ -284,4 +317,22 @@ $currentMedia = $offerData['media'];
     </div>
 
   </body>
+  <style>
+    .media-preview {
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .media-preview-video {
+      max-width: 140px;
+      max-height: 120px;
+      border-radius: 8px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+  </style>
+</html>
 </html>

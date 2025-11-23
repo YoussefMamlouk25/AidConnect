@@ -35,30 +35,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($texte)) {
         $error = "Le texte est requis.";
     } else {
-        $media = $updateData['media'];
-        if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../../public/uploads/';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
+                $media = $updateData['media'];
+                if (isset($_FILES['media'])) {
+                    $uploadDir = __DIR__ . '/../../public/uploads/';
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
 
-            if (!empty($updateData['media'])) {
-                $oldMediaPath = $uploadDir . $updateData['media'];
-                if (file_exists($oldMediaPath)) {
-                    @unlink($oldMediaPath);
+                    if (!empty($updateData['media'])) {
+                        $oldMediaFiles = json_decode($updateData['media'], true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($oldMediaFiles)) {
+                            foreach ($oldMediaFiles as $oldMediaFile) {
+                                $oldMediaPath = $uploadDir . $oldMediaFile;
+                                if (file_exists($oldMediaPath)) {
+                                    @unlink($oldMediaPath);
+                                }
+                            }
+                        } else {
+                            $oldMediaPath = $uploadDir . $updateData['media'];
+                            if (file_exists($oldMediaPath)) {
+                                @unlink($oldMediaPath);
+                            }
+                        }
+                    }
+
+                    $uploadedMedia = [];
+                    $errors = [];
+                    foreach ($_FILES['media']['tmp_name'] as $key => $tmpName) {
+                        if ($_FILES['media']['error'][$key] === UPLOAD_ERR_OK) {
+                            $original = basename($_FILES['media']['name'][$key]);
+                            $mediaName = time() . '_' . $key . '_' . $original;
+                            $targetPath = $uploadDir . $mediaName;
+                            if (move_uploaded_file($tmpName, $targetPath)) {
+                                $uploadedMedia[] = $mediaName;
+                            } else {
+                                $errors[] = "Erreur lors du téléchargement du fichier: " . $original;
+                            }
+                        }
+                    }
+                    if (count($errors) > 0) {
+                        $error = implode("\n", $errors);
+                    }
+                    if (count($uploadedMedia) > 0) {
+                        $media = json_encode($uploadedMedia);
+                    }
                 }
-            }
-
-            $original = basename($_FILES['media']['name']);
-            $mediaName = time() . '_' . $original;
-            $targetPath = $uploadDir . $mediaName;
-
-            if (move_uploaded_file($_FILES['media']['tmp_name'], $targetPath)) {
-                $media = $mediaName;
-            } else {
-                $error = "Erreur lors du téléchargement du fichier.";
-            }
-        }
 
         if (!isset($error)) {
             $update = new UpdateOffer(
@@ -136,12 +157,37 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
                 </div>
 
                 <div class="mb-3">
-                    <label for="media" class="form-label">Média (Optionnel)</label>
-                    <input type="file" class="form-control" id="media" name="media" accept="image/*,video/*">
+
+                    <label for="media" class="form-label">Media (Optionnel)</label>
+                    <input type="file" class="form-control" id="media" name="media[]" accept="image/*,video/*" multiple>
                     <?php if (!empty($updateData['media'])): ?>
-                        <small class="text-muted d-block mt-2">Fichier actuel: <?= e($updateData['media']); ?></small>
+                        <div class="current-media-previews mt-2">
+                            <?php
+                                $mediaFiles = json_decode($updateData['media'], true);
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+                                    foreach ($mediaFiles as $mediaFile) {
+                                        $mediaUrl = '../../public/uploads/' . $mediaFile;
+                                        $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                                        if (in_array($ext, ['mp4','mov','webm'])) {
+                                            echo '<video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video>';
+                                        } else {
+                                            echo '<img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview-img">';
+                                        }
+                                    }
+                                } else {
+                                    $mediaUrl = '../../public/uploads/' . $updateData['media'];
+                                    $ext = strtolower(pathinfo($updateData['media'], PATHINFO_EXTENSION));
+                                    if (in_array($ext, ['mp4','mov','webm'])) {
+                                        echo '<video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video>';
+                                    } else {
+                                        echo '<img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview-img">';
+                                    }
+                                }
+                            ?>
+                        </div>
                     <?php endif; ?>
                 </div>
+
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">Mettre à jour</button>
@@ -159,6 +205,24 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 </body>
 </html>
 <?php endif; ?>
+
+<style>
+.media-preview-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+.media-preview-video {
+    width: 140px;
+    height: 120px;
+    border-radius: 8px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+</style>
 
 <script src="updateoffer.js"></script>
 

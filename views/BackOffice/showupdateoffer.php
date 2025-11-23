@@ -62,7 +62,32 @@ endif;
           </td>
           <td><?= $update['id_user'] ? 'User #'.(int)$update['id_user'] : 'Anonyme' ?></td>
           <td><?= nl2br(htmlspecialchars(mb_strimwidth($update['texte'],0,120,'…'))) ?></td>
-          <td><?= $update['media'] ?: 'Aucun' ?></td>
+          <td>
+          <?php
+            $mediaFiles = json_decode($update['media'], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+                foreach ($mediaFiles as $mediaFile) {
+                    $mediaUrl = '../../public/uploads/' . $mediaFile;
+                    $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                    if (in_array($ext, ['mp4','mov','webm'])) {
+                        echo '<video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-thumb"></video>';
+                    } else {
+                        echo '<img src="' . htmlspecialchars($mediaUrl) . '" alt="Media image" class="media-thumb">';
+                    }
+                }
+            } elseif (!empty($update['media'])) {
+                $mediaUrl = '../../public/uploads/' . $update['media'];
+                $ext = strtolower(pathinfo($update['media'], PATHINFO_EXTENSION));
+                if (in_array($ext, ['mp4','mov','webm'])) {
+                    echo '<video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-thumb"></video>';
+                } else {
+                    echo '<img src="' . htmlspecialchars($mediaUrl) . '" alt="Media image" class="media-thumb">';
+                }
+            } else {
+                echo 'Aucun';
+            }
+          ?>
+          </td>
           <td class="table-actions">
             <a class="btn-action btn-edit"
                href="edit_updateoffer.php?id=<?= (int)$update['id_update_offer'] ?>"
@@ -84,6 +109,15 @@ endif;
     </table>
   </div>
 </div>
+<style>
+.media-thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin: 2px;
+}
+</style>
 <?php if (!$embed): ?>
     </div>
 </div>

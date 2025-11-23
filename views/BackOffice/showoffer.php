@@ -44,7 +44,32 @@ $list = $offerController->getAllOffers();
 					<td><?= $num ?></td>
 					<td><strong><?= $typeDon ?></strong></td>
 					<td><?= $description ?></td>
-					<td><?= $media ?></td>
+					<td>
+					<?php
+						$mediaFiles = json_decode($offer['media'], true);
+						if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+							foreach ($mediaFiles as $mediaFile) {
+								$mediaUrl = '../../public/uploads/' . $mediaFile;
+								$ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+								if (in_array($ext, ['mp4','mov','webm'])) {
+									echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
+								} else {
+									echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
+								}
+							}
+						} elseif (!empty($offer['media'])) {
+							$mediaUrl = '../../public/uploads/' . $offer['media'];
+							$ext = strtolower(pathinfo($offer['media'], PATHINFO_EXTENSION));
+							if (in_array($ext, ['mp4','mov','webm'])) {
+								echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
+							} else {
+								echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
+							}
+						} else {
+							echo 'Aucun';
+						}
+					?>
+					</td>
 					<td class="table-actions">
 						<a href="updateoffer.php?id_offer=<?= urlencode($idOffer) ?>" class="btn-action btn-edit" onclick="if(typeof loadContent==='function'){ loadContent('updateoffer.php?id_offer=<?= urlencode($idOffer) ?>'); return false; }">✎ Éditer</a>
 						<a href="deleteoffer.php?id_offer=<?= urlencode($idOffer) ?>&embed=1" class="btn-action btn-delete" onclick="if(typeof loadContent==='function'){ loadContent('deleteoffer.php?id_offer=<?= urlencode($idOffer) ?>&embed=1'); return false; }">🗑 Supprimer</a>
@@ -58,4 +83,13 @@ $list = $offerController->getAllOffers();
 		</table>
 	</div>
 </div>
+<style>
+.media-thumb {
+	width: 80px;
+	height: 80px;
+	object-fit: cover;
+	border-radius: 6px;
+	margin: 2px;
+}
+</style>
 

@@ -117,12 +117,25 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
                 <?php if (!empty($update['media'])): ?>
                   <div class="post-media">
                     <?php
-                      $mediaUrl = '../../public/uploads/' . $update['media'];
-                      $ext = strtolower(pathinfo($update['media'], PATHINFO_EXTENSION));
-                      if (in_array($ext, ['mp4','mov','webm'])) {
-                        echo '<video src="'.OfferController::escape($mediaUrl).'" controls></video>';
+                      $mediaFiles = json_decode($update['media'], true);
+                      if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+                        foreach ($mediaFiles as $mediaFile) {
+                          $mediaUrl = '../../public/uploads/' . $mediaFile;
+                          $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                          if (in_array($ext, ['mp4','mov','webm'])) {
+                            echo '<video src="'.OfferController::escape($mediaUrl).'" controls></video>';
+                          } else {
+                            echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Reply media">';
+                          }
+                        }
                       } else {
-                        echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Reply media">';
+                        $mediaUrl = '../../public/uploads/' . $update['media'];
+                        $ext = strtolower(pathinfo($update['media'], PATHINFO_EXTENSION));
+                        if (in_array($ext, ['mp4','mov','webm'])) {
+                          echo '<video src="'.OfferController::escape($mediaUrl).'" controls></video>';
+                        } else {
+                          echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Reply media">';
+                        }
                       }
                     ?>
                   </div>

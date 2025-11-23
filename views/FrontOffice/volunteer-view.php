@@ -73,14 +73,27 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
                 <p><strong>Numéro:</strong> <?= OfferController::escape($offer['num']) ?></p>
                 <p><?= nl2br(OfferController::escape($offer['description'])) ?></p>
                 <?php if (!empty($offer['media'])): ?>
-                  <div class="post-media">
+                  <div class="post-media d-flex flex-wrap gap-2">
                     <?php
-                      $mediaUrl = '../../public/uploads/' . $offer['media'];
-                      $ext = strtolower(pathinfo($offer['media'], PATHINFO_EXTENSION));
-                      if (in_array($ext, ['mp4','mov','webm'])) {
-                        echo '<video src="'.OfferController::escape($mediaUrl).'" controls></video>';
+                      $mediaFiles = json_decode($offer['media'], true);
+                      if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+                        foreach ($mediaFiles as $mediaFile) {
+                          $mediaUrl = '../../public/uploads/' . $mediaFile;
+                          $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                          if (in_array($ext, ['mp4','mov','webm'])) {
+                            echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="media-video" style="max-width: 100%;"></video>';
+                          } else {
+                            echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media" class="media-image">';
+                          }
+                        }
                       } else {
-                        echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media">';
+                        $mediaUrl = '../../public/uploads/' . $offer['media'];
+                        $ext = strtolower(pathinfo($offer['media'], PATHINFO_EXTENSION));
+                        if (in_array($ext, ['mp4','mov','webm'])) {
+                          echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="media-video" style="max-width: 100%;"></video>';
+                        } else {
+                          echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media" class="media-image">';
+                        }
                       }
                     ?>
                   </div>

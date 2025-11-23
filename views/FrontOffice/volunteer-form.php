@@ -39,20 +39,33 @@ if (
         } else {
             // Upload media (optional)
             $media = null;
-            if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
+            if (isset($_FILES['media'])) {
                 $uploadDir = __DIR__ . '/../../public/uploads/';
                 if (!file_exists($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
                 }
-                $original = basename($_FILES['media']['name']);
-                $mediaName = time() . '_' . $original;
-                $targetPath = $uploadDir . $mediaName;
-                if (move_uploaded_file($_FILES['media']['tmp_name'], $targetPath)) {
-                    $media = $mediaName;
-                } else {
-                    $error = "Erreur lors du téléchargement du fichier.";
+                $uploadedMedia = [];
+                $errors = [];
+                foreach ($_FILES['media']['tmp_name'] as $key => $tmpName) {
+                    if ($_FILES['media']['error'][$key] === UPLOAD_ERR_OK) {
+                        $original = basename($_FILES['media']['name'][$key]);
+                        $mediaName = time() . '_' . $key . '_' . $original;
+                        $targetPath = $uploadDir . $mediaName;
+                        if (move_uploaded_file($tmpName, $targetPath)) {
+                            $uploadedMedia[] = $mediaName;
+                        } else {
+                            $errors[] = "Erreur lors du téléchargement du fichier: " . $original;
+                        }
+                    }
+                }
+                if (count($errors) > 0) {
+                    $error = implode("\n", $errors);
+                }
+                if (count($uploadedMedia) > 0) {
+                    $media = json_encode($uploadedMedia);
                 }
             }
+
 
             if (!isset($error)) {
                 $offer = new Offer(
@@ -164,10 +177,9 @@ if (
                 </div>
                 <div class="invalid-feedback d-block" id="descriptionError" style="display: none;"></div>
               </div>
-
               <div class="form-group mb-4">
                 <label for="media" class="fw-bold">Media (optionnel)</label>
-                <input type="file" class="form-control" id="media" name="media" />
+                <input type="file" class="form-control" id="media" name="media[]" accept="image/*" multiple />
                 <div class="invalid-feedback d-block" id="mediaError" style="display: none;"></div>
               </div>
 
