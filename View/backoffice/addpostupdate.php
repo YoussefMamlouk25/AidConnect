@@ -68,7 +68,7 @@ if (!$postData) {
         // Insérer dans update_post avec l'id_post de la table post
         $result = $postUpdateC->addPostUpdate($postUpdate);
         if ($result) {
-            header('Location: dashboard.php');
+            header('Location: showpostupdateback.php');
             exit();
         } else {
             $error = "Erreur lors de l'ajout du post résolu.";
@@ -83,9 +83,13 @@ if (!$postData) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AidConnect - Marquer comme Résolu</title>
   <link rel="stylesheet" href="addpostupdate.css">
+  <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-  <main>
+<div class="layout">
+  <?php include 'sidebar.php'; ?>
+  <div class="main-content">
+    <main>
     <h1>Marquer le Post comme Résolu</h1>
     
  
@@ -136,11 +140,14 @@ if (!$postData) {
 
         <p>
             <button type="submit">Publier le post résolu</button>
-            <a href="dashboard.php" class="btn-cancel">Annuler</a>
+            <a href="showpostupdateback.php" class="btn-cancel">Annuler</a>
         </p>
     </form>
-  </main>
+    </main>
+  </div>
+</div>
 
+  <script src="dashboard.js"></script>
   <script src="./jsentiter2.js"></script>
 </body>
 </html>

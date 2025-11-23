@@ -56,7 +56,7 @@ if (
         $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : null;
         $result = $postC->addPost($post, $id_user);
         if ($result) {
-            header('Location: dashboard.php');
+            header('Location: showpostback.php');
             exit();
         } else {
             $error = "Erreur lors de l'ajout du post. Veuillez vérifier les logs d'erreur ou réessayer.";
@@ -72,9 +72,13 @@ if (
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AidConnect - Ajouter un Post</title>
     <link rel="stylesheet" href="addpost.css">
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <main>
+<div class="layout">
+    <?php include 'sidebar.php'; ?>
+    <div class="main-content">
+        <main>
         <h1>Ajouter un Post</h1>
         
         <?php if (isset($error)): ?>
@@ -167,8 +171,11 @@ if (
             <button type="submit">Publier</button>
         </p>
         </form>
-    </main>
+        </main>
+    </div>
+</div>
     
+    <script src="dashboard.js"></script>
     <script src="addpost.js"></script>
 </body>
 </html>

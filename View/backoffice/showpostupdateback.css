@@ -78,6 +78,9 @@
     gap: 6px;
 }
 
+/* Styles de sidebar-link supprimés - maintenant gérés par dashboard.css */
+/* Les styles suivants sont commentés pour éviter les conflits avec dashboard.css */
+/*
 .sidebar-link {
     display: flex;
     align-items: center;
@@ -97,6 +100,7 @@
 
 .sidebar-link.active {
     background: #0056b3;
+*/
     color: white;
 }
 

@@ -89,7 +89,7 @@ if (!$postData) {
             // Mettre à jour le post
             $result = $postController->updatePost($post, $id);
             if ($result) {
-                header('Location: dashboard.php');
+                header('Location: showpostback.php');
                 exit();
             } else {
                 $error = "Erreur lors de la mise à jour du post. Veuillez réessayer.";
@@ -115,12 +115,17 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier un Post</title>
     <link rel="stylesheet" href="addpost.css">
     <link rel="stylesheet" href="showpost.css">
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <h1>Modifier un Post</h1>
+<div class="layout">
+    <?php include 'sidebar.php'; ?>
+    <div class="main-content">
+        <h1>Modifier un Post</h1>
     
     <?php if (!empty($error)): ?>
         <div >
@@ -225,10 +230,13 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
         </p>
 
         <p>
-            <a href="dashboard.php" class="btn-cancel">Annuler</a>
+            <a href="showpostback.php" class="btn-cancel">Annuler</a>
         </p>
     </form>
+    </div>
+</div>
 
+    <script src="dashboard.js"></script>
     <script src="addpost.js"></script>
 </body>
 </html>

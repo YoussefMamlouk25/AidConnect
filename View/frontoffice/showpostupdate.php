@@ -51,7 +51,9 @@ function getInitials($name) {
                     $region = htmlspecialchars($row['region'] ?? '');
                     $tempReponse = htmlspecialchars($row['temp_reponse'] ?? '');
                     $tempResolue = htmlspecialchars($row['temp_resolue'] ?? '');
-                    $realiser = htmlspecialchars($row['realiser'] ?? '');
+                    // Pour realiser, afficher le texte saisi tel quel (VARCHAR)
+                    $realiserRaw = $row['realiser'] ?? '';
+                    $realiser = !empty($realiserRaw) ? htmlspecialchars($realiserRaw) : '';
                     $hasImage = !empty($row['media']);
                     $imagePath = $hasImage ? '../../public/uploads/' . htmlspecialchars($row['media']) : '';
                     $idUpdatePost = $row['id_update_post'];

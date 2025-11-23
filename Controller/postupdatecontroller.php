@@ -17,13 +17,16 @@ class PostUpdateController {
             if ($media === null) {
                 $media = '';
             }
-            
+
+            // Gérer realiser : garder comme chaîne vide pour éviter l'insertion de NULL qui utilise la valeur par défaut 0
+            $realiser = $postUpdate->getRealiser();
+
             $result = $query->execute([
                 ':id_post' => $postUpdate->getIdPost(),
                 ':id_user' => $postUpdate->getIdUser(),
                 ':texte' => $postUpdate->getTexte(),
                 ':media' => $media,
-                ':realiser' => $postUpdate->getRealiser(),
+                ':realiser' => $realiser,
                 ':temp_reponse' => $postUpdate->getTempReponse(),
                 ':temp_resolue' => $postUpdate->getTempResolue()
             ]);

@@ -38,13 +38,34 @@ function formatDate($date) {
         return $dateObj->format('d/m/Y');
     }
 }
+
+// Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
+$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
+          || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
+
+// Si ce n'est pas AJAX, afficher la page complète avec sidebar
+if (!$isAjax) {
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AidConnect - Liste des Posts Résolus</title>
+    <link rel="stylesheet" href="showpostback.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div class="layout">
+    <?php include 'sidebar.php'; ?>
+    <div class="main-content">
+<?php
+}
 ?>
 
 <div class="container">
     <!-- Bouton pour ajouter un nouveau post update -->
-    <div style="margin-bottom:12px;">
-        <a href="addpostupdate.php" class="btn-add-post">+ Ajouter un post update</a>
-    </div>
+
     <table class="post-table">
         <?php
         // Convertir $list en tableau de lignes si nécessaire
@@ -61,7 +82,22 @@ function formatDate($date) {
             $cols = array_keys($rows[0]);
             echo "<thead><tr>";
             foreach ($cols as $c) {
-                echo '<th>' . htmlspecialchars($c) . '</th>';
+                // Traduire les noms de colonnes pour un affichage plus clair
+                $displayName = $c;
+                if ($c === 'realiser') {
+                    $displayName = 'Intervention réalisée par';
+                } elseif ($c === 'temp_reponse') {
+                    $displayName = 'Temps de réponse (jours)';
+                } elseif ($c === 'temp_resolue') {
+                    $displayName = 'Temps de résolution (jours)';
+                } elseif ($c === 'id_post') {
+                    $displayName = 'ID Post';
+                } elseif ($c === 'id_update_post') {
+                    $displayName = 'ID';
+                } elseif ($c === 'id_user') {
+                    $displayName = 'ID Utilisateur';
+                }
+                echo '<th>' . htmlspecialchars($displayName) . '</th>';
             }
             echo '<th>Actions</th></tr></thead><tbody>';
 
@@ -72,15 +108,22 @@ function formatDate($date) {
                     if ($c === 'media' && !empty($val)) {
                         $img = '../../public/uploads/' . htmlspecialchars($val);
                         echo '<td><img src="' . $img . '" style="max-width:120px; max-height:80px; object-fit:cover; border-radius:6px;"></td>';
+                    } elseif ($c === 'realiser') {
+                        // Pour la colonne realiser, afficher le texte saisi tel quel (VARCHAR)
+                        if (!empty($val)) {
+                            echo '<td>' . nl2br(htmlspecialchars($val)) . '</td>';
+                        } else {
+                            echo '<td><em>Non spécifié</em></td>';
+                        }
                     } else {
                         echo '<td>' . nl2br(htmlspecialchars($val)) . '</td>';
                     }
                 }
-                // Actions column (use id_post if present)
-                $idPost = isset($row['id_post']) ? $row['id_post'] : '';
+                // Actions column (use id_update_post for update/delete)
+                $idUpdate = isset($row['id_update_post']) ? $row['id_update_post'] : '';
                 echo '<td class="table-actions">';
-                echo '<a href="updatepostupdate.php?id=' . urlencode($idPost) . '" class="btn-action btn-edit">✎</a>';
-                echo '<a href="deletepostupdate.php?id=' . urlencode($idPost) . '" class="btn-action btn-delete">🗑</a>';
+                echo '<a href="updatepostupdate.php?id=' . urlencode($idUpdate) . '" class="btn-action btn-edit">✎</a>';
+                echo '<a href="deletepostupdate.php?id=' . urlencode($idUpdate) . '" class="btn-action btn-delete">🗑</a>';
                 echo '</td>';
                 echo '</tr>';
             }
@@ -92,3 +135,15 @@ function formatDate($date) {
      </table>
  </div>
 
+<?php
+// Si ce n'est pas AJAX, fermer la structure HTML
+if (!$isAjax) {
+?>
+    </div>
+</div>
+    <script src="dashboard.js"></script>
+</body>
+</html>
+<?php
+}
+?>

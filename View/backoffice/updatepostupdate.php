@@ -27,7 +27,8 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 // Charger les données de l'update_post
 $postUpdateData = $postUpdateC->getPostUpdateById($id);
 if (!$postUpdateData) {
-    $error = "Entrée introuvable.";
+    header('Location: showpostupdateback.php');
+    exit();
 } else {
     // Charger le post parent si besoin
     $postData = $postController->getPostById($postUpdateData['id_post']);
@@ -75,7 +76,7 @@ if (!$postUpdateData) {
             // Appeler la méthode de mise à jour
             $result = $postUpdateC->updatePostUpdate($postUpdate, $id);
             if ($result) {
-                header('Location: dashboard.php');
+                header('Location: showpostupdateback.php');
                 exit();
             } else {
                 $error = "Erreur lors de la mise à jour.";
@@ -88,7 +89,7 @@ if (!$postUpdateData) {
 
 // Préparer valeurs pour le formulaire
 $texte = isset($_POST['texte']) ? htmlspecialchars($_POST['texte']) : htmlspecialchars($postUpdateData['texte'] ?? '');
-$realiser = isset($_POST['intervention']) ? htmlspecialchars($_POST['intervention']) : htmlspecialchars($postUpdateData['realiser'] ?? '');
+$realiser = isset($_POST['intervention']) ? htmlspecialchars($_POST['intervention']) : (isset($postUpdateData['realiser']) && $postUpdateData['realiser'] !== '0' ? htmlspecialchars($postUpdateData['realiser']) : '');
 $joursReponse = isset($_POST['joursReponse']) ? htmlspecialchars($_POST['joursReponse']) : htmlspecialchars($postUpdateData['temp_reponse'] ?? '');
 $joursResolution = isset($_POST['joursResolution']) ? htmlspecialchars($_POST['joursResolution']) : htmlspecialchars($postUpdateData['temp_resolue'] ?? '');
 $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateData['media']) : '';
@@ -102,9 +103,13 @@ $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateDa
   <title>Modifier une résolution</title>
   <link rel="stylesheet" href="addpostupdate.css">
   <link rel="stylesheet" href="addpost.css">
+  <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-  <main>
+<div class="layout">
+  <?php include 'sidebar.php'; ?>
+  <div class="main-content">
+    <main>
     <h1>Modifier la résolution</h1>
 
     <?php if (!empty($error)): ?>
@@ -171,11 +176,14 @@ $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateDa
         </p>
 
         <p>
-            <a href="dashboard.php" class="btn-cancel">Annuler</a>
+            <a href="showpostupdateback.php" class="btn-cancel">Annuler</a>
         </p>
     </form>
-  </main>
+    </main>
+  </div>
+</div>
 
+  <script src="dashboard.js"></script>
   <script src="jsentiter2.js"></script>
 </body>
 </html>
