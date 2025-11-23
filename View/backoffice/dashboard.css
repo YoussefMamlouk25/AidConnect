@@ -1,348 +1,146 @@
+/* CSS pour backoffice avec template socialv-lite */
 
-/* RESET */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
+/* Override pour centrer le main-content et le rendre plus petit */
+.wrapper {
+    position: relative;
 }
 
-/* BODY - Ensure full height */
-body {
-    margin: 0;
-    padding: 0;
+/* Sidebar socialv-lite - s'affiche à gauche */
+.iq-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
     height: 100vh;
-    overflow: hidden;
+    z-index: 1000;
 }
 
-/* LAYOUT */
-.layout {
-    display: flex;
-    height: 100vh;
-    background: #f5f7ff;
-    width: 100%;
-}
-
-/* SIDEBAR */
-.sidebar {
-    width: 240px;
-    background: #ffffff;
-    border-right: 1px solid #e2e6f3;
-    padding: 25px 15px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-
-    box-shadow: 0 0 12px rgba(0,0,0,0.05);
-}
-
-.sidebar h3 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #0057d8;
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-.sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* Protection contre les styles généraux de form button et autres styles */
-/* Ces règles doivent être très spécifiques pour éviter les conflits */
-/* IMPORTANT: Ne s'applique QU'AUX boutons de la sidebar, pas aux formulaires */
-.sidebar button.sidebar-link,
-aside.sidebar button.sidebar-link,
-.sidebar nav button.sidebar-link,
-.sidebar .sidebar-link,
-aside.sidebar .sidebar-link,
-.sidebar nav .sidebar-link {
-    /* Réinitialiser les styles qui pourraient venir de form button ou autres */
-    width: auto !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-    /* Empêcher les styles de form button d'affecter la sidebar */
-    max-width: none !important;
-    min-width: auto !important;
-}
-
-/* ===== BOUTONS DE FORMULAIRE - Styles uniformes pour tous les formulaires ===== */
-/* Protection: Les styles de sidebar ne doivent PAS affecter les boutons de formulaire */
-/* Règles très spécifiques pour garantir l'application correcte */
-
-/* Règle générale pour TOUS les boutons dans les formulaires (sauf sidebar) */
-.layout .main-content form button:not(.sidebar-link):not(.btn-action),
-.layout main form button:not(.sidebar-link):not(.btn-action),
-body .main-content form button:not(.sidebar-link):not(.btn-action),
-body main form button:not(.sidebar-link):not(.btn-action) {
-    width: 100% !important;
-    padding: 0.8rem !important;
-    border-radius: 30px !important;
-    background: #0f5fcc !important;
-    color: #ffffff !important;
-    border: none !important;
-    cursor: pointer !important;
-    font-weight: 600 !important;
-    font-size: 1.1rem !important;
-    transition: all 0.3s !important;
-    display: block !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    text-align: center !important;
-    min-width: auto !important;
-    max-width: 100% !important;
-}
-
-.layout .main-content form button:not(.sidebar-link):not(.btn-action):hover,
-.layout main form button:not(.sidebar-link):not(.btn-action):hover,
-body .main-content form button:not(.sidebar-link):not(.btn-action):hover,
-body main form button:not(.sidebar-link):not(.btn-action):hover {
-    background: #0d4fb0 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 18px rgba(0, 50, 255, 0.25) !important;
-}
-
-/* Tous les boutons submit dans les formulaires */
-.main-content form button[type="submit"],
-main form button[type="submit"],
-.main-content form button:not(.sidebar-link),
-main form button:not(.sidebar-link),
-form button[type="submit"]:not(.sidebar-link),
-form button:not(.sidebar-link):not(.btn-action),
-button[type="submit"].btn-update,
-button.btn-update[type="submit"],
-button.btn-update:not(.sidebar-link) {
-    width: 100% !important;
-    padding: 0.8rem !important;
-    border-radius: 30px !important;
-    background: #0f5fcc !important;
-    color: #ffffff !important;
-    border: none !important;
-    cursor: pointer !important;
-    font-weight: 600 !important;
-    font-size: 1.1rem !important;
-    transition: all 0.3s !important;
-    display: block !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    text-align: center !important;
-    min-width: auto !important;
-    max-width: 100% !important;
-}
-
-.main-content form button[type="submit"]:hover,
-main form button[type="submit"]:hover,
-.main-content form button:not(.sidebar-link):hover,
-main form button:not(.sidebar-link):hover,
-form button[type="submit"]:not(.sidebar-link):hover,
-form button:not(.sidebar-link):not(.btn-action):hover,
-button[type="submit"].btn-update:hover,
-button.btn-update[type="submit"]:hover,
-button.btn-update:not(.sidebar-link):hover {
-    background: #0d4fb0 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 18px rgba(0, 50, 255, 0.25) !important;
-}
-
-/* Bouton Annuler uniforme - Tous les cas possibles */
-.main-content .btn-cancel,
-main .btn-cancel,
-.main-content a.btn-cancel,
-main a.btn-cancel,
-a.btn-cancel:not(.sidebar-link),
-.btn-cancel:not(.sidebar-link) {
-    display: inline-block !important;
-    width: 100% !important;
-    margin-top: 0.5rem !important;
-    padding: 0.8rem !important;
-    border-radius: 30px !important;
-    background: #6c757d !important;
-    color: #ffffff !important;
-    text-align: center !important;
-    text-decoration: none !important;
-    font-weight: 600 !important;
-    transition: all 0.3s !important;
-    box-sizing: border-box !important;
-    border: none !important;
-    cursor: pointer !important;
-    min-width: auto !important;
-    max-width: 100% !important;
-}
-
-.main-content .btn-cancel:hover,
-main .btn-cancel:hover,
-.main-content a.btn-cancel:hover,
-main a.btn-cancel:hover,
-a.btn-cancel:not(.sidebar-link):hover,
-.btn-cancel:not(.sidebar-link):hover {
-    background: #5a6268 !important;
-    transform: translateY(-2px) !important;
-}
-
-/* BUTTONS - Styles spécifiques pour la sidebar pour éviter les conflits */
-.sidebar .sidebar-link,
-aside.sidebar .sidebar-link,
-.sidebar nav .sidebar-link {
-    background: #f1f4ff !important;
-    border: 1px solid #d6defb !important;
-    color: #1f2d40 !important;
-    padding: 12px !important;
-    border-radius: 10px !important;
-    text-decoration: none !important;
-    width: auto !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    transition: 0.25s ease !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    cursor: pointer !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-}
-
-.sidebar .sidebar-link:hover,
-aside.sidebar .sidebar-link:hover,
-.sidebar nav .sidebar-link:hover {
-    background: #e5ebff !important;
-    border-color: #b8c6ff !important;
-    transform: translateX(4px) !important;
-}
-
-.sidebar .sidebar-link.active,
-aside.sidebar .sidebar-link.active,
-.sidebar nav .sidebar-link.active {
-    background: #0057d8 !important;
-    color: white !important;
-    border-color: #0057d8 !important;
-}
-
-/* MAIN CONTENT */
-.main-content {
-    flex: 1;
-    padding: 40px;
-    overflow-y: auto;
-    background: #f5f7ff;
-}
-
-/* Ensure main inside main-content works correctly */
-.main-content main {
-    max-width: 100%;
-    margin: 0;
-}
-
-.main-content h1 {
-    font-size: 28px;
-    font-weight: bold;
-    color: #1b2a49;
-    margin-bottom: 15px;
-}
-
-.main-content p {
-    font-size: 16px;
-    color: #4b5568;
-}
-
-/* TABLES (Matching your backoffice style) */
-.table-container {
-    margin-top: 20px;
-    background: white;
+/* Content page - centré et limité en largeur */
+.content-page {
+    margin-left: 260px; /* Espace pour la sidebar socialv-lite */
+    width: calc(100% - 260px);
+    min-height: 100vh;
     padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-table {
+/* Zone de contenu centrée et limitée */
+.content-area-centered {
+    max-width: 1200px;
     width: 100%;
-    border-collapse: collapse;
-    font-size: 15px;
+    margin: 0 auto;
+    padding: 0;
 }
 
-thead {
-    background: #eef3ff;
+/* Navbar ajustée */
+.iq-top-navbar {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 999;
 }
 
-th {
-    text-align: left;
-    padding: 14px 10px;
-    color: #003a9c;
-    font-weight: 700;
-    border-bottom: 2px solid #dbe3ff;
+/* Ajuster le content-page pour tenir compte de la navbar */
+.content-page {
+    margin-top: 60px; /* Hauteur approximative de la navbar */
 }
 
-td {
-    padding: 12px 10px;
-    border-bottom: 1px solid #f0f2fa;
+/* Footer ajusté */
+.iq-footer {
+    margin-left: 260px;
+    width: calc(100% - 260px);
 }
 
-tr:hover {
-    background: #f7f9ff;
+/* Cards plus compactes */
+.card {
+    margin-bottom: 15px;
 }
 
-/* ACTION BUTTONS */
-.btn-action {
-    padding: 7px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: white;
-    font-size: 14px;
-    transition: 0.20s;
-    cursor: pointer;
+.card-header {
+    padding: 12px 15px;
 }
 
-.btn-edit {
-    background: #ffc233;
-    color: #000;
+.card-body {
+    padding: 15px;
 }
 
-.btn-edit:hover {
-    background: #e0aa29;
+/* Tables */
+.table {
+    font-size: 13px;
 }
 
-.btn-delete {
-    background: #ff4b4b;
+.table th,
+.table td {
+    padding: 8px 10px;
 }
 
-.btn-delete:hover {
-    background: #cc0000;
+/* Boutons */
+.btn {
+    padding: 6px 12px;
+    font-size: 13px;
 }
 
-.btn-resolve {
-    background: #1dbf73;
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
 }
 
-.btn-resolve:hover {
-    background: #159458;
+/* Formulaires */
+.form-control {
+    padding: 6px 10px;
+    font-size: 13px;
 }
 
-/* SCROLLBARS */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #c5cbea;
-    border-radius: 8px;
-}
-
-/* RESPONSIVE */
-@media (max-width: 800px) {
-    .layout {
-        flex-direction: column;
+/* Responsive */
+@media (max-width: 1200px) {
+    .content-area-centered {
+        max-width: 100%;
     }
-    .sidebar {
+}
+
+@media (max-width: 768px) {
+    .iq-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .iq-sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .content-page,
+    .iq-top-navbar,
+    .iq-footer {
+        margin-left: 0;
         width: 100%;
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 15px;
     }
-    .sidebar .sidebar-link,
-    aside.sidebar .sidebar-link,
-    .sidebar nav .sidebar-link {
-        flex: none !important;
-        white-space: nowrap !important;
+    
+    .content-page {
+        margin-top: 60px;
     }
+}
+
+/* Styles pour les éléments spécifiques du backoffice */
+.offers-fragment {
+    width: 100%;
+}
+
+.post-table {
+    width: 100%;
+    font-size: 12px;
+}
+
+.media-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.table-actions {
+    white-space: nowrap;
+}
+
+.table-actions .btn {
+    margin: 0 2px;
 }

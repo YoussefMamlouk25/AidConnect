@@ -11,44 +11,25 @@ body {
     line-height: 1.6;
 }
 
-.header {
-    background-color: #ffffff;
-    border-bottom: 1px solid #e4e6eb;
-    padding: 12px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.header h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #1c1e21;
-}
+/* Header styles are now in header.php */
 
 .btn-add-post {
     display: inline-block;
-    padding: 8px 16px;
-    background-color: #1877f2;
+    padding: 12px 24px;
+    background-color: #0f5fcc;
     color: white;
     text-decoration: none;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 15px;
-    transition: background-color 0.2s;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(15, 95, 204, 0.3);
 }
 
 .btn-add-post:hover {
-    background-color: #166fe5;
+    background-color: #0d4fb0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 95, 204, 0.4);
 }
 
 .container {

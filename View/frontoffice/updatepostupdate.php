@@ -8,6 +8,7 @@ require_once '../../config.php';
 require_once '../../Model/postupdate.php';
 require_once '../../Controller/postupdatecontroller.php';
 require_once '../../Controller/postcontroller.php';
+require_once 'layout.php';
 
 $postUpdateC = new PostUpdateController();
 $postController = new PostController();
@@ -51,29 +52,21 @@ if (!$postUpdateData) {
                 move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $mediaName);
             }
 
-            // realiser
-            $realiser = !empty($_POST['intervention']) ? $_POST['intervention'] : '';
-            $texte = $_POST['texte'];
-            $temp_reponse = isset($_POST['joursReponse']) ? (int)$_POST['joursReponse'] : null;
-            $temp_resolue = isset($_POST['joursResolution']) ? (int)$_POST['joursResolution'] : null;
+            $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : null;
 
-            // Récupérer l'id_user existant ou depuis la session
-            $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : ($postUpdateData['id_user'] ?? null);
-
-            // Créer objet PostUpdate (id_update_post en paramètre 3)
+            // Créer l'objet PostUpdate (ordre selon le constructeur: id_post, texte, id_update_post, id_user, media, realiser, temp_reponse, temp_resolue)
             $postUpdate = new PostUpdate(
-                $postUpdateData['id_post'], // id_post parent
-                $texte,
+                $postUpdateData['id_post'], // id_post
+                $_POST['texte'], // texte
                 $id, // id_update_post
-                $id_user,
-                $media,
-                $realiser,
-                $temp_reponse,
-                $temp_resolue
+                $id_user, // id_user
+                $media, // media
+                $_POST['intervention'], // realiser
+                $_POST['joursReponse'], // temp_reponse
+                $_POST['joursResolution'] // temp_resolue
             );
 
-            // Appeler la méthode de mise à jour
-            $result = $postUpdateC->updatePostUpdate($postUpdate, $id);
+            $result = $postUpdateC->updatePostUpdate($postUpdate);
             if ($result) {
                 header('Location: showpostupdate.php');
                 exit();
@@ -81,101 +74,96 @@ if (!$postUpdateData) {
                 $error = "Erreur lors de la mise à jour.";
             }
         } else {
-            $error = "Veuillez remplir le texte de la résolution.";
+            $error = "Le texte est requis.";
         }
     }
 }
 
-// Préparer valeurs pour le formulaire
-$texte = isset($_POST['texte']) ? htmlspecialchars($_POST['texte']) : htmlspecialchars($postUpdateData['texte'] ?? '');
-$realiser = isset($_POST['intervention']) ? htmlspecialchars($_POST['intervention']) : htmlspecialchars($postUpdateData['realiser'] ?? '');
-$joursReponse = isset($_POST['joursReponse']) ? htmlspecialchars($_POST['joursReponse']) : htmlspecialchars($postUpdateData['temp_reponse'] ?? '');
-$joursResolution = isset($_POST['joursResolution']) ? htmlspecialchars($_POST['joursResolution']) : htmlspecialchars($postUpdateData['temp_resolue'] ?? '');
+// Préparer les valeurs pour le formulaire
+$texte = isset($_POST['texte']) ? htmlspecialchars($_POST['texte']) : (isset($postUpdateData['texte']) ? htmlspecialchars($postUpdateData['texte']) : '');
+$realiser = isset($_POST['intervention']) ? htmlspecialchars($_POST['intervention']) : (isset($postUpdateData['realiser']) ? htmlspecialchars($postUpdateData['realiser']) : '');
+$joursReponse = isset($_POST['joursReponse']) ? htmlspecialchars($_POST['joursReponse']) : (isset($postUpdateData['temp_reponse']) ? htmlspecialchars($postUpdateData['temp_reponse']) : '');
+$joursResolution = isset($_POST['joursResolution']) ? htmlspecialchars($_POST['joursResolution']) : (isset($postUpdateData['temp_resolue']) ? htmlspecialchars($postUpdateData['temp_resolue']) : '');
 $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateData['media']) : '';
 
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modifier une résolution</title>
-  <link rel="stylesheet" href="addpostupdate.css">
-  <link rel="stylesheet" href="addpost.css">
-</head>
-<body>
-  <main>
-    <h1>Modifier la résolution</h1>
-
-    <?php if (!empty($error)): ?>
-        <div class="form-error"><?php echo htmlspecialchars($error); ?></div>
-    <?php endif; ?>
-
-    <?php if (!empty($postData)): ?>
-      <div class="post-info">
-        <h2>Post parent : <?php echo htmlspecialchars($postData['titre'] ?? ''); ?></h2>
-        <p><strong>Région :</strong> <?php echo htmlspecialchars($postData['region'] ?? ''); ?></p>
-      </div>
-    <?php endif; ?>
-
-    <form action="" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="id" value="<?php echo $id; ?>">
-        <p>
-            <label>Description de la résolution :<br>
-                <textarea name="texte" rows="5"><?php echo $texte; ?></textarea>
-            </label>
-        </p>
-
-        <p>
-            <label>Photo actuelle :
-                <?php if (!empty($currentMedia)): ?>
-                    <div class="current-media">
-                        <img src="../../public/uploads/<?php echo $currentMedia; ?>" alt="Photo actuelle">
-                        <small>Photo actuelle</small>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="ri-edit-line me-2"></i>Modifier la résolution</h4>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger">
+                        <i class="ri-error-warning-line me-2"></i><?php echo htmlspecialchars($error); ?>
                     </div>
-                <?php else: ?>
-                    <small>Aucune photo</small>
                 <?php endif; ?>
-            </label>
-        </p>
 
-        <p>
-            <label>Ajouter/Remplacer la photo :
-                <div class="photo-upload">
-                    <input type="file" name="photo" id="photo" accept="image/*" class="file-input-hidden">
-                    <label for="photo" class="photo-icon">📷 Ajouter une photo</label>
-                </div>
-            </label>
-        </p>
+                <?php if (!empty($postData)): ?>
+                    <div class="alert alert-info">
+                        <h6 class="mb-2"><i class="ri-file-list-3-line me-2"></i>Post parent :</h6>
+                        <strong><?php echo htmlspecialchars($postData['titre'] ?? ''); ?></strong>
+                        <?php if (!empty($postData['region'])): ?>
+                            <br><small><i class="ri-map-pin-line me-1"></i><?php echo htmlspecialchars($postData['region']); ?></small>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
 
-        <p>
-            <label>Intervention réalisée par :
-                <input type="text" name="intervention" value="<?php echo $realiser; ?>">
-            </label>
-        </p>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id" value="<?php echo $id; ?>">
+                    
+                    <div class="mb-3">
+                        <label for="texte" class="form-label">Description de la résolution <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="texte" name="texte" rows="5" required><?php echo $texte; ?></textarea>
+                    </div>
 
-        <p>
-            <label>Temps pour répondre (jours) :
-                <input type="number" name="joursReponse" min="0" value="<?php echo $joursReponse; ?>">
-            </label>
-        </p>
+                    <?php if (!empty($currentMedia)): ?>
+                        <div class="mb-3">
+                            <label class="form-label">Photo actuelle</label>
+                            <div>
+                                <img src="../../public/uploads/<?php echo $currentMedia; ?>" alt="Photo actuelle" class="img-thumbnail" style="max-width: 200px;">
+                                <br><small class="text-muted">Photo actuelle</small>
+                            </div>
+                        </div>
+                    <?php endif; ?>
 
-        <p>
-            <label>Temps pour résoudre (jours) :
-                <input type="number" name="joursResolution" min="0" value="<?php echo $joursResolution; ?>">
-            </label>
-        </p>
+                    <div class="mb-3">
+                        <label for="photo" class="form-label">Nouvelle photo (laisser vide pour conserver l'actuelle)</label>
+                        <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+                        <small class="text-muted">Format accepté: JPG, PNG, GIF (optionnel)</small>
+                    </div>
 
-        <p>
-            <button type="submit" class="btn-update">Mettre à jour</button>
-        </p>
+                    <div class="mb-3">
+                        <label for="intervention" class="form-label">Intervention réalisée par <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="intervention" name="intervention" value="<?php echo $realiser; ?>" required>
+                    </div>
 
-        <p>
-            <a href="showpostupdate.php" class="btn-cancel">Annuler</a>
-        </p>
-    </form>
-  </main>
+                    <div class="mb-3">
+                        <label for="joursReponse" class="form-label">Temps pour répondre (jours) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="joursReponse" name="joursReponse" min="0" value="<?php echo $joursReponse; ?>" required>
+                    </div>
 
-  <script src="jsentiter2.js"></script>
-</body>
-</html>
+                    <div class="mb-3">
+                        <label for="joursResolution" class="form-label">Temps pour résoudre (jours) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="joursResolution" name="joursResolution" min="0" value="<?php echo $joursResolution; ?>" required>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line me-2"></i>Mettre à jour
+                        </button>
+                        <a href="showpostupdate.php" class="btn btn-secondary">
+                            <i class="ri-close-line me-2"></i>Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php
+$content = ob_get_clean();
+renderLayout('Modifier la résolution', $content);
+?>

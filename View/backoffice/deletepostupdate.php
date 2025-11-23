@@ -1,6 +1,13 @@
 <?php
 require_once '../../config.php';
 require_once '../../Controller/postupdatecontroller.php';
+
+// Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
+$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
+          || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
+
+// Si ce n'est pas AJAX, afficher la page complète avec sidebar
+if (!$isAjax) {
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -14,6 +21,9 @@ require_once '../../Controller/postupdatecontroller.php';
 <div class="layout">
     <?php include 'sidebar.php'; ?>
     <div class="main-content">
+<?php
+}
+?>
 
 <?php
 if (isset($_GET['id'])) {
@@ -26,8 +36,10 @@ if (isset($_GET['id'])) {
     echo "ID du post résolu non fourni.";
 }
 ?>
+<?php if (!$isAjax): ?>
     </div>
 </div>
     <script src="dashboard.js"></script>
 </body>
 </html>
+<?php endif; ?>

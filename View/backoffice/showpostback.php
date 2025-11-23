@@ -9,121 +9,177 @@ require_once '../../Controller/postcontroller.php';
 $postController = new PostController();
 $list = $postController->getAllPosts();
 
-// Fonction pour obtenir les initiales d'un nom
-function getInitials($name) {
-    $words = explode(' ', trim($name));
-    $initials = '';
-    foreach ($words as $word) {
-        if (!empty($word)) {
-            $initials .= strtoupper(substr($word, 0, 1));
-        }
-    }
-    return substr($initials, 0, 2);
-}
-
-// Fonction pour formater la date
-function formatDate($date) {
-    if (empty($date)) return '';
-    $dateObj = new DateTime($date);
-    $now = new DateTime();
-    $diff = $now->diff($dateObj);
-    
-    if ($diff->days == 0) {
-        return "Aujourd'hui";
-    } elseif ($diff->days == 1) {
-        return "Hier";
-    } elseif ($diff->days < 7) {
-        return "Il y a " . $diff->days . " jours";
-    } else {
-        return $dateObj->format('d/m/Y');
+// Convertir $list en tableau
+$posts = [];
+if ($list) {
+    if (is_object($list) && method_exists($list, 'fetchAll')) {
+        $posts = $list->fetchAll(PDO::FETCH_ASSOC);
+    } elseif (is_array($list)) {
+        $posts = $list;
     }
 }
 
+$embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 // Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
 $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
+$showFullPage = !$embed && !$isAjax;
 
-// Si ce n'est pas AJAX, afficher la page complète avec sidebar
-if (!$isAjax) {
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AidConnect - Liste des Posts</title>
-    <link rel="stylesheet" href="showpostback.css">
-    <link rel="stylesheet" href="dashboard.css">
-</head>
-<body>
-<div class="layout">
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-<?php
+// Si c'est une page complète, utiliser le layout
+if ($showFullPage) {
+    require_once 'layout.php';
+    ob_start();
 }
 ?>
-
-<div class="container">
-    <!-- Bouton pour ajouter un nouveau post -->
-    <div style="margin-bottom:12px;">
-        <a href="addpost.php" class="btn-add-post">+ Ajouter un post</a>
-    </div>
-    <table class="post-table">
-        <?php
-        // Convertir $list en tableau de lignes si nécessaire
-        $rows = [];
-        if ($list) {
-            if (is_object($list) && method_exists($list, 'fetchAll')) {
-                $rows = $list->fetchAll(PDO::FETCH_ASSOC);
-            } elseif (is_array($list)) {
-                $rows = $list;
-            }
-        }
-        if (count($rows) > 0) {
-            // En-têtes dynamiques à partir des clés de la première ligne
-            $cols = array_keys($rows[0]);
-            echo "<thead><tr>";
-            foreach ($cols as $c) {
-                echo '<th>' . htmlspecialchars($c) . '</th>';
-            }
-            echo '<th>Actions</th></tr></thead><tbody>';
-
-            foreach ($rows as $row) {
-                echo '<tr>';
-                foreach ($cols as $c) {
-                    $val = isset($row[$c]) ? $row[$c] : '';
-                    if ($c === 'media' && !empty($val)) {
-                        $img = '../../public/uploads/' . htmlspecialchars($val);
-                        echo '<td><img src="' . $img . '" style="max-width:120px; max-height:80px; object-fit:cover; border-radius:6px;"></td>';
-                    } else {
-                        echo '<td>' . nl2br(htmlspecialchars($val)) . '</td>';
-                    }                }
-                // Actions column (use id_post if present)
-                $idPost = isset($row['id_post']) ? $row['id_post'] : '';
-                echo '<td class="table-actions">';
-                echo '<a href="addpostupdate.php?id_post=' . urlencode($idPost) . '" class="btn-action btn-resolve">✓</a>';
-                echo '<a href="updatepost.php?id=' . urlencode($idPost) . '" class="btn-action btn-edit">✎</a>';
-                echo '<a href="deletepost.php?id=' . urlencode($idPost) . '" class="btn-action btn-delete">🗑</a>';
-                echo '</td>';
-                echo '</tr>';
-            }
-            echo '</tbody>';
-        } else {
-            echo '<tr><td colspan="100%" class="no-data">Aucun post trouvé</td></tr>';
-        }
-        ?>
-     </table>
- </div>
-
-<?php
-// Si ce n'est pas AJAX, fermer la structure HTML
-if (!$isAjax) {
-?>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <div class="header-title">
+                    <h4 class="card-title">Posts</h4>
+                </div>
+                <div>
+                    <button onclick="loadContent('addpost.php')" class="btn btn-primary btn-sm">
+                        <i class="ri-add-line me-1"></i> Ajouter un post
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+<div class="offers-fragment">
+	<div id="addPostFormContainer" style="display: none; margin-bottom: 1.5rem;"></div>
+	<div class="container">
+		<table class="post-table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Titre</th>
+					<th>Nom</th>
+					<th>Email</th>
+					<th>Téléphone</th>
+					<th>Région</th>
+					<th>Description</th>
+					<th>Média</th>
+					<th>Date</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php if (is_array($posts) && count($posts) > 0): ?>
+				<?php foreach ($posts as $post): 
+					$idPost = isset($post['id_post']) ? $post['id_post'] : '';
+					$titre = isset($post['titre']) ? htmlspecialchars($post['titre']) : 'N/A';
+					$nom = isset($post['nom']) ? htmlspecialchars($post['nom']) : 'N/A';
+					$email = isset($post['email']) ? htmlspecialchars($post['email']) : 'N/A';
+					$numero = isset($post['Numéro']) ? htmlspecialchars($post['Numéro']) : (isset($post['numero']) ? htmlspecialchars($post['numero']) : 'N/A');
+					$region = isset($post['region']) ? htmlspecialchars($post['region']) : 'N/A';
+					$description = isset($post['description']) ? substr(htmlspecialchars($post['description']), 0, 100) . '...' : 'N/A';
+					$dateCreation = isset($post['date_creation']) ? htmlspecialchars($post['date_creation']) : 'N/A';
+					$media = isset($post['media']) ? $post['media'] : '';
+				?>
+				<tr>
+					<td><?= htmlspecialchars($idPost) ?></td>
+					<td><?= $titre ?></td>
+					<td><?= $nom ?></td>
+					<td><?= $email ?></td>
+					<td><?= $numero ?></td>
+					<td><?= $region ?></td>
+					<td><?= $description ?></td>
+					<td>
+					<?php
+						if (!empty($media)) {
+							$mediaUrl = '../../public/uploads/' . htmlspecialchars($media);
+							$ext = strtolower(pathinfo($media, PATHINFO_EXTENSION));
+							if (in_array($ext, ['mp4','mov','webm'])) {
+								echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
+							} else {
+								echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
+							}
+						} else {
+							echo 'Aucun';
+						}
+					?>
+					</td>
+					<td><?= $dateCreation ?></td>
+					<td class="table-actions">
+						<a href="addpostupdate.php?id_post=<?= urlencode($idPost) ?>" class="btn btn-sm btn-success" onclick="if(typeof loadContent==='function'){ loadContent('addpostupdate.php?id_post=<?= urlencode($idPost) ?>'); return false; }">
+							<i class="ri-checkbox-circle-line me-1"></i> Résoudre
+						</a>
+						<a href="updatepost.php?id=<?= urlencode($idPost) ?>" class="btn btn-sm btn-primary" onclick="if(typeof loadContent==='function'){ loadContent('updatepost.php?id=<?= urlencode($idPost) ?>'); return false; }">
+							<i class="ri-edit-line me-1"></i> Éditer
+						</a>
+						<a href="deletepost.php?id=<?= urlencode($idPost) ?>&embed=1" class="btn btn-sm btn-danger" onclick="if(typeof loadContent==='function'){ loadContent('deletepost.php?id=<?= urlencode($idPost) ?>&embed=1'); return false; }">
+							<i class="ri-delete-bin-line me-1"></i> Supprimer
+						</a>
+					</td>
+				</tr>
+				<?php endforeach; ?>
+			<?php else: ?>
+				<tr><td colspan="10" class="no-data">Aucun post trouvé</td></tr>
+			<?php endif; ?>
+			</tbody>
+		</table>
+	</div>
+</div>
+            </div>
+        </div>
     </div>
 </div>
-    <script src="dashboard.js"></script>
-</body>
-</html>
+<style>
+.media-thumb {
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+	border-radius: 4px;
+	margin: 2px;
+}
+</style>
+<script>
+let addPostFormVisible = false;
+function toggleAddPostForm() {
+	const container = document.getElementById('addPostFormContainer');
+	if (!container) {
+		console.error('Container addPostFormContainer not found');
+		return;
+	}
+	
+	if (!addPostFormVisible) {
+		// Afficher le conteneur
+		container.style.display = 'block';
+		container.innerHTML = '<p style="padding: 1rem; text-align: center;">Chargement du formulaire...</p>';
+		
+		// Charger le formulaire via AJAX
+		fetch('addpost.php?ajax=1', {
+			headers: {
+				'X-Requested-With': 'XMLHttpRequest'
+			}
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('Erreur HTTP: ' + response.status);
+			}
+			return response.text();
+		})
+		.then(html => {
+			container.innerHTML = html;
+			addPostFormVisible = true;
+		})
+		.catch(error => {
+			console.error('Erreur lors du chargement du formulaire:', error);
+			container.innerHTML = '<p style="padding: 1rem; color: red;">Erreur lors du chargement du formulaire. <a href="addpost.php">Cliquez ici pour ouvrir le formulaire</a></p>';
+		});
+	} else {
+		container.style.display = 'none';
+		container.innerHTML = '';
+		addPostFormVisible = false;
+	}
+}
+</script>
 <?php
+if ($showFullPage) {
+    $content = ob_get_clean();
+    renderBackofficeLayout('Liste des Posts', $content, ['showofferback.css']);
+} else {
+    // Si AJAX, inclure le CSS inline
+    echo '<link rel="stylesheet" href="showofferback.css">';
 }
 ?>

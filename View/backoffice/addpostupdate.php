@@ -75,6 +75,13 @@ if (!$postData) {
         }
     }
 }
+
+// Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
+$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
+          || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
+
+// Si ce n'est pas AJAX, afficher la page complète avec sidebar
+if (!$isAjax) {
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -89,6 +96,9 @@ if (!$postData) {
 <div class="layout">
   <?php include 'sidebar.php'; ?>
   <div class="main-content">
+<?php
+}
+?>
     <main>
     <h1>Marquer le Post comme Résolu</h1>
     
@@ -144,10 +154,13 @@ if (!$postData) {
         </p>
     </form>
     </main>
+<?php if (!$isAjax): ?>
   </div>
 </div>
-
   <script src="dashboard.js"></script>
+<?php endif; ?>
   <script src="./jsentiter2.js"></script>
+<?php if (!$isAjax): ?>
 </body>
 </html>
+<?php endif; ?>

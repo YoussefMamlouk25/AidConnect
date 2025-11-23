@@ -7,11 +7,11 @@ class Config {
             $servername = "localhost";
             $username = "root";
             $password = "";
-            $dbname = "aidconnect"; 
+            $dbname = "aidconnect";
 
             try {
                 self::$pdo = new PDO(
-                    "mysql:host=$servername;dbname=$dbname;charset=utf8",
+                    "mysql:host=$servername;dbname=$dbname;charset=utf8mb4",
                     $username,
                     $password,
                     [
@@ -29,3 +29,4 @@ class Config {
 }
 
 ?>
+

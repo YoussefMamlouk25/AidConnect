@@ -1,0 +1,125 @@
+.fragment-offer-edit,
+.fragment-updateoffer-edit {
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 25px 45px rgba(15, 23, 42, 0.1);
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.fragment-offer-edit .card,
+.fragment-updateoffer-edit .card {
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 20px 35px rgba(15, 23, 42, 0.08);
+}
+
+.fragment-offer-edit .card-header,
+.fragment-updateoffer-edit .card-header {
+  background: linear-gradient(135deg, #2563eb, #312e81);
+  color: #fff;
+  padding: 1.25rem 1.5rem;
+}
+
+.fragment-offer-edit .btn-primary,
+.fragment-updateoffer-edit .btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: none;
+  box-shadow: 0 15px 25px rgba(37, 99, 235, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.fragment-offer-edit .btn-primary:hover,
+.fragment-updateoffer-edit .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 30px rgba(37, 99, 235, 0.45);
+}
+
+.fragment-offer-edit textarea,
+.fragment-updateoffer-edit textarea,
+.fragment-offer-edit input,
+.fragment-updateoffer-edit input,
+.fragment-updateoffer-edit select,
+.fragment-offer-edit select {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  transition: border-color 0.2s ease;
+}
+
+.fragment-updateoffer-edit textarea:focus,
+.fragment-updateoffer-edit input:focus,
+.fragment-updateoffer-edit select:focus,
+.fragment-offer-edit textarea:focus,
+.fragment-offer-edit input:focus,
+.fragment-offer-edit select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  outline: none;
+}
+
+.fragment-offer-edit .alert,
+.fragment-updateoffer-edit .alert {
+  border-radius: 0.75rem;
+}
+
+/* Delete page styles */
+.delete-offer-page {
+  background: #f8fafc;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.delete-offer-page .card,
+.fragment-updateoffer-delete .card {
+  border-radius: 1rem;
+  border: none;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.1);
+}
+
+.delete-offer-page .card.border-danger,
+.fragment-updateoffer-delete .card.border-danger {
+  border: 2px solid #ef4444;
+}
+
+.delete-offer-page .card-header.bg-danger,
+.fragment-updateoffer-delete .card-header.bg-danger {
+  background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+}
+
+.delete-offer-page .alert-warning,
+.fragment-updateoffer-delete .alert-warning {
+  border-radius: 0.75rem;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+}
+
+.delete-offer-page .btn-danger,
+.fragment-updateoffer-delete .btn-danger {
+  border-radius: 999px;
+  padding: 0.65rem 1.5rem;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  border: none;
+  box-shadow: 0 20px 25px rgba(239, 68, 68, 0.35);
+}
+
+.delete-offer-page .btn-secondary,
+.fragment-updateoffer-delete .btn-secondary {
+  border-radius: 999px;
+  padding: 0.65rem 1.5rem;
+}
+
+.fragment-updateoffer-delete {
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 25px 45px rgba(15, 23, 42, 0.08);
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.fragment-updateoffer-delete video,
+.fragment-updateoffer-delete img {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+}
+

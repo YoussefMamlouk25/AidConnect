@@ -109,31 +109,40 @@ $region = isset($_POST['region']) ? htmlspecialchars($_POST['region']) : htmlspe
 $description = isset($_POST['description']) ? htmlspecialchars($_POST['description']) : htmlspecialchars($postData['description'] ?? '');
 $dateCreation = isset($_POST['dateCreation']) ? htmlspecialchars($_POST['dateCreation']) : (isset($postData['date_creation']) ? htmlspecialchars($postData['date_creation']) : '');
 $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media']) : '';
-?>
 
+// Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
+$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
+          || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
+
+// Si ce n'est pas AJAX, afficher la page complète avec sidebar
+if (!$isAjax) {
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier un Post</title>
-    <link rel="stylesheet" href="addpost.css">
-    <link rel="stylesheet" href="showpost.css">
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="addpost.css">
 </head>
 <body>
 <div class="layout">
     <?php include 'sidebar.php'; ?>
     <div class="main-content">
+<?php
+}
+?>
+    <main>
         <h1>Modifier un Post</h1>
     
-    <?php if (!empty($error)): ?>
-        <div >
-            <?php echo $error; ?>
-        </div>
-    <?php endif; ?>
+        <?php if (!empty($error)): ?>
+            <div class="error-message">
+                <?php echo htmlspecialchars($error); ?>
+            </div>
+        <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?php echo $id; ?>">
         
         <p>
@@ -201,9 +210,9 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
         <p>
             <label>Photo actuelle :
                 <?php if (!empty($currentMedia)): ?>
-                    <div style="margin: 10px 0;">
-                        <img src="../../public/uploads/<?php echo $currentMedia; ?>" alt="Photo actuelle" width="150" style="border: 1px solid #ccc; padding: 5px;">
-                        <br><small>Photo actuelle</small>
+                    <div class="current-media">
+                        <img src="../../public/uploads/<?php echo $currentMedia; ?>" alt="Photo actuelle">
+                        <small>Photo actuelle</small>
                     </div>
                 <?php else: ?>
                     <small>Aucune photo</small>
@@ -213,9 +222,12 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
 
         <p>
             <label>Nouvelle photo (laisser vide pour conserver l'actuelle) :
-                <input type="file" name="media" accept="image/*">
-              
-                 
+                <div class="photo-upload">
+                    <input type="file" name="media" id="media" accept="image/*" class="file-input-hidden">
+                    <label for="media" class="photo-icon">
+                        📷 Ajouter une photo
+                    </label>
+                </div>
             </label>
         </p>
 
@@ -226,18 +238,22 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
         </p>
 
         <p>
-            <button type="submit" class="btn-update">Mettre à jour</button>
+            <button type="submit">Mettre à jour</button>
         </p>
 
         <p>
             <a href="showpostback.php" class="btn-cancel">Annuler</a>
         </p>
-    </form>
+        </form>
+    </main>
+<?php if (!$isAjax): ?>
     </div>
 </div>
-
     <script src="dashboard.js"></script>
+<?php endif; ?>
     <script src="addpost.js"></script>
+<?php if (!$isAjax): ?>
 </body>
 </html>
+<?php endif; ?>
 

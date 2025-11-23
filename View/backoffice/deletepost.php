@@ -5,6 +5,13 @@ ini_set('display_errors', 1);
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
+
+// Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
+$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
+          || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
+
+// Si ce n'est pas AJAX, afficher la page complète avec sidebar
+if (!$isAjax) {
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -18,6 +25,9 @@ require_once '../../Controller/postcontroller.php';
 <div class="layout">
     <?php include 'sidebar.php'; ?>
     <div class="main-content">
+<?php
+}
+?>
 
 <?php
 // Vérifier si l'ID est présent dans l'URL
@@ -38,8 +48,10 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     exit();
 }
 ?>
+<?php if (!$isAjax): ?>
     </div>
 </div>
     <script src="dashboard.js"></script>
 </body>
 </html>
+<?php endif; ?>

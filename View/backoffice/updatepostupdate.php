@@ -94,6 +94,12 @@ $joursReponse = isset($_POST['joursReponse']) ? htmlspecialchars($_POST['joursRe
 $joursResolution = isset($_POST['joursResolution']) ? htmlspecialchars($_POST['joursResolution']) : htmlspecialchars($postUpdateData['temp_resolue'] ?? '');
 $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateData['media']) : '';
 
+// Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
+$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
+          || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
+
+// Si ce n'est pas AJAX, afficher la page complète avec sidebar
+if (!$isAjax) {
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -101,14 +107,16 @@ $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateDa
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Modifier une résolution</title>
-  <link rel="stylesheet" href="addpostupdate.css">
-  <link rel="stylesheet" href="addpost.css">
   <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="addpostupdate.css">
 </head>
 <body>
 <div class="layout">
   <?php include 'sidebar.php'; ?>
   <div class="main-content">
+<?php
+}
+?>
     <main>
     <h1>Modifier la résolution</h1>
 
@@ -180,10 +188,13 @@ $currentMedia = isset($postUpdateData['media']) ? htmlspecialchars($postUpdateDa
         </p>
     </form>
     </main>
+<?php if (!$isAjax): ?>
   </div>
 </div>
-
   <script src="dashboard.js"></script>
+<?php endif; ?>
   <script src="jsentiter2.js"></script>
+<?php if (!$isAjax): ?>
 </body>
 </html>
+<?php endif; ?>
