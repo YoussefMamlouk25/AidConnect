@@ -27,7 +27,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </nav>
             </div>
             <div class="col-md-3 text-end">
-                <a href="#" class="btn btn-sm btn-outline-primary">
+                <a href="profile.php" class="btn btn-sm btn-outline-primary">
                     <i class="ri-user-line me-1"></i> Profile
                 </a>
             </div>
