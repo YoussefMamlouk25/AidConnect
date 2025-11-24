@@ -35,32 +35,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($texte)) {
         $error = "Le texte est requis.";
     } else {
-                $media = $updateData['media'];
-                if (isset($_FILES['media'])) {
-                    $uploadDir = __DIR__ . '/../../public/uploads/';
-                    if (!file_exists($uploadDir)) {
-                        mkdir($uploadDir, 0777, true);
-                    }
+                // Handle existing media retention/removal + new uploads
+                $uploadDir = __DIR__ . '/../../public/uploads/';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
 
-                    if (!empty($updateData['media'])) {
-                        $oldMediaFiles = json_decode($updateData['media'], true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($oldMediaFiles)) {
-                            foreach ($oldMediaFiles as $oldMediaFile) {
-                                $oldMediaPath = $uploadDir . $oldMediaFile;
-                                if (file_exists($oldMediaPath)) {
-                                    @unlink($oldMediaPath);
-                                }
-                            }
-                        } else {
-                            $oldMediaPath = $uploadDir . $updateData['media'];
-                            if (file_exists($oldMediaPath)) {
-                                @unlink($oldMediaPath);
-                            }
+                // Parse existing media from DB into array
+                $existingMedia = [];
+                if (!empty($updateData['media'])) {
+                    $tmp = json_decode($updateData['media'], true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+                        $existingMedia = $tmp;
+                    } else {
+                        $existingMedia = [$updateData['media']];
+                    }
+                }
+
+                // Determine kept existing media sent from client (JSON array)
+                $keptExisting = $existingMedia;
+                if (isset($_POST['existing_media']) && $_POST['existing_media'] !== '') {
+                    $posted = json_decode($_POST['existing_media'], true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($posted)) {
+                        $keptExisting = $posted;
+                    }
+                }
+
+                // Remove files that were not kept
+                foreach ($existingMedia as $oldFile) {
+                    if (!in_array($oldFile, $keptExisting, true)) {
+                        $oldPath = $uploadDir . $oldFile;
+                        if (file_exists($oldPath)) {
+                            @unlink($oldPath);
                         }
                     }
+                }
 
-                    $uploadedMedia = [];
-                    $errors = [];
+                // Process newly uploaded files and append to keptExisting
+                $uploadedMedia = [];
+                $errors = [];
+                if (isset($_FILES['media'])) {
                     foreach ($_FILES['media']['tmp_name'] as $key => $tmpName) {
                         if ($_FILES['media']['error'][$key] === UPLOAD_ERR_OK) {
                             $original = basename($_FILES['media']['name'][$key]);
@@ -76,10 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (count($errors) > 0) {
                         $error = implode("\n", $errors);
                     }
-                    if (count($uploadedMedia) > 0) {
-                        $media = json_encode($uploadedMedia);
-                    }
                 }
+
+                $finalMediaList = array_values(array_merge($keptExisting, $uploadedMedia));
+                $media = count($finalMediaList) > 0 ? json_encode($finalMediaList) : null;
 
         if (!isset($error)) {
             $update = new UpdateOffer(
@@ -108,6 +122,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 ?>
 <link rel="stylesheet" href="dashboard.css">
 <link rel="stylesheet" href="offer_actions.css">
+<link rel="stylesheet" href="updateoffer.css">
 
 <?php if ($embed): ?>
 <div class="fragment-updateoffer-edit">
@@ -120,6 +135,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
     <title>Modifier la mise à jour</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="offer_actions.css">
+    <link rel="stylesheet" href="updateoffer.css">
 </head>
 <body>
 <div class="layout">
@@ -157,35 +173,47 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
                 </div>
 
                 <div class="mb-3">
-
                     <label for="media" class="form-label">Media (Optionnel)</label>
-                    <input type="file" class="form-control" id="media" name="media[]" accept="image/*,video/*" multiple>
-                    <?php if (!empty($updateData['media'])): ?>
-                        <div class="current-media-previews mt-2">
-                            <?php
-                                $mediaFiles = json_decode($updateData['media'], true);
-                                if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
-                                    foreach ($mediaFiles as $mediaFile) {
-                                        $mediaUrl = '../../public/uploads/' . $mediaFile;
-                                        $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
-                                        if (in_array($ext, ['mp4','mov','webm'])) {
-                                            echo '<video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video>';
-                                        } else {
-                                            echo '<img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview-img">';
-                                        }
-                                    }
+                    <?php
+                        $existingFiles = [];
+                        if (!empty($updateData['media'])) {
+                            $tmp = json_decode($updateData['media'], true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+                                $existingFiles = $tmp;
+                            } else {
+                                $existingFiles = [$updateData['media']];
+                            }
+                        }
+                    ?>
+                    <input type="hidden" id="existing_media" name="existing_media" value='<?= htmlspecialchars(json_encode($existingFiles), ENT_QUOTES, "UTF-8") ?>'>
+                    
+                    <?php if (!empty($existingFiles)): ?>
+                        <div class="current-media-previews mt-2 mb-3">
+                            <div class="existing-media-label">Médias existants</div>
+                            <div id="existingMediaGrid" class="media-preview-grid">
+                            <?php foreach ($existingFiles as $mediaFile) {
+                                $mediaUrl = '../../public/uploads/' . $mediaFile;
+                                $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                                if (in_array($ext, ['mp4','mov','webm'])) {
+                                    echo '<div class="media-preview-item" data-filename="'.htmlspecialchars($mediaFile, ENT_QUOTES).'"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video><button type="button" class="media-remove-btn" aria-label="Remove existing media">&times;</button></div>';
                                 } else {
-                                    $mediaUrl = '../../public/uploads/' . $updateData['media'];
-                                    $ext = strtolower(pathinfo($updateData['media'], PATHINFO_EXTENSION));
-                                    if (in_array($ext, ['mp4','mov','webm'])) {
-                                        echo '<video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video>';
-                                    } else {
-                                        echo '<img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview-img">';
-                                    }
+                                    echo '<div class="media-preview-item" data-filename="'.htmlspecialchars($mediaFile, ENT_QUOTES).'"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" /><button type="button" class="media-remove-btn" aria-label="Remove existing media">&times;</button></div>';
                                 }
-                            ?>
+                            } ?>
+                            </div>
                         </div>
                     <?php endif; ?>
+                    
+                    <div class="media-dropzone" id="mediaDropzone">
+                        <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*,video/*" multiple>
+                        <div class="dropzone-content">
+                            <div class="dropzone-icon">📁</div>
+                            <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                            <div class="dropzone-link">ou cliquez pour parcourir</div>
+                            <div class="dropzone-hint">Formats supportés: JPG, PNG, MP4, MOV, WEBM</div>
+                        </div>
+                    </div>
+                    <div id="mediaPreview" class="media-preview-grid mt-3"></div>
                 </div>
 
 
@@ -206,23 +234,6 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 </html>
 <?php endif; ?>
 
-<style>
-.media-preview-img {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-right: 8px;
-    margin-bottom: 8px;
-}
-.media-preview-video {
-    width: 140px;
-    height: 120px;
-    border-radius: 8px;
-    margin-right: 8px;
-    margin-bottom: 8px;
-}
-</style>
-
+<script src="edit_updateoffer.js"></script>
 <script src="updateoffer.js"></script>
 

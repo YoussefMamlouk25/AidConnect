@@ -10,9 +10,112 @@
 
 .offers-fragment h2 {
   font-size: 1.8rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   font-weight: 600;
   color: #1f2937;
+}
+
+.offers-fragment .d-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.offers-fragment .btn.btn-primary,
+.offers-fragment .btn.btn-add-offer,
+.offers-fragment button.btn-primary,
+.offers-fragment button.btn-add-offer {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  border: 1.5px solid #e5e7eb !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  text-decoration: none;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.offers-fragment .btn-primary::before,
+.offers-fragment .btn-add-offer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.08), transparent);
+  transition: left 0.4s ease;
+}
+
+.offers-fragment .btn-primary:hover::before,
+.offers-fragment .btn-add-offer:hover::before {
+  left: 100%;
+}
+
+.offers-fragment .btn.btn-primary:hover,
+.offers-fragment .btn.btn-add-offer:hover,
+.offers-fragment button.btn-primary:hover,
+.offers-fragment button.btn-add-offer:hover {
+  background: #f9fafb !important;
+  border-color: #2563eb !important;
+  color: #2563eb !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15), 0 2px 4px rgba(37, 99, 235, 0.1) !important;
+}
+
+.offers-fragment .btn.btn-primary:active,
+.offers-fragment .btn.btn-add-offer:active,
+.offers-fragment button.btn-primary:active,
+.offers-fragment button.btn-add-offer:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  background: #f3f4f6 !important;
+  border-color: #1d4ed8 !important;
+  color: #1d4ed8 !important;
+}
+
+.offers-fragment .btn.btn-primary:focus,
+.offers-fragment .btn.btn-add-offer:focus,
+.offers-fragment button.btn-primary:focus,
+.offers-fragment button.btn-add-offer:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 2px 4px rgba(37, 99, 235, 0.1) !important;
+  color: #2563eb !important;
+}
+
+.offers-fragment .btn.btn-primary:focus:not(:hover),
+.offers-fragment .btn.btn-add-offer:focus:not(:hover),
+.offers-fragment button.btn-primary:focus:not(:hover),
+.offers-fragment button.btn-add-offer:focus:not(:hover) {
+  background: #ffffff !important;
+}
+
+@media (max-width: 768px) {
+  .offers-fragment .d-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .offers-fragment .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .offers-fragment .container {

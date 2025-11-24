@@ -31,6 +31,7 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/libs.min.js"></script>
   <script src="assets/js/app.js"></script>
+  <link rel="stylesheet" href="assets/css/media-lightbox.css">
 </head>
 <body>
 <header class="header bg-white shadow-sm p-3 mb-4">
@@ -73,30 +74,47 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
                 <p><strong>Numéro:</strong> <?= OfferController::escape($offer['num']) ?></p>
                 <p><?= nl2br(OfferController::escape($offer['description'])) ?></p>
                 <?php if (!empty($offer['media'])): ?>
-                  <div class="post-media d-flex flex-wrap gap-2">
-                    <?php
-                      $mediaFiles = json_decode($offer['media'], true);
-                      if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
-                        foreach ($mediaFiles as $mediaFile) {
-                          $mediaUrl = '../../public/uploads/' . $mediaFile;
-                          $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
-                          if (in_array($ext, ['mp4','mov','webm'])) {
-                            echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="media-video" style="max-width: 100%;"></video>';
-                          } else {
-                            echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media" class="media-image">';
-                          }
-                        }
+                  <?php
+                    $mediaFiles = json_decode($offer['media'], true);
+                    if (!(json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles))) {
+                      $mediaFiles = [$offer['media']];
+                    }
+                    $images = [];
+                    $videos = [];
+                    foreach ($mediaFiles as $m) {
+                      $ext = strtolower(pathinfo($m, PATHINFO_EXTENSION));
+                      if (in_array($ext, ['mp4','mov','webm'])) {
+                        $videos[] = $m;
                       } else {
-                        $mediaUrl = '../../public/uploads/' . $offer['media'];
-                        $ext = strtolower(pathinfo($offer['media'], PATHINFO_EXTENSION));
-                        if (in_array($ext, ['mp4','mov','webm'])) {
-                          echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="media-video" style="max-width: 100%;"></video>';
-                        } else {
-                          echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media" class="media-image">';
-                        }
+                        $images[] = $m;
                       }
-                    ?>
-                  </div>
+                    }
+                    // Render videos first (full width)
+                    if (!empty($videos)) {
+                      foreach ($videos as $v) {
+                        $vUrl = '../../public/uploads/' . $v;
+                        echo '<div class="post-media" style="margin-bottom:8px;"><video src="'.OfferController::escape($vUrl).'" controls style="width:100%;height:auto;max-height:480px;border-radius:6px;" preload="none"></video></div>';
+                      }
+                    }
+                    // Render images in a Facebook-like grid
+                    if (!empty($images)) {
+                      $imgCount = count($images);
+                      $showCount = $imgCount > 4 ? 4 : $imgCount;
+                      $extra = $imgCount - $showCount;
+                      $display = array_slice($images, 0, $showCount);
+                      echo '<div class="fb-media-grid count-'.(int)$showCount.'">';
+                      foreach ($display as $i => $img) {
+                        $imgUrl = '../../public/uploads/' . $img;
+                        echo '<div class="grid-item">';
+                        echo '<img src="'.OfferController::escape($imgUrl).'" alt="Volunteer image">';
+                        if ($i === $showCount - 1 && $extra > 0) {
+                          echo '<div class="more-overlay">+' . (int)$extra . '</div>';
+                        }
+                        echo '</div>';
+                      }
+                      echo '</div>';
+                    }
+                  ?>
                 <?php endif; ?>
               </div>
               <div class="post-footer">
@@ -124,6 +142,13 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
 </div>
 <script src="form.js"></script>
 <script src="javascript.js"></script>
+<div id="image-modal" class="image-modal" aria-hidden="true" role="dialog" aria-label="Image preview">
+  <button class="close-btn" aria-label="Close">&times;</button>
+  <button class="nav prev" aria-label="Previous">&#10094;</button>
+  <div class="media-wrap" role="document"></div>
+  <button class="nav next" aria-label="Next">&#10095;</button>
+</div>
+<script src="assets/js/media-lightbox.js"></script>
 <footer class="bg-light text-center text-muted py-3 mt-4">
   <p>© 2025 AidConnect. Edit/Delete Enabled.</p>
 </footer>

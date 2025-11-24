@@ -30,11 +30,22 @@ $success = null;
 
 // Handle form submission for deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
-    // Delete the media file if it exists
+    // Delete the media files if they exist
     if (!empty($offerData['media'])) {
-        $mediaPath = __DIR__ . '/../../public/uploads/' . $offerData['media'];
-        if (file_exists($mediaPath)) {
-            @unlink($mediaPath);
+        $uploadDir = __DIR__ . '/../../public/uploads/';
+        $mediaFiles = [];
+        $tmp = json_decode($offerData['media'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+            $mediaFiles = $tmp;
+        } else {
+            $mediaFiles = [$offerData['media']];
+        }
+        
+        foreach ($mediaFiles as $mediaFile) {
+            $mediaPath = $uploadDir . $mediaFile;
+            if (file_exists($mediaPath)) {
+                @unlink($mediaPath);
+            }
         }
     }
     
@@ -63,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
     <link rel="stylesheet" href="assets/css/custom.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/volunteer-delete.css">
     <script src="assets/js/volunteer.js"></script>
   </head>
 
@@ -124,19 +136,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
                       <strong><i class="fas fa-align-left me-2"></i>Description:</strong>
                       <p class="mb-0"><?php echo nl2br(OfferController::escape($offerData['description'])); ?></p>
                     </div>
-                    <?php if (!empty($offerData['media'])): ?>
+                    <?php 
+                      $mediaFiles = [];
+                      if (!empty($offerData['media'])) {
+                        $tmp = json_decode($offerData['media'], true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+                          $mediaFiles = $tmp;
+                        } else {
+                          $mediaFiles = [$offerData['media']];
+                        }
+                      }
+                    ?>
+                    <?php if (!empty($mediaFiles)): ?>
                       <div class="col-12 mb-2">
-                        <strong><i class="fas fa-image me-2"></i>Media:</strong>
-                        <div class="mt-2">
-                          <?php
-                            $mediaUrl = '../../public/uploads/' . $offerData['media'];
-                            $ext = strtolower(pathinfo($offerData['media'], PATHINFO_EXTENSION));
-                            if (in_array($ext, ['mp4','mov','webm'])) {
-                              echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="media-preview-video"></video>';
-                            } else {
-                              echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media" class="media-preview">';
-                            }
+                        <strong><i class="fas fa-image me-2"></i>Media (<?= count($mediaFiles); ?> fichier<?= count($mediaFiles) > 1 ? 's' : ''; ?>):</strong>
+                        <div class="delete-media-grid mt-3">
+                          <?php foreach ($mediaFiles as $mediaFile): 
+                            $mediaUrl = '../../public/uploads/' . $mediaFile;
+                            $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
                           ?>
+                            <div class="delete-media-item">
+                              <?php if (in_array($ext, ['mp4','mov','webm'])): ?>
+                                <video src="<?= OfferController::escape($mediaUrl); ?>" controls class="delete-media-preview"></video>
+                              <?php else: ?>
+                                <img src="<?= OfferController::escape($mediaUrl); ?>" alt="Volunteer media" class="delete-media-preview">
+                              <?php endif; ?>
+                            </div>
+                          <?php endforeach; ?>
                         </div>
                       </div>
                     <?php endif; ?>

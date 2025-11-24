@@ -26,11 +26,22 @@ $error = null;
 $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
-    // Delete the media file if it exists
+    // Delete the media files if they exist
     if (!empty($offerData['media'])) {
-        $mediaPath = __DIR__ . '/../../public/uploads/' . $offerData['media'];
-        if (file_exists($mediaPath)) {
-            @unlink($mediaPath);
+        $uploadDir = __DIR__ . '/../../public/uploads/';
+        $mediaFiles = [];
+        $tmp = json_decode($offerData['media'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+            $mediaFiles = $tmp;
+        } else {
+            $mediaFiles = [$offerData['media']];
+        }
+        
+        foreach ($mediaFiles as $mediaFile) {
+            $mediaPath = $uploadDir . $mediaFile;
+            if (file_exists($mediaPath)) {
+                @unlink($mediaPath);
+            }
         }
     }
 
@@ -48,6 +59,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 ?>
 <link rel="stylesheet" href="dashboard.css">
 <link rel="stylesheet" href="offer_actions.css">
+<link rel="stylesheet" href="updateoffer.css">
 
 <?php if ($embed): ?>
 <div class="fragment-delete-offer">
@@ -60,6 +72,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
     <title>Supprimer l'offre</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="offer_actions.css">
+    <link rel="stylesheet" href="updateoffer.css">
 </head>
 <body class="delete-offer-page">
     <div class="layout">
@@ -113,19 +126,33 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                             <p><strong>Description:</strong> <?php echo nl2br(e($offerData['description'])); ?></p>
                         </div>
                     </div>
-                    <?php if (!empty($offerData['media'])): ?>
+                    <?php 
+                        $mediaFiles = [];
+                        if (!empty($offerData['media'])) {
+                            $tmp = json_decode($offerData['media'], true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+                                $mediaFiles = $tmp;
+                            } else {
+                                $mediaFiles = [$offerData['media']];
+                            }
+                        }
+                    ?>
+                    <?php if (!empty($mediaFiles)): ?>
                         <div class="mt-3">
-                            <strong>Média:</strong>
-                            <div class="mt-2">
-                                <?php
-                                    $mediaUrl = '../../public/uploads/' . $offerData['media'];
-                                    $ext = strtolower(pathinfo($offerData['media'], PATHINFO_EXTENSION));
-                                    if (in_array($ext, ['mp4','mov','webm'])) {
-                                        echo '<video src="'.e($mediaUrl).'" controls class="img-fluid" style="max-width: 300px;"></video>';
-                                    } else {
-                                        echo '<img src="'.e($mediaUrl).'" alt="Offer media" class="img-fluid" style="max-width: 300px;">';
-                                    }
+                            <strong>Média (<?= count($mediaFiles); ?> fichier<?= count($mediaFiles) > 1 ? 's' : ''; ?>):</strong>
+                            <div class="delete-media-grid mt-3">
+                                <?php foreach ($mediaFiles as $mediaFile): 
+                                    $mediaUrl = '../../public/uploads/' . $mediaFile;
+                                    $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
                                 ?>
+                                    <div class="delete-media-item">
+                                        <?php if (in_array($ext, ['mp4','mov','webm'])): ?>
+                                            <video src="<?= e($mediaUrl); ?>" controls class="delete-media-preview"></video>
+                                        <?php else: ?>
+                                            <img src="<?= e($mediaUrl); ?>" alt="Offer media" class="delete-media-preview">
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     <?php endif; ?>

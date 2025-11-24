@@ -1,0 +1,942 @@
+/* ============================================
+   Update Offer & Edit Update Offer Styles
+   Modern Dashboard Styling
+   ============================================ */
+
+/* Container Styles */
+.fragment-offer-edit,
+.fragment-updateoffer-edit {
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 25px 45px rgba(15, 23, 42, 0.1);
+    padding: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Card Styles */
+.fragment-offer-edit .card,
+.fragment-updateoffer-edit .card {
+    border: none;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 20px 35px rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    transition: box-shadow 0.3s ease;
+}
+
+.fragment-offer-edit .card:hover,
+.fragment-updateoffer-edit .card:hover {
+    box-shadow: 0 25px 45px rgba(15, 23, 42, 0.12);
+}
+
+/* Card Header */
+.fragment-offer-edit .card-header,
+.fragment-updateoffer-edit .card-header {
+    background: linear-gradient(135deg, #2563eb 0%, #312e81 100%);
+    color: #ffffff;
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+}
+
+.fragment-offer-edit .card-header h4,
+.fragment-updateoffer-edit .card-header h4 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.fragment-updateoffer-edit .card-header small {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+}
+
+/* Card Body */
+.fragment-offer-edit .card-body,
+.fragment-updateoffer-edit .card-body {
+    padding: 2rem;
+    background: #ffffff;
+}
+
+/* Form Labels */
+.fragment-offer-edit .form-label,
+.fragment-updateoffer-edit .form-label {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+    font-size: 0.9375rem;
+    display: block;
+}
+
+.fragment-offer-edit .form-label::after,
+.fragment-updateoffer-edit .form-label::after {
+    content: '';
+}
+
+/* Form Controls */
+.fragment-offer-edit .form-control,
+.fragment-updateoffer-edit .form-control {
+    border-radius: 0.75rem;
+    border: 1.5px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    color: #1e293b;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.fragment-offer-edit .form-control:focus,
+.fragment-updateoffer-edit .form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    outline: none;
+    background: #ffffff;
+}
+
+.fragment-offer-edit .form-control:hover,
+.fragment-updateoffer-edit .form-control:hover {
+    border-color: #cbd5e1;
+}
+
+/* Textarea */
+.fragment-offer-edit textarea.form-control,
+.fragment-updateoffer-edit textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+/* Select Dropdown */
+.fragment-offer-edit select.form-control,
+.fragment-updateoffer-edit select.form-control {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231e293b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    padding-right: 2.5rem;
+    appearance: none;
+}
+
+/* File Input */
+.fragment-offer-edit input[type="file"],
+.fragment-updateoffer-edit input[type="file"] {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.fragment-offer-edit input[type="file"]::-webkit-file-upload-button,
+.fragment-updateoffer-edit input[type="file"]::-webkit-file-upload-button {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-right: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.fragment-offer-edit input[type="file"]::-webkit-file-upload-button:hover,
+.fragment-updateoffer-edit input[type="file"]::-webkit-file-upload-button:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-1px);
+}
+
+/* Buttons */
+.fragment-offer-edit .btn,
+.fragment-updateoffer-edit .btn {
+    padding: 0.75rem 1.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.fragment-offer-edit .btn-primary,
+.fragment-updateoffer-edit .btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+}
+
+.fragment-offer-edit .btn-primary:hover,
+.fragment-updateoffer-edit .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.fragment-offer-edit .btn-primary:active,
+.fragment-updateoffer-edit .btn-primary:active {
+    transform: translateY(0);
+}
+
+.fragment-offer-edit .btn-secondary,
+.fragment-updateoffer-edit .btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1.5px solid #e2e8f0;
+}
+
+.fragment-offer-edit .btn-secondary:hover,
+.fragment-updateoffer-edit .btn-secondary:hover {
+    background: #e2e8f0;
+    color: #334155;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+/* Button Group */
+.fragment-offer-edit .d-flex.gap-2,
+.fragment-updateoffer-edit .d-flex.gap-2 {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* Alerts */
+.fragment-offer-edit .alert,
+.fragment-updateoffer-edit .alert {
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.fragment-offer-edit .alert-danger,
+.fragment-updateoffer-edit .alert-danger {
+    background: #fef2f2;
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+}
+
+.fragment-offer-edit .alert-success,
+.fragment-updateoffer-edit .alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border-left: 4px solid #22c55e;
+}
+
+/* Media Preview Grid */
+.media-preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.media-preview-item {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 2px solid #e2e8f0;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.media-preview-item:hover {
+    border-color: #2563eb;
+    box-shadow: 0 8px 12px rgba(37, 99, 235, 0.15);
+    transform: translateY(-2px);
+}
+
+.media-preview-item img,
+.media-preview-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.media-preview-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.media-remove-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(239, 68, 68, 0.9);
+    color: #ffffff;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.media-remove-btn:hover {
+    background: rgba(220, 38, 38, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.media-remove-btn:focus {
+    outline: 2px solid rgba(37, 99, 235, 0.5);
+    outline-offset: 2px;
+}
+
+.media-remove-btn:active {
+    transform: scale(0.95);
+}
+
+/* Current Media Previews Container */
+.current-media-previews {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px dashed #cbd5e1;
+}
+
+.existing-media-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
+}
+
+/* ============================================
+   Dropzone Styles
+   ============================================ */
+
+.media-dropzone {
+    position: relative;
+    border: 2px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.media-dropzone:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.1);
+}
+
+.media-dropzone.drag-over {
+    border-color: #2563eb;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-width: 3px;
+    transform: scale(1.02);
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+}
+
+.media-dropzone.drag-over .dropzone-icon {
+    transform: scale(1.2);
+    animation: bounce 0.6s ease infinite;
+}
+
+.media-dropzone.has-files {
+    border-color: #22c55e;
+    background: #f0fdf4;
+    min-height: auto;
+    padding: 1.5rem;
+}
+
+.media-file-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.dropzone-content {
+    pointer-events: none;
+    z-index: 1;
+}
+
+.media-dropzone.has-files .dropzone-content {
+    display: none;
+}
+
+.dropzone-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+    display: block;
+}
+
+.dropzone-text {
+    font-size: 1rem;
+    color: #475569;
+    margin: 0.5rem 0;
+    font-weight: 500;
+}
+
+.dropzone-link {
+    color: #2563eb;
+    text-decoration: underline;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.media-dropzone:hover .dropzone-link {
+    color: #1d4ed8;
+}
+
+.dropzone-hint {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0.5rem 0 0 0;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0) scale(1.2);
+    }
+    50% {
+        transform: translateY(-10px) scale(1.2);
+    }
+}
+
+/* Form Rows */
+.fragment-offer-edit .row,
+.fragment-updateoffer-edit .row {
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+}
+
+.fragment-offer-edit .row > [class*="col-"],
+.fragment-updateoffer-edit .row > [class*="col-"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.fragment-offer-edit .mb-3,
+.fragment-updateoffer-edit .mb-3 {
+    margin-bottom: 1.5rem;
+}
+
+.fragment-offer-edit .mb-4,
+.fragment-updateoffer-edit .mb-4 {
+    margin-bottom: 2rem;
+}
+
+/* Back Button */
+.fragment-offer-edit .mb-4 .btn-secondary,
+.fragment-updateoffer-edit .mb-4 .btn-secondary {
+    margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fragment-offer-edit,
+    .fragment-updateoffer-edit {
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+    }
+
+    .fragment-offer-edit .card-body,
+    .fragment-updateoffer-edit .card-body {
+        padding: 1.5rem;
+    }
+
+    .fragment-offer-edit .card-header,
+    .fragment-updateoffer-edit .card-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .fragment-offer-edit .card-header h4,
+    .fragment-updateoffer-edit .card-header h4 {
+        font-size: 1.25rem;
+    }
+
+    .fragment-offer-edit .d-flex.gap-2,
+    .fragment-updateoffer-edit .d-flex.gap-2 {
+        flex-direction: column;
+    }
+
+    .fragment-offer-edit .btn,
+    .fragment-updateoffer-edit .btn {
+        width: 100%;
+    }
+
+    .media-preview-item {
+        width: 100px;
+        height: 100px;
+    }
+
+    .fragment-offer-edit .row > [class*="col-md-6"],
+    .fragment-updateoffer-edit .row > [class*="col-md-6"] {
+        margin-bottom: 1rem;
+    }
+
+    .media-dropzone {
+        padding: 2rem 1rem;
+        min-height: 150px;
+    }
+
+    .dropzone-icon {
+        font-size: 2.5rem;
+    }
+
+    .dropzone-text {
+        font-size: 0.9375rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .fragment-offer-edit,
+    .fragment-updateoffer-edit {
+        padding: 1rem;
+    }
+
+    .fragment-offer-edit .card-body,
+    .fragment-updateoffer-edit .card-body {
+        padding: 1rem;
+    }
+
+    .media-preview-item {
+        width: 80px;
+        height: 80px;
+    }
+
+    .media-remove-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 1rem;
+        top: 0.25rem;
+        right: 0.25rem;
+    }
+
+    .media-dropzone {
+        padding: 1.5rem 0.75rem;
+        min-height: 120px;
+    }
+
+    .dropzone-icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .dropzone-text {
+        font-size: 0.875rem;
+    }
+
+    .dropzone-hint {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Loading States */
+.fragment-offer-edit .form-control:disabled,
+.fragment-updateoffer-edit .form-control:disabled {
+    background: #f1f5f9;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.fragment-offer-edit .btn:disabled,
+.fragment-updateoffer-edit .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Focus Visible for Accessibility */
+.fragment-offer-edit .btn:focus-visible,
+.fragment-updateoffer-edit .btn:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+/* Smooth Transitions */
+* {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* ============================================
+   Delete Confirmation Pages Styles
+   ============================================ */
+
+/* Delete Fragment Container */
+.fragment-updateoffer-delete,
+.fragment-delete-offer {
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 25px 45px rgba(15, 23, 42, 0.1);
+    padding: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Delete Card with Danger Border */
+.fragment-updateoffer-delete .card.border-danger,
+.fragment-delete-offer .card.border-danger {
+    border: 2px solid #ef4444;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 20px 35px rgba(239, 68, 68, 0.15);
+    background: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.fragment-updateoffer-delete .card.border-danger:hover,
+.fragment-delete-offer .card.border-danger:hover {
+    box-shadow: 0 25px 45px rgba(239, 68, 68, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Delete Card Header */
+.fragment-updateoffer-delete .card-header.bg-danger,
+.fragment-delete-offer .card-header.bg-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+    color: #ffffff;
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+}
+
+.fragment-updateoffer-delete .card-header.bg-danger h4,
+.fragment-delete-offer .card-header.bg-danger h4 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.fragment-updateoffer-delete .card-header.bg-danger small,
+.fragment-delete-offer .card-header.bg-danger small {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 400;
+}
+
+/* Delete Card Body */
+.fragment-updateoffer-delete .card-body,
+.fragment-delete-offer .card-body {
+    padding: 2rem;
+    background: #ffffff;
+}
+
+/* Danger Button (Delete Confirmation) */
+.fragment-updateoffer-delete .btn-danger,
+.fragment-delete-offer .btn-danger,
+.fragment-offer-edit .btn-danger,
+.fragment-updateoffer-edit .btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 20px rgba(239, 68, 68, 0.35);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.fragment-updateoffer-delete .btn-danger:hover,
+.fragment-delete-offer .btn-danger:hover,
+.fragment-offer-edit .btn-danger:hover,
+.fragment-updateoffer-edit .btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(239, 68, 68, 0.45);
+}
+
+.fragment-updateoffer-delete .btn-danger:active,
+.fragment-delete-offer .btn-danger:active,
+.fragment-offer-edit .btn-danger:active,
+.fragment-updateoffer-edit .btn-danger:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 15px rgba(239, 68, 68, 0.3);
+}
+
+.fragment-updateoffer-delete .btn-danger:focus-visible,
+.fragment-delete-offer .btn-danger:focus-visible,
+.fragment-offer-edit .btn-danger:focus-visible,
+.fragment-updateoffer-edit .btn-danger:focus-visible {
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
+}
+
+/* Warning Alert */
+.fragment-updateoffer-delete .alert-warning,
+.fragment-delete-offer .alert-warning {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    color: #92400e;
+    border: 2px solid #fdba74;
+    border-left: 4px solid #f59e0b;
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.fragment-updateoffer-delete .alert-warning strong,
+.fragment-delete-offer .alert-warning strong {
+    color: #78350f;
+    font-weight: 700;
+}
+
+/* Danger Alert */
+.fragment-updateoffer-delete .alert-danger,
+.fragment-delete-offer .alert-danger {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    color: #991b1b;
+    border: 2px solid #fca5a5;
+    border-left: 4px solid #ef4444;
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+/* Success Alert in Delete Pages */
+.fragment-updateoffer-delete .alert-success,
+.fragment-delete-offer .alert-success {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    color: #166534;
+    border: 2px solid #86efac;
+    border-left: 4px solid #22c55e;
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+/* Delete Details Section */
+.fragment-updateoffer-delete .mb-4 h5,
+.fragment-delete-offer .mb-4 h5 {
+    color: #1e293b;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.fragment-updateoffer-delete .mb-4 p,
+.fragment-delete-offer .mb-4 p {
+    color: #475569;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+}
+
+.fragment-updateoffer-delete .mb-4 p strong,
+.fragment-delete-offer .mb-4 p strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* Media Preview in Delete Pages */
+.fragment-updateoffer-delete .img-fluid,
+.fragment-delete-offer .img-fluid {
+    border-radius: 0.75rem;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+    transition: all 0.2s ease;
+}
+
+.fragment-updateoffer-delete .img-fluid:hover,
+.fragment-delete-offer .img-fluid:hover {
+    box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2);
+    transform: scale(1.02);
+}
+
+.fragment-updateoffer-delete video.img-fluid,
+.fragment-delete-offer video.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Delete Media Grid - Photo Display */
+.delete-media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.delete-media-item {
+    position: relative;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 2px solid #fee2e2;
+    background: #fef2f2;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    transition: all 0.3s ease;
+    aspect-ratio: 1;
+}
+
+.delete-media-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+    border-color: #fca5a5;
+}
+
+.delete-media-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.delete-media-item:hover .delete-media-preview {
+    transform: scale(1.05);
+}
+
+.delete-media-item video.delete-media-preview {
+    object-fit: cover;
+}
+
+/* Media Count Badge */
+.fragment-updateoffer-delete .mt-3 strong,
+.fragment-delete-offer .mt-3 strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Nested Card in Delete Pages */
+.fragment-delete-offer .card.mb-4 {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background: #f8fafc;
+}
+
+.fragment-delete-offer .card.mb-4 .card-header {
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.5rem;
+}
+
+.fragment-delete-offer .card.mb-4 .card-header h5 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.fragment-delete-offer .card.mb-4 .card-body {
+    padding: 1.5rem;
+}
+
+/* Responsive Delete Pages */
+@media (max-width: 768px) {
+    .fragment-updateoffer-delete,
+    .fragment-delete-offer {
+        padding: 1.5rem;
+    }
+
+    .fragment-updateoffer-delete .card-body,
+    .fragment-delete-offer .card-body {
+        padding: 1.5rem;
+    }
+
+    .fragment-updateoffer-delete .card-header.bg-danger,
+    .fragment-delete-offer .card-header.bg-danger {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .fragment-updateoffer-delete .card-header.bg-danger h4,
+    .fragment-delete-offer .card-header.bg-danger h4 {
+        font-size: 1.25rem;
+    }
+
+    .fragment-updateoffer-delete .d-flex.gap-2,
+    .fragment-delete-offer .d-flex.gap-2 {
+        flex-direction: column;
+    }
+
+    .fragment-updateoffer-delete .btn,
+    .fragment-delete-offer .btn {
+        width: 100%;
+    }
+
+    .delete-media-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .fragment-updateoffer-delete,
+    .fragment-delete-offer {
+        padding: 1rem;
+    }
+
+    .fragment-updateoffer-delete .card-body,
+    .fragment-delete-offer .card-body {
+        padding: 1rem;
+    }
+
+    .delete-media-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .delete-media-item {
+        border-width: 1.5px;
+    }
+}
+

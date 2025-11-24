@@ -104,6 +104,7 @@ if (
   <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css" />
   <link rel="stylesheet" href="assets/css/custom.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/volunteer-form.css" />
 </head>
 <body class="volunteer-form-body">
   <header class="header bg-white shadow-sm">
@@ -179,7 +180,16 @@ if (
               </div>
               <div class="form-group mb-4">
                 <label for="media" class="fw-bold">Media (optionnel)</label>
-                <input type="file" class="form-control" id="media" name="media[]" accept="image/*" multiple />
+                <div class="media-dropzone" id="mediaDropzone">
+                  <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*,video/*" multiple />
+                  <div class="dropzone-content">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                    <div class="dropzone-link">ou cliquez pour parcourir</div>
+                    <div class="dropzone-hint">Formats supportés: JPG, PNG, MP4, MOV, WEBM</div>
+                  </div>
+                </div>
+                <div id="mediaPreview" class="media-preview-grid mt-3" aria-live="polite"></div>
                 <div class="invalid-feedback d-block" id="mediaError" style="display: none;"></div>
               </div>
 
@@ -199,6 +209,7 @@ if (
       </div>
     </section>
   </div>
+  <script src="assets/js/volunteer-form.js"></script>
   <script src="form.js"></script>
 </body>
 </html>

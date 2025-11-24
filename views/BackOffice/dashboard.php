@@ -86,6 +86,9 @@ function loadContent(page) {
             if (typeof initUpdateOfferFragments === 'function') {
                 initUpdateOfferFragments();
             }
+            if (typeof initAddOfferFragments === 'function') {
+                initAddOfferFragments();
+            }
         })
         .catch(err => {
             document.getElementById("content-area").innerHTML =
@@ -95,6 +98,7 @@ function loadContent(page) {
 </script>
 <script src="offer.js"></script>
 <script src="updateoffer.js"></script>
+<script src="add_offer.js"></script>
 
 <!-- No auto-load: offers will load when you click the 'Offres' button -->
 

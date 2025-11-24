@@ -55,52 +55,65 @@ if (
             $error = "Type de don invalide.";
         } else {
             
-            $media = $offerData['media']; 
-            
-            if (isset($_FILES['media'])) {
-                $uploadDir = __DIR__ . '/../../public/uploads/';
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                
-                if (!empty($offerData['media'])) {
-                    $oldMediaFiles = json_decode($offerData['media'], true);
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($oldMediaFiles)) {
-                        foreach ($oldMediaFiles as $oldMediaFile) {
-                            $oldMediaPath = $uploadDir . $oldMediaFile;
-                            if (file_exists($oldMediaPath)) {
-                                @unlink($oldMediaPath);
-                            }
-                        }
-                    } else {
-                        $oldMediaPath = $uploadDir . $offerData['media'];
-                        if (file_exists($oldMediaPath)) {
-                            @unlink($oldMediaPath);
-                        }
-                    }
-                }
-
-                $uploadedMedia = [];
-                $errors = [];
-                foreach ($_FILES['media']['tmp_name'] as $key => $tmpName) {
-                    if ($_FILES['media']['error'][$key] === UPLOAD_ERR_OK) {
-                        $original = basename($_FILES['media']['name'][$key]);
-                        $mediaName = time() . '_' . $key . '_' . $original;
-                        $targetPath = $uploadDir . $mediaName;
-                        if (move_uploaded_file($tmpName, $targetPath)) {
-                            $uploadedMedia[] = $mediaName;
-                        } else {
-                            $errors[] = "Erreur lors du téléchargement du fichier: " . $original;
-                        }
-                    }
-                }
-                if (count($errors) > 0) {
-                    $error = implode("\n", $errors);
-                }
-                if (count($uploadedMedia) > 0) {
-                    $media = json_encode($uploadedMedia);
-                }
+            // Handle existing media retention/removal + new uploads
+            $uploadDir = __DIR__ . '/../../public/uploads/';
+            if (!file_exists($uploadDir)) {
+              mkdir($uploadDir, 0777, true);
             }
+
+            // Parse existing media from DB into array
+            $existingMedia = [];
+            if (!empty($offerData['media'])) {
+              $tmp = json_decode($offerData['media'], true);
+              if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+                $existingMedia = $tmp;
+              } else {
+                $existingMedia = [$offerData['media']];
+              }
+            }
+
+            // Determine kept existing media sent from client (JSON array)
+            $keptExisting = $existingMedia;
+            if (isset($_POST['existing_media']) && $_POST['existing_media'] !== '') {
+              $posted = json_decode($_POST['existing_media'], true);
+              if (json_last_error() === JSON_ERROR_NONE && is_array($posted)) {
+                $keptExisting = $posted;
+              }
+            }
+
+            // Remove files that were not kept
+            foreach ($existingMedia as $oldFile) {
+              if (!in_array($oldFile, $keptExisting, true)) {
+                $oldPath = $uploadDir . $oldFile;
+                if (file_exists($oldPath)) {
+                  @unlink($oldPath);
+                }
+              }
+            }
+
+            // Process newly uploaded files and append to keptExisting
+            $uploadedMedia = [];
+            $errors = [];
+            if (isset($_FILES['media'])) {
+              foreach ($_FILES['media']['tmp_name'] as $key => $tmpName) {
+                if ($_FILES['media']['error'][$key] === UPLOAD_ERR_OK) {
+                  $original = basename($_FILES['media']['name'][$key]);
+                  $mediaName = time() . '_' . $key . '_' . $original;
+                  $targetPath = $uploadDir . $mediaName;
+                  if (move_uploaded_file($tmpName, $targetPath)) {
+                    $uploadedMedia[] = $mediaName;
+                  } else {
+                    $errors[] = "Erreur lors du téléchargement du fichier: " . $original;
+                  }
+                }
+              }
+              if (count($errors) > 0) {
+                $error = implode("\n", $errors);
+              }
+            }
+
+            $finalMediaList = array_values(array_merge($keptExisting, $uploadedMedia));
+            $media = count($finalMediaList) > 0 ? json_encode($finalMediaList) : null;
 
             if (!isset($error)) {
                
@@ -150,6 +163,7 @@ $currentMedia = $offerData['media'];
     <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
     <link rel="stylesheet" href="assets/css/custom.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/volunteer-edit.css">
     <script src="javascript.js"></script>
   </head>
 
@@ -261,37 +275,53 @@ $currentMedia = $offerData['media'];
 
                 <div class="form-group mb-4">
                   <label for="media" class="fw-bold">Media</label>
-                  <input type="file" class="form-control" id="media" name="media[]" accept="image/*,video/*" multiple>
-                  <small class="text-muted d-block mt-2">
-                    Leave empty to keep current media. Upload new files to replace them.
-                  </small>
-                  <?php if (!empty($currentMedia)): ?>
-                    <div class="mt-3">
-                      <label class="text-muted small">Current Media:</label>
-                      <?php
-                        $mediaFiles = json_decode($currentMedia, true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
-                          foreach ($mediaFiles as $mediaFile) {
-                            $mediaUrl = '../../public/uploads/' . $mediaFile;
-                            $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
-                            if (in_array($ext, ['mp4','mov','webm'])) {
-                              echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
-                            } else {
-                              echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
-                            }
-                          }
-                        } else {
-                          $mediaUrl = '../../public/uploads/' . $currentMedia;
-                          $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
+                  <?php
+                    // Prepare existing media array for JS and display
+                    $existingFiles = [];
+                    if (!empty($currentMedia)) {
+                      $tmp = json_decode($currentMedia, true);
+                      if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+                        $existingFiles = $tmp;
+                      } else {
+                        $existingFiles = [$currentMedia];
+                      }
+                    }
+                  ?>
+                  <input type="hidden" id="existing_media" name="existing_media" value='<?= htmlspecialchars(json_encode($existingFiles), ENT_QUOTES, "UTF-8") ?>'>
+                  
+                  <?php if (!empty($existingFiles)): ?>
+                    <div class="mb-3">
+                      <label class="text-muted small fw-bold">Médias existants:</label>
+                      <div id="existingMediaGrid" class="media-preview-grid mt-2">
+                        <?php foreach ($existingFiles as $mediaFile):
+                          $mediaUrl = '../../public/uploads/' . $mediaFile;
+                          $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
                           if (in_array($ext, ['mp4','mov','webm'])) {
-                            echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
+                            echo '<div class="media-preview-item" data-filename="'.htmlspecialchars($mediaFile, ENT_QUOTES).'">';
+                            echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-preview-video"></video>';
+                            echo '<button type="button" class="media-remove-btn" aria-label="Remove existing media">&times;</button>';
+                            echo '</div>';
                           } else {
-                            echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
+                            echo '<div class="media-preview-item" data-filename="'.htmlspecialchars($mediaFile, ENT_QUOTES).'">';
+                            echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Current media">';
+                            echo '<button type="button" class="media-remove-btn" aria-label="Remove existing media">&times;</button>';
+                            echo '</div>';
                           }
-                        }
-                      ?>
+                        endforeach; ?>
+                      </div>
                     </div>
                   <?php endif; ?>
+                  
+                  <div class="media-dropzone" id="mediaDropzone">
+                    <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*,video/*" multiple>
+                    <div class="dropzone-content">
+                      <div class="dropzone-icon">📁</div>
+                      <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                      <div class="dropzone-link">ou cliquez pour parcourir</div>
+                      <div class="dropzone-hint">Formats supportés: JPG, PNG, MP4, MOV, WEBM</div>
+                    </div>
+                  </div>
+                  <div id="mediaPreview" class="media-preview-grid mt-3"></div>
                 </div>
 
                 <div class="d-grid gap-2">
@@ -317,22 +347,5 @@ $currentMedia = $offerData['media'];
     </div>
 
   </body>
-  <style>
-    .media-preview {
-      max-width: 120px;
-      max-height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-right: 8px;
-      margin-bottom: 8px;
-    }
-    .media-preview-video {
-      max-width: 140px;
-      max-height: 120px;
-      border-radius: 8px;
-      margin-right: 8px;
-      margin-bottom: 8px;
-    }
-  </style>
-</html>
+  <script src="assets/js/volunteer-edit.js"></script>
 </html>

@@ -29,9 +29,20 @@ $success = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     if (!empty($updateData['media'])) {
-        $mediaPath = __DIR__ . '/../../public/uploads/' . $updateData['media'];
-        if (file_exists($mediaPath)) {
-            @unlink($mediaPath);
+        $uploadDir = __DIR__ . '/../../public/uploads/';
+        $mediaFiles = [];
+        $tmp = json_decode($updateData['media'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+            $mediaFiles = $tmp;
+        } else {
+            $mediaFiles = [$updateData['media']];
+        }
+        
+        foreach ($mediaFiles as $mediaFile) {
+            $mediaPath = $uploadDir . $mediaFile;
+            if (file_exists($mediaPath)) {
+                @unlink($mediaPath);
+            }
         }
     }
 
@@ -50,6 +61,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 ?>
 <link rel="stylesheet" href="dashboard.css">
 <link rel="stylesheet" href="offer_actions.css">
+<link rel="stylesheet" href="updateoffer.css">
 
 <?php if ($embed): ?>
 <div class="fragment-updateoffer-delete">
@@ -62,6 +74,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
     <title>Supprimer la mise à jour</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="offer_actions.css">
+    <link rel="stylesheet" href="updateoffer.css">
 </head>
 <body>
 <div class="layout">
@@ -103,19 +116,33 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
                 <?php if ($offerData): ?>
                     <p><strong>Offre:</strong> #<?= e($offerData['id_offer']); ?> - <?= e($offerData['nom']); ?></p>
                 <?php endif; ?>
-                <?php if (!empty($updateData['media'])): ?>
+                <?php 
+                    $mediaFiles = [];
+                    if (!empty($updateData['media'])) {
+                        $tmp = json_decode($updateData['media'], true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($tmp)) {
+                            $mediaFiles = $tmp;
+                        } else {
+                            $mediaFiles = [$updateData['media']];
+                        }
+                    }
+                ?>
+                <?php if (!empty($mediaFiles)): ?>
                     <div class="mt-3">
-                        <strong>Média:</strong>
-                        <div class="mt-2">
-                            <?php
-                                $mediaUrl = '../../public/uploads/' . $updateData['media'];
-                                $ext = strtolower(pathinfo($updateData['media'], PATHINFO_EXTENSION));
-                                if (in_array($ext, ['mp4','mov','webm'])) {
-                                    echo '<video src="'.e($mediaUrl).'" controls class="img-fluid" style="max-width: 300px;"></video>';
-                                } else {
-                                    echo '<img src="'.e($mediaUrl).'" alt="Update media" class="img-fluid" style="max-width: 300px;">';
-                                }
+                        <strong>Média (<?= count($mediaFiles); ?> fichier<?= count($mediaFiles) > 1 ? 's' : ''; ?>):</strong>
+                        <div class="delete-media-grid mt-3">
+                            <?php foreach ($mediaFiles as $mediaFile): 
+                                $mediaUrl = '../../public/uploads/' . $mediaFile;
+                                $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
                             ?>
+                                <div class="delete-media-item">
+                                    <?php if (in_array($ext, ['mp4','mov','webm'])): ?>
+                                        <video src="<?= e($mediaUrl); ?>" controls class="delete-media-preview"></video>
+                                    <?php else: ?>
+                                        <img src="<?= e($mediaUrl); ?>" alt="Update media" class="delete-media-preview">
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 <?php endif; ?>
