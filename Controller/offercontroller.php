@@ -30,10 +30,21 @@ class OfferController
             $q->bindValue(':num', $offer->getNum(), PDO::PARAM_STR);
             $q->bindValue(':email', $offer->getEmail(), PDO::PARAM_STR);
             $q->bindValue(':type_don', $offer->getTypeDon(), PDO::PARAM_STR);
-            if ($q->execute()) { return $bd->lastInsertId(); }
+            if ($q->execute()) { 
+                return $bd->lastInsertId(); 
+            }
+            return false;
+        } catch (PDOException $e) {
+            error_log("Erreur PDO addOffer : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo "Erreur SQL (addOffer) : " . htmlspecialchars($e->getMessage()) . "<br>";
+            }
             return false;
         } catch (Exception $e) {
             error_log("Erreur addOffer : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo "Erreur (addOffer) : " . htmlspecialchars($e->getMessage()) . "<br>";
+            }
             return false;
         }
     }

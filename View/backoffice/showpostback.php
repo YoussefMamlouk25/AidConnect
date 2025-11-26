@@ -44,10 +44,8 @@ if ($showFullPage) {
                     </button>
                 </div>
             </div>
-            <div class="card-body">
 <div class="offers-fragment">
 	<div id="addPostFormContainer" style="display: none; margin-bottom: 1.5rem;"></div>
-	<div class="container">
 		<table class="post-table">
 			<thead>
 				<tr>
@@ -84,15 +82,30 @@ if ($showFullPage) {
 					<td><?= $numero ?></td>
 					<td><?= $region ?></td>
 					<td><?= $description ?></td>
-					<td>
+					<td class="media-cell">
 					<?php
 						if (!empty($media)) {
-							$mediaUrl = '../../public/uploads/' . htmlspecialchars($media);
-							$ext = strtolower(pathinfo($media, PATHINFO_EXTENSION));
-							if (in_array($ext, ['mp4','mov','webm'])) {
-								echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
+							$mediaFiles = json_decode($media, true);
+							if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+								// Format JSON (multiple fichiers)
+								foreach ($mediaFiles as $mediaFile) {
+									$mediaUrl = '../../public/uploads/' . htmlspecialchars($mediaFile);
+									$ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+									if (in_array($ext, ['mp4','mov','webm'])) {
+										echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
+									} else {
+										echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
+									}
+								}
 							} else {
-								echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
+								// Ancien format: chaîne simple (un seul fichier)
+								$mediaUrl = '../../public/uploads/' . htmlspecialchars($media);
+								$ext = strtolower(pathinfo($media, PATHINFO_EXTENSION));
+								if (in_array($ext, ['mp4','mov','webm'])) {
+									echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
+								} else {
+									echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
+								}
 							}
 						} else {
 							echo 'Aucun';
@@ -118,7 +131,6 @@ if ($showFullPage) {
 			<?php endif; ?>
 			</tbody>
 		</table>
-	</div>
 </div>
             </div>
         </div>

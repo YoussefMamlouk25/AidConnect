@@ -1,7 +1,7 @@
 /* Styles for the offer fragment table and action buttons */
 
 .offers-fragment {
-  padding: 1.5rem;
+  padding: 1.5rem 0.5rem; /* reduce side padding so table area is wider */
   background: #fff;
   border-radius: 1rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
@@ -16,6 +16,10 @@
 }
 
 .offers-fragment .container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
   overflow-x: auto;
 }
 
@@ -53,10 +57,25 @@
   background: #e0f2fe;
 }
 
-.table-actions {
+/* Make media column narrower */
+.post-table th:nth-child(7),
+.post-table td:nth-child(7) {
+  width: 120px;
+}
+
+/* Align actions column */
+.post-table th:last-child,
+.post-table td:last-child {
+  text-align: center;
+}
+
+.offers-fragment .table-actions {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  white-space: normal; /* override global nowrap so buttons can stack */
 }
 
 .btn-action {

@@ -30,6 +30,66 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
   <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
   <link rel="stylesheet" href="assets/css/custom.css">
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="showpost.css">
+  <style>
+    /* Facebook-style Media Grid for Offers */
+    .fb-media-grid {
+      display: grid;
+      gap: 2px;
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 500px;
+    }
+    
+    .fb-media-grid.count-1 {
+      grid-template-columns: 1fr;
+    }
+    
+    .fb-media-grid.count-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .fb-media-grid.count-3 {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+    
+    .fb-media-grid.count-3 .grid-item:first-child {
+      grid-row: 1 / 3;
+    }
+    
+    .fb-media-grid.count-4 {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+    
+    .fb-media-grid .grid-item {
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+    
+    .fb-media-grid .grid-item img,
+    .fb-media-grid .grid-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .fb-media-grid.count-1 .grid-item {
+      height: 400px;
+    }
+    
+    .fb-media-grid.count-2 .grid-item {
+      height: 300px;
+    }
+    
+    .fb-media-grid.count-3 .grid-item,
+    .fb-media-grid.count-4 .grid-item {
+      height: 250px;
+    }
+  </style>
   <script src="assets/js/libs.min.js"></script>
   <script src="assets/js/app.js"></script>
 </head>
@@ -68,81 +128,109 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
           </div>
         </div>
       <?php else: ?>
-        <div class="row">
-          <?php foreach ($offers as $offer): ?>
-            <div class="col-lg-6 mb-4">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="d-flex align-items-center mb-3">
-                    <div class="avatar avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-weight: 600;">
-                      <?= strtoupper(substr(OfferController::escape($offer['nom']), 0, 1)) ?>
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <?php foreach ($offers as $offer): 
+              $nom = OfferController::escape($offer['nom']);
+              $email = OfferController::escape($offer['email']);
+              $typeDon = OfferController::escape($offer['type_don']);
+              $typeDonLabel = $offerC->getTypeDonLabel($typeDon);
+              $num = OfferController::escape($offer['num']);
+              $description = OfferController::escape($offer['description']);
+              $initials = strtoupper(substr($nom, 0, 1));
+              
+              // Parse media files
+              $mediaFiles = [];
+              if (!empty($offer['media'])) {
+                $decoded = json_decode($offer['media'], true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                  $mediaFiles = array_values(array_filter($decoded));
+                } else {
+                  $mediaFiles[] = $offer['media'];
+                }
+              }
+              $mediaCount = count($mediaFiles);
+            ?>
+              <div class="post-card mb-3">
+                <!-- Post Header -->
+                <div class="post-header">
+                  <div class="avatar"><?= $initials ?></div>
+                  <div class="post-info">
+                    <div class="post-author"><?= $nom ?></div>
+                    <div class="post-meta">
+                      <span class="badge bg-primary"><?= $typeDonLabel ?></span>
+                      <span class="text-muted ms-2">Volunteer</span>
                     </div>
-                    <div>
-                      <h6 class="mb-0"><?= OfferController::escape($offer['nom']) ?></h6>
-                      <small class="text-muted"><?= OfferController::escape($offer['email']) ?> • Volunteer</small>
-                    </div>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <span class="badge bg-info me-2">Type: <?= OfferController::escape($offer['type_don']) ?></span>
-                    <span class="badge bg-secondary">Numéro: <?= OfferController::escape($offer['num']) ?></span>
-                  </div>
-                  
-                  <p><?= nl2br(OfferController::escape($offer['description'])) ?></p>
-                  <?php if (!empty($offer['media'])): ?>
-                    <div class="mb-3">
-                      <?php
-                        $mediaFiles = json_decode($offer['media'], true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
-                          foreach ($mediaFiles as $mediaFile) {
-                            $mediaUrl = '../../public/uploads/' . $mediaFile;
-                            $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
-                            if (in_array($ext, ['mp4','mov','webm'])) {
-                              echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="img-fluid rounded mb-2" style="max-width: 100%;"></video>';
-                            } else {
-                              echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media" class="img-fluid rounded mb-2" style="max-width: 100%; max-height: 300px; object-fit: cover;">';
-                            }
-                          }
-                        } else {
-                          $mediaUrl = '../../public/uploads/' . $offer['media'];
-                          $ext = strtolower(pathinfo($offer['media'], PATHINFO_EXTENSION));
-                          if (in_array($ext, ['mp4','mov','webm'])) {
-                            echo '<video src="'.OfferController::escape($mediaUrl).'" controls class="img-fluid rounded mb-2" style="max-width: 100%;"></video>';
-                          } else {
-                            echo '<img src="'.OfferController::escape($mediaUrl).'" alt="Volunteer media" class="img-fluid rounded mb-2" style="max-width: 100%; max-height: 300px; object-fit: cover;">';
-                          }
-                        }
-                      ?>
-                    </div>
-                  <?php endif; ?>
-                  
-                  <div class="d-flex gap-2 flex-wrap">
-                    <?php if ($offer['is_creator']): ?>
-                      <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-info">
-                        <i class="ri-edit-line me-1"></i> Update
-                      </a>
-                    <?php else: ?>
-                      <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-primary">
-                        <i class="ri-reply-line me-1"></i> Reply
-                      </a>
-                    <?php endif; ?>
-                    <a href="update-offer-view.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-secondary">
-                      <i class="ri-file-list-3-line me-1"></i> Updates
-                      <?php if ($offer['updates_count'] > 0): ?>
-                        <span class="badge bg-primary"><?= $offer['updates_count'] ?></span>
-                      <?php endif; ?>
-                    </a>
-                    <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-warning">
-                      <i class="ri-pencil-line me-1"></i> Edit
-                    </a>
-                    <a href="volunteer-delete.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-danger">
-                      <i class="ri-delete-bin-line me-1"></i> Delete
-                    </a>
                   </div>
                 </div>
+
+                <!-- Post Content -->
+                <div class="post-content">
+                  <p class="post-description"><?= nl2br($description) ?></p>
+                  
+                  <!-- Media Gallery -->
+                  <?php if ($mediaCount > 0): ?>
+                    <div class="post-media-container mb-3">
+                      <div class="fb-media-grid count-<?= $mediaCount >= 4 ? 4 : $mediaCount ?>">
+                        <?php foreach ($mediaFiles as $index => $mediaFile): ?>
+                          <?php if ($index >= 4) break; ?>
+                          <?php 
+                            $mediaUrl = '../../public/uploads/' . htmlspecialchars($mediaFile);
+                            $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                            $isVideo = in_array($ext, ['mp4','mov','webm']);
+                          ?>
+                          <div class="grid-item">
+                            <?php if ($isVideo): ?>
+                              <video src="<?= $mediaUrl ?>" controls class="img-fluid"></video>
+                            <?php else: ?>
+                              <img src="<?= $mediaUrl ?>" alt="Offer media" class="img-fluid">
+                            <?php endif; ?>
+                          </div>
+                        <?php endforeach; ?>
+                      </div>
+                    </div>
+                  <?php endif; ?>
+
+                  <!-- Contact Info -->
+                  <div class="post-contact">
+                    <div class="contact-item">
+                      <i class="ri-mail-line me-2"></i>
+                      <strong>Email:</strong> <?= $email ?>
+                    </div>
+                    <div class="contact-item">
+                      <i class="ri-phone-line me-2"></i>
+                      <strong>Téléphone:</strong> <?= $num ?>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Post Actions -->
+                <div class="post-actions">
+                  <?php if ($offer['is_creator']): ?>
+                    <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-primary">
+                      <i class="ri-edit-line me-1"></i> Modifier
+                    </a>
+                  <?php else: ?>
+                    <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-primary">
+                      <i class="ri-reply-line me-1"></i> Répondre
+                    </a>
+                  <?php endif; ?>
+                  <a href="update-offer-view.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-secondary">
+                    <i class="ri-file-list-3-line me-1"></i> Réponses
+                    <?php if ($offer['updates_count'] > 0): ?>
+                      <span class="badge bg-primary ms-1"><?= $offer['updates_count'] ?></span>
+                    <?php endif; ?>
+                  </a>
+                  <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-warning">
+                    <i class="ri-pencil-line me-1"></i> Éditer
+                  </a>
+                  <a href="volunteer-delete.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-danger">
+                    <i class="ri-delete-bin-line me-1"></i> Supprimer
+                  </a>
+                </div>
               </div>
-            </div>
-          <?php endforeach; ?>
+            <?php endforeach; ?>
+          </div>
         </div>
       <?php endif; ?>
     </div>

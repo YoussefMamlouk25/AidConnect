@@ -6,6 +6,7 @@ session_start();
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/offer.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
+require_once 'layout.php';
 
 $offerC = new OfferController();
 $error = '';
@@ -67,9 +68,13 @@ if (
                 }
             }
 
-            if (!isset($error)) {
+            // S'il n'y a pas d'erreur de validation, on enregistre l'offre
+            if (empty($error)) {
+                // Récupérer id_user depuis la session si disponible, sinon null
+                $id_user = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : null;
+
                 $offer = new Offer(
-                    isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : null,
+                    $id_user,
                     $description,
                     $media,
                     $nom,
@@ -78,11 +83,13 @@ if (
                     $type_don,
                     null
                 );
+
+                // Insérer l'offre en base (l'id_user est déjà dans l'objet Offer)
                 $result = $offerC->addOffer($offer);
+
                 if ($result) {
-                    // Rediriger vers showoffer.php après succès
+                    // Si AJAX, recharger la page showoffer
                     if ((isset($_GET['ajax']) && $_GET['ajax'] == '1') || (isset($_POST['ajax']) && $_POST['ajax'] == '1')) {
-                        // Si AJAX, recharger la page showoffer
                         echo '<script>if(typeof loadContent==="function"){ loadContent("showoffer.php"); }</script>';
                         exit();
                     } else {
@@ -103,26 +110,9 @@ if (
 $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
 
-// Si ce n'est pas AJAX, afficher la page complète avec sidebar
-if (!$isAjax) {
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AidConnect - Ajouter une Offre</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="addpost.css">
-</head>
-<body>
-<div class="layout">
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-<?php
-}
-?>
-<div class="offers-fragment">
+<div class="offers-fragment add-form">
     <h2>Ajouter une Offre</h2>
     
     <?php if (!empty($error)): ?>
@@ -176,19 +166,38 @@ if (!$isAjax) {
 
         <p>
             <label>Media (optionnel) :
-                <input type="file" name="media[]" id="media" accept="image/*" multiple>
+                <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreview" data-max-files="4">
+                    <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*,video/*" multiple>
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">📁</div>
+                        <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                        <div class="dropzone-link">ou cliquez pour parcourir</div>
+                        <div class="dropzone-hint">Formats supportés: JPG, PNG, GIF - max 4 fichiers</div>
+                    </div>
+                </div>
+                <div id="mediaPreview" class="media-preview-grid mt-3" aria-live="polite"></div>
             </label>
         </p>
 
-        <p>
-            <button type="submit">Enregistrer</button>
+        <p class="form-actions">
+            <button type="submit" class="btn btn-primary btn-submit">
+                <i class="ri-save-line me-1"></i> Enregistrer
+            </button>
+            <?php if (!$isAjax): ?>
+            <a href="showoffer.php" class="btn btn-secondary btn-cancel">
+                <i class="ri-close-line me-1"></i> Annuler
+            </a>
+            <?php endif; ?>
         </p>
     </form>
 </div>
-<?php if (!$isAjax): ?>
-    </div>
-</div>
-    <script src="dashboard.js"></script>
-</body>
-</html>
-<?php endif; ?>
+<?php
+$content = ob_get_clean();
+
+if ($isAjax) {
+    echo $content;
+    echo '<script src="media-dropzone.js"></script>';
+} else {
+    renderBackofficeLayout('Ajouter une Offre', $content, ['addform.css'], ['media-dropzone.js']);
+}
+?>

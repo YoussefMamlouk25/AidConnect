@@ -34,10 +34,9 @@ if ($showFullPage) {
                     </button>
                 </div>
             </div>
-            <div class="card-body">
 <div class="offers-fragment">
 	<div id="addOfferFormContainer" style="display: none; margin-bottom: 1.5rem;"></div>
-	<div class="container">
+	<div id="editOfferFormContainer" style="display: none; margin-bottom: 1.5rem;"></div>
 		<table class="post-table">
 			<thead>
 				<tr>
@@ -69,7 +68,7 @@ if ($showFullPage) {
 					<td><?= $num ?></td>
 					<td><strong><?= $typeDon ?></strong></td>
 					<td><?= $description ?></td>
-					<td>
+					<td class="media-cell">
 					<?php
 						$mediaFiles = json_decode($offer['media'], true);
 						if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
@@ -96,7 +95,7 @@ if ($showFullPage) {
 					?>
 					</td>
 					<td class="table-actions">
-						<a href="updateoffer.php?id_offer=<?= urlencode($idOffer) ?>" class="btn btn-sm btn-primary" onclick="if(typeof loadContent==='function'){ loadContent('updateoffer.php?id_offer=<?= urlencode($idOffer) ?>'); return false; }">
+						<a href="updateoffer.php?id_offer=<?= urlencode($idOffer) ?>" class="btn btn-sm btn-primary" onclick="openEditOffer(<?= (int)$idOffer ?>); return false;">
 							<i class="ri-edit-line me-1"></i> Éditer
 						</a>
 						<a href="deleteoffer.php?id_offer=<?= urlencode($idOffer) ?>&embed=1" class="btn btn-sm btn-danger" onclick="if(typeof loadContent==='function'){ loadContent('deleteoffer.php?id_offer=<?= urlencode($idOffer) ?>&embed=1'); return false; }">
@@ -110,19 +109,27 @@ if ($showFullPage) {
 			<?php endif; ?>
 			</tbody>
 		</table>
-	</div>
 </div>
             </div>
         </div>
     </div>
 </div>
 <style>
+.media-cell {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-auto-rows: 60px;
+	gap: 4px;
+	justify-items: center;
+	align-items: center;
+}
 .media-thumb {
-	width: 60px;
-	height: 60px;
+	width: 45px;
+	height: 45px;
 	object-fit: cover;
 	border-radius: 4px;
-	margin: 2px;
+	margin: 0;
+	display: block;
 }
 </style>
 <script>
@@ -165,14 +172,47 @@ function toggleAddOfferForm() {
 		addOfferFormVisible = false;
 	}
 }
+
+// Ouvrir le formulaire d'édition d'une offre dans le layout actuel (sans quitter la page)
+function openEditOffer(idOffer) {
+	const container = document.getElementById('editOfferFormContainer');
+	if (!container) {
+		console.error('Container editOfferFormContainer not found');
+		return;
+	}
+
+	container.style.display = 'block';
+	container.innerHTML = '<p style="padding: 1rem; text-align: center;">Chargement du formulaire d\'édition...</p>';
+
+	fetch('updateoffer.php?id_offer=' + encodeURIComponent(idOffer) + '&ajax=1', {
+		headers: {
+			'X-Requested-With': 'XMLHttpRequest'
+		}
+	})
+	.then(response => {
+		if (!response.ok) {
+			throw new Error('Erreur HTTP: ' + response.status);
+		}
+		return response.text();
+	})
+	.then(html => {
+		container.innerHTML = html;
+		container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	})
+	.catch(error => {
+		console.error('Erreur lors du chargement du formulaire d\'édition:', error);
+		container.innerHTML = '<p style="padding: 1rem; color: red;">Erreur lors du chargement du formulaire d\'édition.</p>';
+	});
+}
 </script>
 <?php
 if ($showFullPage) {
     $content = ob_get_clean();
-    renderBackofficeLayout('Liste des Offres', $content, ['showofferback.css']);
+	renderBackofficeLayout('Liste des Offres', $content, ['showofferback.css', 'addform.css']);
 } else {
     // Si AJAX, inclure le CSS inline
     echo '<link rel="stylesheet" href="showofferback.css">';
+	echo '<link rel="stylesheet" href="addform.css">';
 }
 ?>
 

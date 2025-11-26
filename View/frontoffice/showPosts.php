@@ -65,8 +65,17 @@ ob_start();
                     $region = htmlspecialchars($row['region'] ?? '');
                     $email = htmlspecialchars($row['email'] ?? '');
                     $dateFormatted = formatDate($row['date_creation'] ?? '');
-                    $hasImage = !empty($row['media']);
-                    $imagePath = $hasImage ? '../../public/uploads/' . htmlspecialchars($row['media']) : '';
+                    $mediaRaw = $row['media'] ?? '';
+                    $mediaItems = [];
+                    if (!empty($mediaRaw)) {
+                        $decoded = json_decode($mediaRaw, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            $mediaItems = array_values(array_filter($decoded));
+                        } else {
+                            $mediaItems[] = $mediaRaw;
+                        }
+                    }
+                    $mediaCount = count($mediaItems);
                     $idPost = $row['id_post'];
                     ?>
                     <div class="card mb-3">
@@ -94,9 +103,17 @@ ob_start();
                                 <p class="mb-3"><?php echo nl2br($description); ?></p>
                             <?php endif; ?>
 
-                            <?php if ($hasImage): ?>
+                            <?php if ($mediaCount > 0): ?>
                                 <div class="mb-3">
-                                    <img src="<?php echo $imagePath; ?>" alt="Photo du post" class="img-fluid rounded" style="max-height: 500px; width: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+                                    <div class="fb-media-grid count-<?php echo $mediaCount >= 4 ? 4 : $mediaCount; ?>">
+                                        <?php foreach ($mediaItems as $index => $mediaFile): ?>
+                                            <?php if ($index >= 4) break; ?>
+                                            <?php $mediaPath = '../../public/uploads/' . htmlspecialchars($mediaFile); ?>
+                                            <div class="grid-item">
+                                                <img src="<?php echo $mediaPath; ?>" alt="Photo du post" class="img-fluid rounded">
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
                             <?php endif; ?>
 

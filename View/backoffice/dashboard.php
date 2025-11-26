@@ -14,12 +14,12 @@ $content = '
                 <p>Sélectionnez un module dans le menu à gauche.</p>
                 
                 <div class="d-flex gap-2 flex-wrap mt-3">
-                    <button onclick="loadContent(\'addpost.php\')" class="btn btn-primary">
+                    <a href="addpost.php" class="btn btn-primary">
                         <i class="ri-add-line me-1"></i> Ajouter un Post
-                    </button>
-                    <button onclick="loadContent(\'addoffer.php\')" class="btn btn-primary">
+                    </a>
+                    <a href="addoffer.php" class="btn btn-primary">
                         <i class="ri-add-line me-1"></i> Ajouter une Offre
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

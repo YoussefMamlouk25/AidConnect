@@ -105,6 +105,8 @@ if (
   <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css" />
   <link rel="stylesheet" href="assets/css/custom.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/volunteer-form.css" />
+  <link rel="stylesheet" href="assets/css/media-lightbox.css" />
 </head>
 <body class="volunteer-form-body">
   <?php include 'header.php'; ?>
@@ -154,14 +156,24 @@ if (
               </div>
 
               <div class="form-group mb-3">
-                <label for="description" class="fw-bold">Description <span class="text-danger">*</span></label>
+                <label for="description" class="fw-bold">Description</label>
                 <div class="input-group">
-                  <textarea class="form-control" id="description" name="description" required></textarea>
+                  <textarea class="form-control" id="description" name="description"></textarea>
                 </div>
+                <div class="invalid-feedback d-block" id="descriptionError" style="display: none;"></div>
               </div>
               <div class="form-group mb-4">
                 <label for="media" class="fw-bold">Media (optionnel)</label>
-                <input type="file" class="form-control" id="media" name="media[]" accept="image/*" multiple />
+                <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreview">
+                  <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*,video/*" multiple />
+                  <div class="dropzone-content">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                    <div class="dropzone-link">ou cliquez pour parcourir</div>
+                    <div class="dropzone-hint">Formats supportés: JPG, PNG, MP4, MOV, WEBM</div>
+                  </div>
+                </div>
+                <div id="mediaPreview" class="media-preview-grid mt-3" aria-live="polite"></div>
                 <div class="invalid-feedback d-block" id="mediaError" style="display: none;"></div>
               </div>
 
@@ -181,6 +193,7 @@ if (
       </div>
     </section>
   </div>
+  <script src="assets/js/media-dropzone.js"></script>
   <script src="form-validation.js"></script>
 </body>
 </html>

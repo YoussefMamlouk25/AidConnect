@@ -150,6 +150,7 @@ $currentMedia = $offerData['media'];
     <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
     <link rel="stylesheet" href="assets/css/custom.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/volunteer-form.css">
     <script src="javascript.js"></script>
   </head>
 
@@ -260,36 +261,48 @@ $currentMedia = $offerData['media'];
                 </div>
 
                 <div class="form-group mb-4">
-                  <label for="media" class="fw-bold">Media</label>
-                  <input type="file" class="form-control" id="media" name="media[]" accept="image/*,video/*" multiple>
+                  <label for="media" class="fw-bold">Media (optionnel)</label>
+                  <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreview" data-error-target="mediaError" data-max-files="4">
+                    <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*,video/*" multiple>
+                    <div class="dropzone-content">
+                      <div class="dropzone-icon">📁</div>
+                      <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                      <div class="dropzone-link">ou cliquez pour parcourir</div>
+                      <div class="dropzone-hint">Formats supportés: JPG, PNG, GIF, MP4, MOV, WEBM - max 4 fichiers</div>
+                    </div>
+                  </div>
+                  <div id="mediaPreview" class="media-preview-grid mt-3" aria-live="polite"></div>
+                  <div class="invalid-feedback d-block" id="mediaError" style="display: none;"></div>
                   <small class="text-muted d-block mt-2">
-                    Leave empty to keep current media. Upload new files to replace them.
+                    Laissez vide pour conserver les médias actuels. Téléchargez de nouveaux fichiers pour les remplacer.
                   </small>
                   <?php if (!empty($currentMedia)): ?>
                     <div class="mt-3">
-                      <label class="text-muted small">Current Media:</label>
-                      <?php
-                        $mediaFiles = json_decode($currentMedia, true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
-                          foreach ($mediaFiles as $mediaFile) {
-                            $mediaUrl = '../../public/uploads/' . $mediaFile;
-                            $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                      <label class="fw-bold text-muted small d-block mb-2">Current Media:</label>
+                      <div class="d-flex flex-wrap gap-2">
+                        <?php
+                          $mediaFiles = json_decode($currentMedia, true);
+                          if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+                            foreach ($mediaFiles as $mediaFile) {
+                              $mediaUrl = '../../public/uploads/' . htmlspecialchars($mediaFile);
+                              $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                              if (in_array($ext, ['mp4','mov','webm'])) {
+                                echo '<div class="current-media-item"><video src="' . $mediaUrl . '" controls class="current-media-preview"></video></div>';
+                              } else {
+                                echo '<div class="current-media-item"><img src="' . $mediaUrl . '" alt="Current media" class="current-media-preview"></div>';
+                              }
+                            }
+                          } else {
+                            $mediaUrl = '../../public/uploads/' . htmlspecialchars($currentMedia);
+                            $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
                             if (in_array($ext, ['mp4','mov','webm'])) {
-                              echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
+                              echo '<div class="current-media-item"><video src="' . $mediaUrl . '" controls class="current-media-preview"></video></div>';
                             } else {
-                              echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
+                              echo '<div class="current-media-item"><img src="' . $mediaUrl . '" alt="Current media" class="current-media-preview"></div>';
                             }
                           }
-                        } else {
-                          $mediaUrl = '../../public/uploads/' . $currentMedia;
-                          $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
-                          if (in_array($ext, ['mp4','mov','webm'])) {
-                            echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
-                          } else {
-                            echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
-                          }
-                        }
-                      ?>
+                        ?>
+                      </div>
                     </div>
                   <?php endif; ?>
                 </div>
@@ -316,23 +329,30 @@ $currentMedia = $offerData['media'];
       </section>
     </div>
 
+    <script src="assets/js/media-dropzone.js"></script>
   </body>
   <style>
-    .media-preview {
-      max-width: 120px;
-      max-height: 120px;
+    .current-media-item {
+      position: relative;
+      display: inline-block;
+    }
+    .current-media-preview {
+      width: 120px;
+      height: 120px;
       object-fit: cover;
       border-radius: 8px;
-      margin-right: 8px;
-      margin-bottom: 8px;
+      border: 2px solid #e4e6eb;
+      cursor: pointer;
+      transition: transform 0.2s;
     }
-    .media-preview-video {
-      max-width: 140px;
-      max-height: 120px;
-      border-radius: 8px;
-      margin-right: 8px;
-      margin-bottom: 8px;
+    .current-media-preview:hover {
+      transform: scale(1.05);
+      border-color: #1877f2;
+    }
+    .current-media-preview[src*=".mp4"],
+    .current-media-preview[src*=".mov"],
+    .current-media-preview[src*=".webm"] {
+      width: 140px;
     }
   </style>
-</html>
 </html>

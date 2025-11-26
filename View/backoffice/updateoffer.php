@@ -5,20 +5,21 @@ ini_set('display_errors', 1);
 require_once '../../config.php';
 require_once '../../Model/offer.php';
 require_once '../../Controller/offercontroller.php';
+require_once 'layout.php';
 
 $offerController = new OfferController();
 
 $id_offer = isset($_GET['id_offer']) ? (int)$_GET['id_offer'] : 0;
 
 if ($id_offer <= 0) {
-    header('Location: dashboard.php');
+    header('Location: showoffer.php');
     exit();
 }
 
 $offerData = $offerController->getOfferById($id_offer);
 
 if (!$offerData) {
-    header('Location: dashboard.php');
+    header('Location: showoffer.php');
     exit();
 }
 
@@ -119,28 +120,11 @@ $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 // Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
 $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
-$showFullPage = !$embed && !$isAjax;
 
-if ($showFullPage):
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier une Offre</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="addpost.css">
-</head>
-<body>
-<div class="layout">
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-<?php
-endif;
-?>
-<main>
-    <h1>Modifier l'Offre #<?php echo e($id_offer); ?></h1>
+<div class="offers-fragment add-form">
+    <h2>Modifier l'Offre #<?php echo e($id_offer); ?></h2>
     
     <?php if (isset($error)): ?>
         <div class="error-message">
@@ -153,7 +137,7 @@ endif;
         </div>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data" action="updateoffer.php?id_offer=<?php echo urlencode($id_offer); ?>">
+    <form method="POST" enctype="multipart/form-data" action="updateoffer.php?id_offer=<?php echo urlencode($id_offer); ?><?php echo $isAjax ? '&ajax=1' : ''; ?>">
         <p>
             <label>Nom :
                 <input type="text" name="nom" value="<?php echo e($offerData['nom']); ?>" required>
@@ -227,23 +211,35 @@ endif;
 
         <p>
             <label>Nouveau Media (optionnel) :
-                <input type="file" name="media[]" accept="image/*,video/*" multiple>
+                <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreviewNew" data-max-files="4">
+                    <input type="file" class="media-file-input" id="mediaNew" name="media[]" accept="image/*,video/*" multiple>
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">📁</div>
+                        <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                        <div class="dropzone-link">ou cliquez pour parcourir</div>
+                        <div class="dropzone-hint">Formats supportés: JPG, PNG, GIF - max 4 fichiers</div>
+                    </div>
+                </div>
+                <div id="mediaPreviewNew" class="media-preview-grid mt-3" aria-live="polite"></div>
             </label>
         </p>
 
-        <p>
-            <button type="submit">Mettre à jour</button>
-        </p>
-
-        <p>
-            <a href="showoffer.php" class="btn-cancel" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer.php'); return false; }">Annuler</a>
+        <p class="form-actions">
+            <button type="submit" class="btn btn-primary btn-submit">
+                <i class="ri-save-line me-1"></i> Mettre à jour
+            </button>
+            <a href="showoffer.php" class="btn btn-secondary btn-cancel" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer.php'); return false; }">
+                <i class="ri-close-line me-1"></i> Annuler
+            </a>
         </p>
     </form>
-</main>
-<?php if ($showFullPage): ?>
-    </div>
 </div>
-    <script src="dashboard.js"></script>
-</body>
-</html>
-<?php endif; ?>
+<?php
+$content = ob_get_clean();
+
+if ($isAjax) {
+    echo $content;
+    echo '<script src="media-dropzone.js"></script>';
+} else {
+    renderBackofficeLayout('Modifier une Offre', $content, ['addform.css'], ['media-dropzone.js']);
+}

@@ -7,6 +7,7 @@ session_start();
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
+require_once 'layout.php';
 
 $postC = new PostController();
 
@@ -26,17 +27,34 @@ if (
         !empty($_POST['region']) &&
         !empty($_POST['description'])
     ) {
-        // Gestion de l'image
+        // Gestion des images (multiple, max 4)
         $media = ''; // Chaîne vide au lieu de null si pas de photo
-        if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = '../../public/uploads/';
+        if (isset($_FILES['media'])) {
+            $uploadDir = __DIR__ . '/../../public/uploads/';
             // Créer le dossier s'il n'existe pas
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
-            $mediaName = basename($_FILES['media']['name']);
-            $media = $mediaName;
-            move_uploaded_file($_FILES['media']['tmp_name'], $uploadDir . $mediaName);
+            $uploadedMedia = [];
+            $errors = [];
+            foreach ($_FILES['media']['tmp_name'] as $key => $tmpName) {
+                if ($_FILES['media']['error'][$key] === UPLOAD_ERR_OK) {
+                    $original = basename($_FILES['media']['name'][$key]);
+                    $mediaName = time() . '_' . $key . '_' . $original;
+                    $targetPath = $uploadDir . $mediaName;
+                    if (move_uploaded_file($tmpName, $targetPath)) {
+                        $uploadedMedia[] = $mediaName;
+                    } else {
+                        $errors[] = "Erreur lors du téléchargement du fichier: " . $original;
+                    }
+                }
+            }
+            if (count($errors) > 0) {
+                $error = implode("\n", $errors);
+            }
+            if (count($uploadedMedia) > 0) {
+                $media = json_encode($uploadedMedia);
+            }
         }
 
         // Gestion de la date de création
@@ -85,26 +103,9 @@ if (
 $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
 
-// Si ce n'est pas AJAX, afficher la page complète avec sidebar
-if (!$isAjax) {
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AidConnect - Ajouter un Post</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="addpost.css">
-</head>
-<body>
-<div class="layout">
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-<?php
-}
-?>
-<div class="offers-fragment">
+<div class="offers-fragment add-form">
     <h2>Ajouter un Post</h2>
     
     <?php if (isset($error)): ?>
@@ -182,12 +183,16 @@ if (!$isAjax) {
 
         <p>
             <label>Photo :
-                <div class="photo-upload">
-                    <input type="file" name="media" id="media" accept="image/*" class="file-input-hidden">
-                    <label for="media" class="photo-icon">
-                        📷 Ajouter une photo
-                    </label>
+                <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreview" data-max-files="4">
+                    <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*" multiple>
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">📁</div>
+                        <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                        <div class="dropzone-link">ou cliquez pour parcourir</div>
+                        <div class="dropzone-hint">Formats supportés: JPG, PNG, GIF - max 4 fichiers</div>
+                    </div>
                 </div>
+                <div id="mediaPreview" class="media-preview-grid mt-3" aria-live="polite"></div>
             </label>
         </p>
 
@@ -197,18 +202,25 @@ if (!$isAjax) {
             </label>
         </p>
 
-        <p>
-            <button type="submit">Publier</button>
+        <p class="form-actions">
+            <button type="submit" class="btn btn-primary btn-submit">
+                <i class="ri-save-line me-1"></i> Publier
+            </button>
+            <?php if (!$isAjax): ?>
+            <a href="showpostback.php" class="btn btn-secondary btn-cancel">
+                <i class="ri-close-line me-1"></i> Annuler
+            </a>
+            <?php endif; ?>
         </p>
     </form>
 </div>
-<?php if (!$isAjax): ?>
-    </div>
-</div>
-    <script src="dashboard.js"></script>
-<?php endif; ?>
-    <script src="addpost.js"></script>
-<?php if (!$isAjax): ?>
-</body>
-</html>
-<?php endif; ?>
+<?php
+$content = ob_get_clean();
+
+if ($isAjax) {
+    echo $content;
+    echo '<script src="media-dropzone.js"></script>';
+} else {
+    renderBackofficeLayout('Ajouter un Post', $content, ['addform.css'], ['addpost.js', 'media-dropzone.js']);
+}
+?>
