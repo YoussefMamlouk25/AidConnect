@@ -1,59 +1,46 @@
 <?php
 session_start();
-require_once '../../Model/user.php';
-require_once 'template.php';
-
-$model = new UserModel();
-$error = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email    = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-
-    if ($email === '' || $password === '') {
-        $error = "Veuillez remplir tous les champs.";
-    } else {
-        $result = $model->login($email, $password);
-
-        if ($result['success']) {
-            $u = $result['user'];
-
-            $_SESSION['id_user'] = $u['id_user'];
-            $_SESSION['name']    = $u['name'];
-            $_SESSION['role']    = $u['role'] ?? 'volunteer';
-
-            // Redirection de base → frontoffice posts
-            header('Location: showPosts.php');
-            exit;
-        } else {
-            $error = $result['error'] ?? "Erreur de connexion.";
-        }
-    }
-}
-
-ob_start();
+$error = $_GET['error'] ?? '';
+$success = $_GET['success'] ?? '';
 ?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion - AidConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
 
-<h2 class="mb-3">Connexion</h2>
+<div class="container d-flex justify-content-center align-items-center" style="min-height:100vh;">
+    <div class="card p-4 shadow" style="width:400px;">
+        
+        <h3 class="text-center mb-3">Connexion</h3>
 
-<?php if ($error): ?>
-    <div style="color:red;"><?= htmlspecialchars($error) ?></div>
-<?php endif; ?>
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
 
-<form method="post">
-    <label>Email</label><br>
-    <input type="email" name="email" required><br><br>
+        <?php if ($success): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
 
-    <label>Mot de passe</label><br>
-    <input type="password" name="password" required><br><br>
+        <form action="../../Controller/logincontroller.php" method="POST">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control mb-3" required>
 
-    <button type="submit">Se connecter</button>
-</form>
+            <label>Mot de passe</label>
+            <input type="password" name="password" class="form-control mb-4" required>
 
-<p class="mt-3">
-    Pas de compte ? <a href="signup.php">Créer un compte</a>
-</p>
+            <button class="btn btn-primary w-100">Se connecter</button>
+        </form>
 
-<?php
-$content = ob_get_clean();
-renderTemplate('Connexion', $content);
+        <p class="mt-3 text-center">
+            Pas de compte ? <a href="signup.php">Créer un compte</a>
+        </p>
+
+    </div>
+</div>
+
+</body>
+</html>
