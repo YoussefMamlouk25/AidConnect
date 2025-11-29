@@ -23,27 +23,58 @@ function renderLayout($page_title, $content, $additional_styles = [], $additiona
         <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css" />
         <link rel="stylesheet" href="assets/css/custom.css" />
         <link rel="stylesheet" href="assets/css/style.css" />
+        <link rel="stylesheet" href="assets/css/footer.css" />
         
         <!-- CSS additionnels -->
         <?php foreach ($additional_styles as $style): ?>
             <link rel="stylesheet" href="<?php echo htmlspecialchars($style); ?>" />
         <?php endforeach; ?>
+        
+        <!-- Background Image Style -->
+        <style>
+            body {
+                background-image: url('assets/images/small/background.jpg');
+                background-size: cover;
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .wrapper {
+                background-color: transparent;
+                min-height: calc(100vh - 200px);
+                padding-bottom: 20px;
+                flex: 1;
+            }
+            
+            @media (max-width: 768px) {
+                body {
+                    background-attachment: scroll;
+                }
+            }
+        </style>
     </head>
     <body>
         <?php include 'header.php'; ?>
         
         <div class="wrapper">
             <div class="container-fluid">
+                
                 <?php echo $content; ?>
             </div>
         </div>
+        
+        <?php include 'footer.php'; ?>
         
         <!-- SocialV-Lite JS -->
         <script src="assets/js/libs.min.js"></script>
         <script src="assets/js/app.js"></script>
         
         <!-- Validation JavaScript -->
-        <script src="form-validation.js"></script>
+        <script src="assets/js/form-validation.js"></script>
         
         <!-- Scripts additionnels -->
         <?php foreach ($additional_scripts as $script): ?>

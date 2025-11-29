@@ -98,7 +98,7 @@ if (
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AidConnect – Register New Volunteer</title>
-  <link rel="stylesheet" href="template.css" />
+  <link rel="stylesheet" href="assets/css/template.css" />
   <link rel="stylesheet" href="assets/css/libs.min.css" />
   <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0" />
   <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" />
@@ -194,6 +194,6 @@ if (
     </section>
   </div>
   <script src="assets/js/media-dropzone.js"></script>
-  <script src="form-validation.js"></script>
+  <script src="assets/js/form-validation.js"></script>
 </body>
 </html>

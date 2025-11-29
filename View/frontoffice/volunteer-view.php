@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../../Controller/offercontroller.php';
 require_once __DIR__ . '/../../Controller/updateoffercontroller.php';
+require_once __DIR__ . '/layout.php';
 
 $offerC = new OfferController();
 $updateOfferC = new UpdateOfferController();
@@ -17,95 +18,19 @@ foreach ($offers as &$offer) {
 unset($offer);
 
 $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
-?>
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>AidConnect • Volunteers</title>
-  <link rel="stylesheet" href="template.css">
-  <link rel="stylesheet" href="assets/css/libs.min.css">
-  <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0">
-  <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
-  <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
-  <link rel="stylesheet" href="assets/css/custom.css">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="showpost.css">
-  <style>
-    /* Facebook-style Media Grid for Offers */
-    .fb-media-grid {
-      display: grid;
-      gap: 2px;
-      border-radius: 8px;
-      overflow: hidden;
-      max-height: 500px;
-    }
-    
-    .fb-media-grid.count-1 {
-      grid-template-columns: 1fr;
-    }
-    
-    .fb-media-grid.count-2 {
-      grid-template-columns: 1fr 1fr;
-    }
-    
-    .fb-media-grid.count-3 {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-    }
-    
-    .fb-media-grid.count-3 .grid-item:first-child {
-      grid-row: 1 / 3;
-    }
-    
-    .fb-media-grid.count-4 {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-    }
-    
-    .fb-media-grid .grid-item {
-      position: relative;
-      overflow: hidden;
-      background: #000;
-    }
-    
-    .fb-media-grid .grid-item img,
-    .fb-media-grid .grid-item video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    
-    .fb-media-grid.count-1 .grid-item {
-      height: 400px;
-    }
-    
-    .fb-media-grid.count-2 .grid-item {
-      height: 300px;
-    }
-    
-    .fb-media-grid.count-3 .grid-item,
-    .fb-media-grid.count-4 .grid-item {
-      height: 250px;
-    }
-  </style>
-  <script src="assets/js/libs.min.js"></script>
-  <script src="assets/js/app.js"></script>
-</head>
-<body>
-<?php include 'header.php'; ?>
 
-<div class="container-fluid">
-  <div class="row justify-content-center">
-    <div class="col-12">
-      <div class="card mb-4">
-        <div class="card-body text-center">
-          <a href="volunteer-form.php" class="btn btn-primary">
-            <i class="ri-add-circle-line me-2"></i> Ajouter une Offre
-          </a>
-        </div>
+// Start output buffering to capture content
+ob_start();
+?>
+
+<div class="row justify-content-center">
+  <div class="col-lg-6 col-xl-5">
+      <div class="text-center mb-4">
+        <a href="volunteer-form.php" class="btn-add-offer">
+          <i class="ri-add-circle-line me-2"></i> Ajouter une Offre
+        </a>
       </div>
+      
       <h5 class="mb-3 text-center">Volunteer Posts</h5>
       <?php if ($deleted): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -128,8 +53,6 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
           </div>
         </div>
       <?php else: ?>
-        <div class="row justify-content-center">
-          <div class="col-lg-8">
             <?php foreach ($offers as $offer): 
               $nom = OfferController::escape($offer['nom']);
               $email = OfferController::escape($offer['email']);
@@ -154,12 +77,21 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
               <div class="post-card mb-3">
                 <!-- Post Header -->
                 <div class="post-header">
-                  <div class="avatar"><?= $initials ?></div>
+                  <div class="avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"><?= $initials ?></div>
                   <div class="post-info">
-                    <div class="post-author"><?= $nom ?></div>
+                    <div class="post-author">
+                      <?= $nom ?>
+                      <?php if ($offer['is_creator']): ?>
+                        <i class="ri-verified-badge-fill text-primary ms-1" title="Post Creator"></i>
+                      <?php endif; ?>
+                    </div>
                     <div class="post-meta">
-                      <span class="badge bg-primary"><?= $typeDonLabel ?></span>
-                      <span class="text-muted ms-2">Volunteer</span>
+                      <span class="badge bg-primary">
+                        <i class="ri-gift-line me-1"></i><?= $typeDonLabel ?>
+                      </span>
+                      <span class="badge bg-success ms-2">
+                        <i class="ri-user-heart-line me-1"></i>Volunteer
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -194,52 +126,88 @@ $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
                   <!-- Contact Info -->
                   <div class="post-contact">
                     <div class="contact-item">
-                      <i class="ri-mail-line me-2"></i>
-                      <strong>Email:</strong> <?= $email ?>
+                      <i class="ri-mail-line me-2 text-primary"></i>
+                      <strong>Email:</strong> 
+                      <a href="mailto:<?= $email ?>"><?= $email ?></a>
                     </div>
                     <div class="contact-item">
-                      <i class="ri-phone-line me-2"></i>
-                      <strong>Téléphone:</strong> <?= $num ?>
+                      <i class="ri-phone-line me-2 text-success"></i>
+                      <strong>Téléphone:</strong> 
+                      <a href="tel:<?= $num ?>"><?= $num ?></a>
                     </div>
+                    <div class="mt-2">
+                      <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('<?= $email ?>')" title="Copy Email">
+                        <i class="ri-file-copy-line me-1"></i>Copy Email
+                      </button>
+                      <button class="btn btn-sm btn-outline-success" onclick="copyToClipboard('<?= $num ?>')" title="Copy Phone">
+                        <i class="ri-file-copy-line me-1"></i>Copy Phone
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Engagement Bar -->
+                <div class="post-engagement">
+                  <div class="engagement-stats">
+                    <button class="btn-link like-post-btn" data-offer-id="<?= (int)$offer['id_offer'] ?>" onclick="likePost(<?= (int)$offer['id_offer'] ?>)" title="Like this post">
+                      <i class="ri-heart-line me-1"></i>Like
+                      <span class="like-count" data-offer-id="<?= (int)$offer['id_offer'] ?>">0</span>
+                    </button>
+                    <button class="btn-link" onclick="sharePost(<?= (int)$offer['id_offer'] ?>)" title="Share this post">
+                      <i class="ri-share-line me-1"></i>Share
+                    </button>
+                  </div>
+                  <div class="engagement-counts">
+                    <?php if ($offer['updates_count'] > 0): ?>
+                      <span class="badge bg-info">
+                        <i class="ri-message-3-line me-1"></i><?= $offer['updates_count'] ?> Response<?= $offer['updates_count'] > 1 ? 's' : '' ?>
+                      </span>
+                    <?php endif; ?>
                   </div>
                 </div>
 
                 <!-- Post Actions -->
                 <div class="post-actions">
                   <?php if ($offer['is_creator']): ?>
-                    <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-primary">
-                      <i class="ri-edit-line me-1"></i> Modifier
+                    <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-primary">
+                      <i class="ri-edit-line me-1"></i> Update
                     </a>
                   <?php else: ?>
-                    <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-primary">
-                      <i class="ri-reply-line me-1"></i> Répondre
+                    <a href="update-offer-form.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-primary">
+                      <i class="ri-reply-line me-1"></i> Reply
                     </a>
                   <?php endif; ?>
-                  <a href="update-offer-view.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-secondary">
-                    <i class="ri-file-list-3-line me-1"></i> Réponses
+                  <a href="update-offer-view.php?id_offer=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-info">
+                    <i class="ri-file-list-3-line me-1"></i> View Replies
                     <?php if ($offer['updates_count'] > 0): ?>
                       <span class="badge bg-primary ms-1"><?= $offer['updates_count'] ?></span>
                     <?php endif; ?>
                   </a>
-                  <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-warning">
-                    <i class="ri-pencil-line me-1"></i> Éditer
+                  <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-warning">
+                    <i class="ri-pencil-line me-1"></i> Edit
                   </a>
-                  <a href="volunteer-delete.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-action btn-outline-danger">
-                    <i class="ri-delete-bin-line me-1"></i> Supprimer
+                  <a href="volunteer-delete.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-danger">
+                    <i class="ri-delete-bin-line me-1"></i> Delete
                   </a>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="window.print()" title="Print this post">
+                    <i class="ri-printer-line me-1"></i> Print
+                  </button>
                 </div>
               </div>
             <?php endforeach; ?>
-          </div>
-        </div>
       <?php endif; ?>
     </div>
   </div>
 </div>
-<script src="form.js"></script>
-<script src="javascript.js"></script>
-<footer class="bg-light text-center text-muted py-3 mt-4">
-  <p>© 2025 AidConnect. Edit/Delete Enabled.</p>
-</footer>
-</body>
-</html>
+
+
+<?php
+$content = ob_get_clean();
+
+// Define additional styles and scripts
+$additional_styles = ['assets/css/template.css', 'assets/css/showpost.css', 'assets/css/volunteer-view.css'];
+$additional_scripts = ['assets/js/volunteer-view.js', 'assets/js/form.js', 'assets/js/javascript.js'];
+
+// Render the layout
+renderLayout('Volunteers', $content, $additional_styles, $additional_scripts);
+?>

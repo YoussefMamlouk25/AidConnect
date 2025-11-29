@@ -6,6 +6,7 @@ session_start();
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/offer.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
+require_once __DIR__ . '/layout.php';
 
 $offerC = new OfferController();
 
@@ -49,42 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     }
 }
 
+// Start output buffering to capture content
+ob_start();
 ?>
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AidConnect | Delete Volunteer</title>
 
-    <link rel="stylesheet" href="assets/css/libs.min.css">
-    <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0">
-    <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
-    <link rel="stylesheet" href="assets/css/custom.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="assets/js/volunteer.js"></script>
-  </head>
-
-  <body>
-    <header class="header bg-white shadow-sm">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-12">
-            <a href="volunteer-view.php" class="d-flex align-items-center text-decoration-none">
-              <i class="fas fa-arrow-left text-primary me-2"></i>
-              <h4 class="mb-0 text-primary ms-2">AidConnect</h4>
-            </a>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="wrapper">
-      <section class="sign-up-page">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-md-8 pt-5 pb-5">
+<div class="row justify-content-center">
+  <div class="col-md-8 pt-5 pb-5">
               <div class="delete-card p-4">
                 <h4 class="mb-4 text-danger">
                   <i class="fas fa-exclamation-triangle me-2"></i>Delete Volunteer
@@ -166,8 +137,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
             </div>
           </div>
         </div>
-      </section>
-    </div>
 
-  </body>
-</html>
+<?php
+$content = ob_get_clean();
+
+// Define additional styles and scripts
+$additional_styles = [];
+$additional_scripts = ['assets/js/volunteer.js'];
+
+// Render the layout
+renderLayout('Delete Volunteer', $content, $additional_styles, $additional_scripts);
+?>

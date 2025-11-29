@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function refreshSubmitState() {
-    // We don’t want to require media; so skip media in gating state
+    // We don't want to require media; so skip media in gating state
     const ready =
       validateNom() &&
       validateNumero() &&
@@ -147,3 +147,4 @@ document.addEventListener('DOMContentLoaded', () => {
     form.submit();
   });
 });
+

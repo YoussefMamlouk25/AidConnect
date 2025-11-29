@@ -44,12 +44,10 @@ ob_start();
 ?>
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card mb-4">
-            <div class="card-body text-center">
-                <a href="addpost.php" class="btn btn-primary">
-                    <i class="ri-add-circle-line me-2"></i> Ajouter un Post
-                </a>
-            </div>
+        <div class="text-center mb-4">
+            <a href="addpost.php" class="btn-add-offer">
+                <i class="ri-add-circle-line me-2"></i> Ajouter un Post
+            </a>
         </div>
 
         <?php
@@ -177,5 +175,5 @@ ob_start();
 </div>
 <?php
 $content = ob_get_clean();
-renderLayout('Posts', $content);
+renderLayout('Posts', $content, ['assets/css/showpost.css', 'assets/css/volunteer-view.css']);
 ?>

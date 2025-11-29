@@ -122,7 +122,7 @@ if (
     <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
     <link rel="stylesheet" href="assets/css/custom.css">
     <link rel="stylesheet" href="assets/css/style.css">
-    <script src="javascript.js"></script>
+    <script src="assets/js/javascript.js"></script>
   </head>
 
   <body class="volunteer-form-body">

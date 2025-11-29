@@ -6,6 +6,7 @@ session_start();
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/offer.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
+require_once __DIR__ . '/layout.php';
 
 $offerC = new OfferController();
 
@@ -136,47 +137,13 @@ $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : htmlspecia
 $type_don = isset($_POST['type_don']) ? htmlspecialchars($_POST['type_don']) : htmlspecialchars($offerData['type_don']);
 $description = isset($_POST['description']) ? htmlspecialchars($_POST['description']) : htmlspecialchars($offerData['description']);
 $currentMedia = $offerData['media'];
+
+// Start output buffering to capture content
+ob_start();
 ?>
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AidConnect | Edit Volunteer</title>
 
-    <link rel="stylesheet" href="assets/css/libs.min.css">
-    <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0">
-    <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
-    <link rel="stylesheet" href="assets/css/custom.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/volunteer-form.css">
-    <script src="javascript.js"></script>
-  </head>
-
-  <body class="volunteer-form-body">
-
-    <header class="header bg-white shadow-sm">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-4">
-            <a href="volunteer-view.php" class="d-flex align-items-center text-decoration-none">
-              <i class="fas fa-arrow-left text-primary me-2"></i>
-              <h4 class="mb-0 text-primary ms-2">AidConnect</h4>
-            </a>
-          </div>
-          <div class="col-4 text-center">
-            <button class="btn btn-outline-primary" onclick="window.location.href='volunteer-form.php'">Add New Volunteer</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="wrapper">
-      <section class="sign-up-page">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-md-6 pt-5 pb-5 d-flex align-items-center justify-content-center">
+<div class="row justify-content-center">
+  <div class="col-md-6 pt-5 pb-5 d-flex align-items-center justify-content-center">
 
               <form method="POST" enctype="multipart/form-data"
                     class="sign-in-from bg-white p-4 rounded shadow-lg volunteer-form-container"
@@ -323,36 +290,16 @@ $currentMedia = $offerData['media'];
 
               </form>
 
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+  </div>
+</div>
 
-    <script src="assets/js/media-dropzone.js"></script>
-  </body>
-  <style>
-    .current-media-item {
-      position: relative;
-      display: inline-block;
-    }
-    .current-media-preview {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #e4e6eb;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .current-media-preview:hover {
-      transform: scale(1.05);
-      border-color: #1877f2;
-    }
-    .current-media-preview[src*=".mp4"],
-    .current-media-preview[src*=".mov"],
-    .current-media-preview[src*=".webm"] {
-      width: 140px;
-    }
-  </style>
-</html>
+<?php
+$content = ob_get_clean();
+
+// Define additional styles and scripts
+$additional_styles = ['assets/css/volunteer-form.css', 'assets/css/volunteer-edit.css'];
+$additional_scripts = ['assets/js/javascript.js', 'assets/js/media-dropzone.js'];
+
+// Render the layout
+renderLayout('Edit Volunteer', $content, $additional_styles, $additional_scripts);
+?>
