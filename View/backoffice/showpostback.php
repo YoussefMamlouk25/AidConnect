@@ -39,9 +39,9 @@ if ($showFullPage) {
                     <h4 class="card-title">Posts</h4>
                 </div>
                 <div>
-                    <button onclick="loadContent('addpost.php')" class="btn btn-primary btn-sm">
-                        <i class="ri-add-line me-1"></i> Ajouter un post
-                    </button>
+                    <a href="addpost.php" class="btn btn-primary">
+                        <i class="ri-add-line me-1"></i> Ajouter un Post
+                    </a>
                 </div>
             </div>
 <div class="offers-fragment">

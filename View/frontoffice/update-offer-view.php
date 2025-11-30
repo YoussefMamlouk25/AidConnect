@@ -293,15 +293,6 @@ ob_start();
   </div>
 </div>
 
-<footer class="bg-light text-center text-muted py-3 mt-4">
-  <div class="container">
-    <p class="mb-0">
-      <i class="ri-heart-fill text-danger"></i>
-      © 2025 AidConnect. Reply System.
-    </p>
-  </div>
-</footer>
-
 <?php
 $content = ob_get_clean();
 

@@ -5,6 +5,7 @@ ini_set('display_errors', 1);
 require_once '../../config.php';
 require_once '../../Model/offer.php';
 require_once '../../Controller/offercontroller.php';
+require_once 'layout.php';
 // no updateoffercontroller here; we only list offers
 $offerController = new OfferController();
 $list = $offerController->getAllOffers();
@@ -29,9 +30,9 @@ if ($showFullPage) {
                     <h4 class="card-title">Offres</h4>
                 </div>
                 <div>
-                    <button onclick="loadContent('addoffer.php')" class="btn btn-primary btn-sm">
-                        <i class="ri-add-line me-1"></i> Ajouter une offre
-                    </button>
+				<a href="addoffer.php" class="btn btn-primary">
+                        <i class="ri-add-line me-1"></i> Ajouter une Offre
+                </a>
                 </div>
             </div>
 <div class="offers-fragment">
