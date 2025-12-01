@@ -99,7 +99,7 @@ class PostUpdateController {
         }
     }
 
-    public function updatePostUpdate(PostUpdate $postUpdate, $id) {
+    public function updatePostUpdate(PostUpdate $postUpdate, $id = null) {
         $sql = "UPDATE update_post 
                 SET id_post = :id_post,
                     id_user = :id_user,
@@ -114,13 +114,14 @@ class PostUpdateController {
 
         try {
             $query = $bd->prepare($sql);
-            
-            // Gérer media : si null, utiliser chaîne vide
+
             $media = $postUpdate->getMedia();
             if ($media === null) {
                 $media = '';
             }
-            
+            if ($id === null) {
+                $id = $postUpdate->getIdUpdatePost();
+            }
             $result = $query->execute([
                 ':id_post' => $postUpdate->getIdPost(),
                 ':id_user' => $postUpdate->getIdUser(),

@@ -168,7 +168,7 @@ class PostController {
     }
 
     // Mettre à jour un post
-    public function updatePost(Post $post, $id) {
+    public function updatePost(Post $post, $id = null) {
         $sql = "UPDATE post 
                 SET titre = :titre, 
                     nom = :nom, 
@@ -198,6 +198,9 @@ class PostController {
             }
             
             $query = $bd->prepare($sql);
+            if ($id === null) {
+                $id = $post->getId();
+            }
             $result = $query->execute([
                 ':titre' => $post->getTitre(),
                 ':nom' => $post->getNom(),
