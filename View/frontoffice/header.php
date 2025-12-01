@@ -39,11 +39,14 @@ $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
                     <button type="button" class="btn btn-sm btn-outline-primary search-icon-btn" id="searchIconBtn" onclick="toggleSearchCard()">
                         <i class="ri-search-line"></i>
                     </button>
+<<<<<<< HEAD
                     <?php if ($isAdmin): ?>
                         <a href="../backoffice/dashboard.php" class="btn btn-sm btn-outline-dark">
                             <i class="ri-dashboard-line me-1"></i> Backoffice
                         </a>
                     <?php endif; ?>
+=======
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
                     <a href="profile.php" class="btn btn-sm btn-outline-primary">
                         <i class="ri-user-line me-1"></i> Profile
                     </a>

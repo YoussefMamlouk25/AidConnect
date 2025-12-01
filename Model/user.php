@@ -4,13 +4,17 @@ require_once __DIR__ . '/../config.php';
 class UserModel
 {
     private $db;
+<<<<<<< HEAD
     private $passwordColumn;
     private $profileColumn;
     private $columnsCache = null;
+=======
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
 
     public function __construct()
     {
         $this->db = Config::getConnexion();
+<<<<<<< HEAD
         $this->passwordColumn = $this->detectColumn(['password_hash', 'password'], true);
         $this->profileColumn  = $this->detectColumn(
             ['profile_pic', 'profile_picture', 'avatar', 'photo', 'picture', 'image'],
@@ -79,22 +83,37 @@ class UserModel
         }
 
         return $users;
+=======
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
     }
 
     public function signup($name, $email, $password, $cin, $date_naissance, $tel, $region)
     {
+<<<<<<< HEAD
+=======
+        // Vérifier si email existe déjà
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
         $check = $this->db->prepare("SELECT id_user FROM user WHERE email = :email");
         $check->execute([':email' => $email]);
         if ($check->fetch()) {
             return ['success' => false, 'error' => 'Email déjà utilisé'];
         }
 
+<<<<<<< HEAD
         $hash = password_hash($password, PASSWORD_BCRYPT);
 
         $stmt = $this->db->prepare(sprintf("
             INSERT INTO user (name, email, %s, cin, date_naissance, tel, region, date_creation, role)
             VALUES (:name, :email, :hash, :cin, :date_naissance, :tel, :region, NOW(), 'volunteer')
         ", $this->passwordColumn));
+=======
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        $stmt = $this->db->prepare("
+            INSERT INTO user (name, email, password_hash, cin, date_naissance, tel, region, date_creation, role)
+            VALUES (:name, :email, :hash, :cin, :date_naissance, :tel, :region, CURDATE(), 'volunteer')
+        ");
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
 
         $stmt->execute([
             ':name'           => $name,
@@ -119,9 +138,13 @@ class UserModel
             return ['success' => false, 'error' => 'Email introuvable'];
         }
 
+<<<<<<< HEAD
         $passwordField = $this->passwordColumn;
 
         if (empty($user[$passwordField]) || !password_verify($password, $user[$passwordField])) {
+=======
+        if (empty($user['password_hash']) || !password_verify($password, $user['password_hash'])) {
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
             return ['success' => false, 'error' => 'Mot de passe incorrect'];
         }
 
@@ -132,6 +155,7 @@ class UserModel
     {
         $stmt = $this->db->prepare("SELECT * FROM user WHERE id_user = :id LIMIT 1");
         $stmt->execute([':id' => $id]);
+<<<<<<< HEAD
         $user = $stmt->fetch();
         return $this->normalizeProfileField($user);
     }
@@ -196,14 +220,24 @@ class UserModel
     }
 
     public function updateUserByAdmin($id, $name, $email, $tel, $region, $role)
+=======
+        return $stmt->fetch();
+    }
+
+    public function updateProfile($id, $name, $email, $tel, $region)
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
     {
         $stmt = $this->db->prepare("
             UPDATE user
             SET name = :name,
                 email = :email,
                 tel = :tel,
+<<<<<<< HEAD
                 region = :region,
                 role = :role
+=======
+                region = :region
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
             WHERE id_user = :id
         ");
 
@@ -212,6 +246,7 @@ class UserModel
             ':name'   => $name,
             ':email'  => $email,
             ':tel'    => $tel ?: null,
+<<<<<<< HEAD
             ':region' => $region ?: null,
             ':role'   => $role
         ]);
@@ -224,3 +259,25 @@ class UserModel
     }
 }
 ?>
+=======
+            ':region' => $region ?: null
+        ]);
+    }
+
+    public function changePassword($id, $password)
+    {
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        $stmt = $this->db->prepare("
+            UPDATE user
+            SET password_hash = :hash
+            WHERE id_user = :id
+        ");
+
+        return $stmt->execute([
+            ':id'   => $id,
+            ':hash' => $hash
+        ]);
+    }
+}
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb

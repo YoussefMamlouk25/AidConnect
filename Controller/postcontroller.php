@@ -176,7 +176,11 @@ class PostController {
     }
 
     // Mettre à jour un post
+<<<<<<< HEAD
     public function updatePost(Post $post, $id = null, $ownerId = null) {
+=======
+    public function updatePost(Post $post, $id = null) {
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
         $sql = "UPDATE post 
                 SET titre = :titre, 
                     nom = :nom, 
@@ -212,7 +216,11 @@ class PostController {
             if ($id === null) {
                 $id = $post->getId();
             }
+<<<<<<< HEAD
             $params = [
+=======
+            $result = $query->execute([
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
                 ':titre' => $post->getTitre(),
                 ':nom' => $post->getNom(),
                 ':numero' => $post->getNumero(),

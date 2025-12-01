@@ -20,8 +20,11 @@ foreach ($offers as &$offer) {
 unset($offer);
 
 $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
+<<<<<<< HEAD
 $flashError = $_SESSION['flash_error'] ?? null;
 unset($_SESSION['flash_error']);
+=======
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
 
 // Start output buffering to capture content
 ob_start();
@@ -193,6 +196,7 @@ ob_start();
                       <span class="badge bg-primary ms-1"><?= $offer['updates_count'] ?></span>
                     <?php endif; ?>
                   </a>
+<<<<<<< HEAD
                   <?php if ($offer['can_manage']): ?>
                     <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-warning">
                       <i class="ri-pencil-line me-1"></i> Edit
@@ -201,6 +205,14 @@ ob_start();
                       <i class="ri-delete-bin-line me-1"></i> Delete
                     </a>
                   <?php endif; ?>
+=======
+                  <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-warning">
+                    <i class="ri-pencil-line me-1"></i> Edit
+                  </a>
+                  <a href="volunteer-delete.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-danger">
+                    <i class="ri-delete-bin-line me-1"></i> Delete
+                  </a>
+>>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
                   <button class="btn btn-sm btn-outline-secondary" onclick="window.print()" title="Print this post">
                     <i class="ri-printer-line me-1"></i> Print
                   </button>
