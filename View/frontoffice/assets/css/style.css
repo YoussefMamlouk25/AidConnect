@@ -171,6 +171,44 @@ body {
   max-width: 100%;
   max-height: 200px;
 }
+
+/* Media Gallery Styles for volunteer-delete */
+.media-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.media-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  flex-shrink: 0;
+}
+
+.media-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.media-item img,
+.media-item video {
+  width: 120px;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+.volunteer-info .media-item img,
+.volunteer-info .media-item video {
+  width: 120px;
+  height: 100px;
+  cursor: pointer;
+}
   .post-media {
     display: flex;
     flex-wrap: wrap;

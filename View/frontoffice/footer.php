@@ -38,7 +38,7 @@
                 <div class="footer-section">
                     <h5 class="footer-title">Liens Rapides</h5>
                     <ul class="footer-links">
-                        <li><a href="showPosts.php"><i class="ri-home-line me-2"></i>Accueil</a></li>
+                        <li><a href="index.php"><i class="ri-home-line me-2"></i>Accueil</a></li>
                         <li><a href="showPosts.php"><i class="ri-file-list-3-line me-2"></i>Posts</a></li>
                         <li><a href="showpostupdate.php"><i class="ri-checkbox-circle-line me-2"></i>Posts Résolus</a></li>
                         <li><a href="volunteer-view.php"><i class="ri-price-tag-3-line me-2"></i>Offres</a></li>

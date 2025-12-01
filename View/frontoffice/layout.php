@@ -22,6 +22,7 @@ function renderLayout($page_title, $content, $additional_styles = [], $additiona
         <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" />
         <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css" />
         <link rel="stylesheet" href="assets/css/custom.css" />
+        <link rel="stylesheet" href="assets/css/header.css" />
         <link rel="stylesheet" href="assets/css/style.css" />
         <link rel="stylesheet" href="assets/css/footer.css" />
         

@@ -162,4 +162,62 @@ class OfferController
         return isset($types[$type]) ? $types[$type] : $type;
     }
 
+    // Rechercher des offres avec filtres avancés
+    public function searchOffers($query = '', $filters = []) {
+        $bd = Config::getConnexion();
+        try {
+            $sql = "SELECT o.*, 
+                    (SELECT COUNT(*) FROM update_offer WHERE id_offer = o.id_offer) as updates_count
+                    FROM offer o WHERE 1=1";
+            $params = [];
+            
+            // Search query
+            if (!empty($query)) {
+                $sql .= " AND (o.description LIKE :query OR o.nom LIKE :query)";
+                $params[':query'] = '%' . $query . '%';
+            }
+            
+            // Category filter
+            if (!empty($filters['category'])) {
+                $sql .= " AND o.type_don = :category";
+                $params[':category'] = $filters['category'];
+            }
+            
+            // Date range filter (using offer creation date if available, or default to current)
+            // Note: You may need to add a date_creation column to offer table
+            // For now, we'll skip date filtering for offers if the column doesn't exist
+            
+            // Status filter (offers with updates are considered "active" or "resolved")
+            if (isset($filters['status'])) {
+                if ($filters['status'] == 'resolved') {
+                    $sql .= " AND EXISTS (SELECT 1 FROM update_offer WHERE id_offer = o.id_offer)";
+                } elseif ($filters['status'] == 'active') {
+                    $sql .= " AND NOT EXISTS (SELECT 1 FROM update_offer WHERE id_offer = o.id_offer)";
+                }
+            }
+            
+            // Sorting
+            $sort = $filters['sort'] ?? 'date_desc';
+            switch ($sort) {
+                case 'date_asc':
+                    $sql .= " ORDER BY o.id_offer ASC";
+                    break;
+                case 'popularity':
+                    $sql .= " ORDER BY updates_count DESC, o.id_offer DESC";
+                    break;
+                case 'date_desc':
+                default:
+                    $sql .= " ORDER BY o.id_offer DESC";
+                    break;
+            }
+            
+            $q = $bd->prepare($sql);
+            $q->execute($params);
+            return $q->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Erreur searchOffers : " . $e->getMessage());
+            return [];
+        }
+    }
+
 }
