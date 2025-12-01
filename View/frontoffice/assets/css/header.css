@@ -1,0 +1,272 @@
+/* Header Button Styles for AidConnect */
+
+/* Base styles for all header buttons - ensures consistent sizing */
+header .btn-sm.btn-primary,
+header .btn-sm.btn-outline-primary {
+    border-radius: 20px;
+    font-weight: 600;
+    padding: 16px 26px;
+    transition: all 0.3s ease;
+    border-width: 1px;
+    border-style: solid;
+    box-sizing: border-box;
+    line-height: 1.5;
+    font-size: 16px;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Header Button - Primary (Active State) */
+header .btn-primary {
+    background-color: #1877f2;
+    border-color: #1877f2;
+    color: #ffffff;
+}
+
+header .btn-primary:hover {
+    background-color: #166fe5;
+    border-color: #166fe5;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(24, 119, 242, 0.3);
+}
+
+/* Header Button - Outline Primary (Inactive State) */
+header .btn-outline-primary {
+    border-color: #1877f2;
+    color: #1877f2;
+    background-color: rgba(24, 119, 242, 0.05);
+}
+
+header .btn-outline-primary:hover {
+    background-color: #1877f2;
+    border-color: #1877f2;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(24, 119, 242, 0.3);
+}
+
+/* Search Icon Button */
+.search-icon-btn {
+    border-radius: 20px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-icon-btn i {
+    font-size: 18px;
+}
+
+/* Search Card */
+.search-card {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.search-card.active {
+    opacity: 1;
+}
+
+.search-card-content {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.search-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-card-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.search-card-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.search-card-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.search-card.active .search-card-content {
+    transform: scale(1);
+}
+
+.search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-header h5 {
+    color: #1c1e21;
+    font-weight: 600;
+}
+
+.btn-close-search {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #65676b;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.btn-close-search:hover {
+    background-color: #f0f2f5;
+    color: #1c1e21;
+}
+
+.search-form {
+    width: 100%;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input-wrapper .search-input {
+    border: 1px solid #dadde1;
+    border-radius: 12px;
+    padding: 12px 45px 12px 16px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background-color: #f0f2f5;
+    width: 100%;
+}
+
+.search-input-wrapper .search-input:focus {
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+    outline: none;
+    background-color: #ffffff;
+}
+
+.search-input-wrapper .search-input-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #65676b;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.category-select {
+    border: 1px solid #dadde1;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    background-color: #f0f2f5;
+    color: #1c1e21;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.category-select:focus {
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+    outline: none;
+    background-color: #ffffff;
+}
+
+.search-submit-btn {
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+.form-label {
+    color: #1c1e21;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.filters-section {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.filters-section::-webkit-scrollbar {
+    width: 4px;
+}
+
+.filters-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.filters-section::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.search-form input[type="date"] {
+    border: 1px solid #dadde1;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 14px;
+    background-color: #f0f2f5;
+    transition: all 0.3s ease;
+}
+
+.search-form input[type="date"]:focus {
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+    outline: none;
+    background-color: #ffffff;
+}
+
+/* Responsive adjustments for search card */
+@media (max-width: 768px) {
+    .search-card {
+        padding: 10px;
+        padding-top: 80px;
+        justify-content: center;
+    }
+    
+    .search-card-content {
+        padding: 20px;
+        max-width: 100%;
+        border-radius: 16px;
+        max-height: calc(100vh - 100px);
+    }
+}
+

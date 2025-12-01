@@ -22,14 +22,6 @@
     padding: 20px;
 }
 
-/* Zone de contenu centrée et limitée */
-.content-area-centered {
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0;
-}
-
 /* Navbar ajustée */
 .iq-top-navbar {
     margin-left: 260px;
@@ -56,12 +48,18 @@
     margin-bottom: 15px;
 }
 
-.card-header {
-    padding: 12px 15px;
+.content-page .container-fluid > .row {
+    margin-left: 0;
+    margin-right: 0;
 }
 
-.card-body {
-    padding: 15px;
+.content-page .container-fluid > .row > [class^="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.card-header {
+    padding: 12px 15px;
 }
 
 /* Tables */
@@ -92,12 +90,6 @@
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
-    .content-area-centered {
-        max-width: 100%;
-    }
-}
-
 @media (max-width: 768px) {
     .iq-sidebar {
         transform: translateX(-100%);
@@ -143,4 +135,37 @@
 
 .table-actions .btn {
     margin: 0 2px;
+    border: none;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
+
+/* Unified edit/delete button styling in all backoffice tables */
+.table-actions .btn.btn-sm.btn-primary,
+.table-actions .btn.btn-primary {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+}
+
+.table-actions .btn.btn-sm.btn-danger,
+.table-actions .btn.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+.table-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+}
+
+.table-actions .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.2);
+}
+
+/* (Add Post / Add Offer form styles now live in addform.css) */

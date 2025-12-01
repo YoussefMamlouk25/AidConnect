@@ -3,27 +3,35 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour créer une offre.'));
+    exit();
+}
+
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/offer.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
 
 $offerC = new OfferController();
+$accountName = trim($_SESSION['name'] ?? '');
+$accountEmail = trim($_SESSION['email'] ?? '');
 
 if (
-    isset($_POST['nom']) &&
     isset($_POST['numero']) &&
     isset($_POST['email']) &&
     isset($_POST['type_don']) &&
     isset($_POST['description'])
 ) {
     if (
-        !empty($_POST['nom']) &&
         !empty($_POST['numero']) &&
         !empty($_POST['email']) &&
         !empty($_POST['type_don']) &&
         !empty($_POST['description'])
     ) {
-        $nom = trim($_POST['nom']);
+        $nom = $accountName;
+        if ($nom === '') {
+            $error = "Nom du compte introuvable. Veuillez mettre à jour votre profil.";
+        }
         $numero = trim($_POST['numero']);
         $email = trim($_POST['email']);
         $type_don = trim($_POST['type_don']);
@@ -98,13 +106,16 @@ if (
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AidConnect – Register New Volunteer</title>
-  <link rel="stylesheet" href="template.css" />
+  <link rel="stylesheet" href="assets/css/template.css" />
   <link rel="stylesheet" href="assets/css/libs.min.css" />
   <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0" />
   <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" />
   <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css" />
   <link rel="stylesheet" href="assets/css/custom.css" />
+  <link rel="stylesheet" href="assets/css/header.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/volunteer-form.css" />
+  <link rel="stylesheet" href="assets/css/media-lightbox.css" />
 </head>
 <body class="volunteer-form-body">
   <?php include 'header.php'; ?>
@@ -126,8 +137,9 @@ if (
               <?php endif; ?>
 
               <div class="form-group mb-3">
-                <label for="nom" class="fw-bold">Nom <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="nom" name="nom" required />
+                <label class="fw-bold">Nom du compte</label>
+                <input type="text" class="form-control" value="<?php echo htmlspecialchars($accountName); ?>" disabled />
+                <input type="hidden" name="nom" value="<?php echo htmlspecialchars($accountName); ?>" />
               </div>
 
               <div class="form-group mb-3">
@@ -137,7 +149,7 @@ if (
 
               <div class="form-group mb-3">
                 <label for="email" class="fw-bold">Email <span class="text-danger">*</span></label>
-                <input type="email" class="form-control" id="email" name="email" required />
+                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($accountEmail); ?>" required />
               </div>
 
               <div class="form-group mb-3">
@@ -154,14 +166,24 @@ if (
               </div>
 
               <div class="form-group mb-3">
-                <label for="description" class="fw-bold">Description <span class="text-danger">*</span></label>
+                <label for="description" class="fw-bold">Description</label>
                 <div class="input-group">
-                  <textarea class="form-control" id="description" name="description" required></textarea>
+                  <textarea class="form-control" id="description" name="description"></textarea>
                 </div>
+                <div class="invalid-feedback d-block" id="descriptionError" style="display: none;"></div>
               </div>
               <div class="form-group mb-4">
                 <label for="media" class="fw-bold">Media (optionnel)</label>
-                <input type="file" class="form-control" id="media" name="media[]" accept="image/*" multiple />
+                <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreview">
+                  <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*,video/*" multiple />
+                  <div class="dropzone-content">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                    <div class="dropzone-link">ou cliquez pour parcourir</div>
+                    <div class="dropzone-hint">Formats supportés: JPG, PNG, MP4, MOV, WEBM</div>
+                  </div>
+                </div>
+                <div id="mediaPreview" class="media-preview-grid mt-3" aria-live="polite"></div>
                 <div class="invalid-feedback d-block" id="mediaError" style="display: none;"></div>
               </div>
 
@@ -181,6 +203,7 @@ if (
       </div>
     </section>
   </div>
-  <script src="form-validation.js"></script>
+  <script src="assets/js/media-dropzone.js"></script>
+  <script src="assets/js/form-validation.js"></script>
 </body>
 </html>

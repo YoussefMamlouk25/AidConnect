@@ -7,6 +7,7 @@ session_start();
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
+require_once 'layout.php';
 
 $postController = new PostController();
 $error = '';
@@ -43,21 +44,56 @@ if (!$postData) {
             !empty($_POST['region']) &&
             !empty($_POST['description'])
         ) {
-            // Gestion de l'image
+            // Gestion des images (multiple, max 4)
             $media = !empty($postData['media']) ? $postData['media'] : ''; // Garder l'ancienne image par défaut ou chaîne vide
-            if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = '../../public/uploads/';
+            
+            if (isset($_FILES['media']) && !empty($_FILES['media']['name'][0])) {
+                $uploadDir = __DIR__ . '/../../public/uploads/';
                 // Créer le dossier s'il n'existe pas
                 if (!file_exists($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
                 }
-                // Supprimer l'ancienne image si elle existe
-                if (!empty($postData['media']) && file_exists($uploadDir . $postData['media'])) {
-                    unlink($uploadDir . $postData['media']);
+
+                // Supprimer les anciennes images si elles existent
+                if (!empty($postData['media'])) {
+                    $oldMediaFiles = json_decode($postData['media'], true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($oldMediaFiles)) {
+                        foreach ($oldMediaFiles as $oldMediaFile) {
+                            $oldMediaPath = $uploadDir . $oldMediaFile;
+                            if (file_exists($oldMediaPath)) {
+                                @unlink($oldMediaPath);
+                            }
+                        }
+                    } else {
+                        // Ancien format: chaîne simple
+                        $oldMediaPath = $uploadDir . $postData['media'];
+                        if (file_exists($oldMediaPath)) {
+                            @unlink($oldMediaPath);
+                        }
+                    }
                 }
-                $mediaName = basename($_FILES['media']['name']);
-                $media = $mediaName;
-                move_uploaded_file($_FILES['media']['tmp_name'], $uploadDir . $mediaName);
+
+                $uploadedMedia = [];
+                $errors = [];
+                foreach ($_FILES['media']['tmp_name'] as $key => $tmpName) {
+                    if ($_FILES['media']['error'][$key] === UPLOAD_ERR_OK) {
+                        $original = basename($_FILES['media']['name'][$key]);
+                        $mediaName = time() . '_' . $key . '_' . $original;
+                        $targetPath = $uploadDir . $mediaName;
+                        if (move_uploaded_file($tmpName, $targetPath)) {
+                            $uploadedMedia[] = $mediaName;
+                        } else {
+                            $errors[] = "Erreur lors du téléchargement du fichier: " . $original;
+                        }
+                    }
+                }
+
+                if (count($errors) > 0) {
+                    $error = implode("\n", $errors);
+                }
+                if (count($uploadedMedia) > 0) {
+                    $media = json_encode($uploadedMedia);
+                }
             }
 
             // Gestion de la date
@@ -114,35 +150,18 @@ $currentMedia = isset($postData['media']) ? htmlspecialchars($postData['media'])
 $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
 
-// Si ce n'est pas AJAX, afficher la page complète avec sidebar
-if (!$isAjax) {
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier un Post</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="addpost.css">
-</head>
-<body>
-<div class="layout">
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-<?php
-}
-?>
-    <main>
-        <h1>Modifier un Post</h1>
-    
-        <?php if (!empty($error)): ?>
-            <div class="error-message">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
+<div class="offers-fragment add-form">
+    <h2>Modifier un Post</h2>
 
-        <form method="POST" enctype="multipart/form-data">
+    <?php if (!empty($error)): ?>
+        <div class="error-message">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" enctype="multipart/form-data" action="updatepost.php?id=<?php echo urlencode($id); ?><?php echo $isAjax ? '&ajax=1' : ''; ?>">
         <input type="hidden" name="id" value="<?php echo $id; ?>">
         
         <p>
@@ -211,8 +230,31 @@ if (!$isAjax) {
             <label>Photo actuelle :
                 <?php if (!empty($currentMedia)): ?>
                     <div class="current-media">
-                        <img src="../../public/uploads/<?php echo $currentMedia; ?>" alt="Photo actuelle">
-                        <small>Photo actuelle</small>
+                        <?php
+                            $mediaFiles = json_decode($currentMedia, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+                                // Format JSON (multiple fichiers)
+                                foreach ($mediaFiles as $mediaFile) {
+                                    $mediaUrl = '../../public/uploads/' . htmlspecialchars($mediaFile);
+                                    $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                                    if (in_array($ext, ['mp4','mov','webm'])) {
+                                        echo '<video src="'.htmlspecialchars($mediaUrl).'" controls style="width:150px; height:150px; object-fit:cover; border-radius:6px; margin:5px;"></video>';
+                                    } else {
+                                        echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Current media" style="width:150px; height:150px; object-fit:cover; border-radius:6px; margin:5px;">';
+                                    }
+                                }
+                            } else {
+                                // Ancien format: chaîne simple (un seul fichier)
+                                $mediaUrl = '../../public/uploads/' . htmlspecialchars($currentMedia);
+                                $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
+                                if (in_array($ext, ['mp4','mov','webm'])) {
+                                    echo '<video src="'.htmlspecialchars($mediaUrl).'" controls style="width:150px; height:150px; object-fit:cover; border-radius:6px; margin:5px;"></video>';
+                                } else {
+                                    echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Current media" style="width:150px; height:150px; object-fit:cover; border-radius:6px; margin:5px;">';
+                                }
+                            }
+                        ?>
+                        <small>Photo(s) actuelle(s)</small>
                     </div>
                 <?php else: ?>
                     <small>Aucune photo</small>
@@ -222,12 +264,16 @@ if (!$isAjax) {
 
         <p>
             <label>Nouvelle photo (laisser vide pour conserver l'actuelle) :
-                <div class="photo-upload">
-                    <input type="file" name="media" id="media" accept="image/*" class="file-input-hidden">
-                    <label for="media" class="photo-icon">
-                        📷 Ajouter une photo
-                    </label>
+                <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreviewNew" data-max-files="4">
+                    <input type="file" class="media-file-input" id="mediaNew" name="media[]" accept="image/*" multiple>
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">📁</div>
+                        <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                        <div class="dropzone-link">ou cliquez pour parcourir</div>
+                        <div class="dropzone-hint">Formats supportés: JPG, PNG, GIF - max 4 fichiers</div>
+                    </div>
                 </div>
+                <div id="mediaPreviewNew" class="media-preview-grid mt-3" aria-live="polite"></div>
             </label>
         </p>
 
@@ -237,23 +283,22 @@ if (!$isAjax) {
             </label>
         </p>
 
-        <p>
-            <button type="submit">Mettre à jour</button>
-        </p>
-
-        <p>
-            <a href="showpostback.php" class="btn-cancel">Annuler</a>
+        <p class="form-actions">
+            <button type="submit" class="btn btn-primary btn-submit">
+                <i class="ri-save-line me-1"></i> Mettre à jour
+            </button>
+            <a href="showpostback.php" class="btn btn-secondary btn-cancel" onclick="if(typeof loadContent === 'function'){ loadContent('showpostback.php'); return false; }">
+                <i class="ri-close-line me-1"></i> Annuler
+            </a>
         </p>
         </form>
-    </main>
-<?php if (!$isAjax): ?>
-    </div>
 </div>
-    <script src="dashboard.js"></script>
-<?php endif; ?>
-    <script src="addpost.js"></script>
-<?php if (!$isAjax): ?>
-</body>
-</html>
-<?php endif; ?>
+<?php
+$content = ob_get_clean();
 
+if ($isAjax) {
+    echo $content;
+    echo '<script src="media-dropzone.js"></script>';
+} else {
+    renderBackofficeLayout('Modifier un Post', $content, ['addform.css'], ['addpost.js', 'media-dropzone.js']);
+}

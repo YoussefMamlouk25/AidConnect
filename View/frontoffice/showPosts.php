@@ -2,6 +2,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+session_start();
+
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
@@ -9,6 +11,11 @@ require_once 'layout.php';
 
 $postController = new PostController();
 $list = $postController->getAllPosts();
+
+$currentUserId = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : 0;
+$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
+$flashError = $_SESSION['flash_error'] ?? null;
+unset($_SESSION['flash_error']);
 
 // Fonction pour obtenir les initiales d'un nom
 function getInitials($name) {
@@ -44,19 +51,26 @@ ob_start();
 ?>
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card mb-4">
-            <div class="card-body text-center">
-                <a href="addpost.php" class="btn btn-primary">
-                    <i class="ri-add-circle-line me-2"></i> Ajouter un Post
-                </a>
-            </div>
+        <div class="text-center mb-4">
+            <a href="addpost.php" class="btn-add-offer">
+                <i class="ri-add-circle-line me-2"></i> Ajouter un Post
+            </a>
         </div>
+
+        <?php if (!empty($flashError)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="ri-error-warning-line me-2"></i><?php echo htmlspecialchars($flashError); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        <?php endif; ?>
 
         <?php
         if ($list && is_object($list) && method_exists($list, 'rowCount')) {
             $rowCount = $list->rowCount();
             if ($rowCount > 0) {
                 foreach ($list as $row) {
+                    $ownerId = isset($row['id_user']) ? (int)$row['id_user'] : 0;
+                    $canManage = $isAdmin || ($currentUserId > 0 && $ownerId === $currentUserId);
                     $numero = isset($row['Numéro']) ? $row['Numéro'] : (isset($row['numero']) ? $row['numero'] : '');
                     $authorName = htmlspecialchars($row['nom'] ?? 'Anonyme');
                     $initials = getInitials($authorName);
@@ -65,8 +79,17 @@ ob_start();
                     $region = htmlspecialchars($row['region'] ?? '');
                     $email = htmlspecialchars($row['email'] ?? '');
                     $dateFormatted = formatDate($row['date_creation'] ?? '');
-                    $hasImage = !empty($row['media']);
-                    $imagePath = $hasImage ? '../../public/uploads/' . htmlspecialchars($row['media']) : '';
+                    $mediaRaw = $row['media'] ?? '';
+                    $mediaItems = [];
+                    if (!empty($mediaRaw)) {
+                        $decoded = json_decode($mediaRaw, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            $mediaItems = array_values(array_filter($decoded));
+                        } else {
+                            $mediaItems[] = $mediaRaw;
+                        }
+                    }
+                    $mediaCount = count($mediaItems);
                     $idPost = $row['id_post'];
                     ?>
                     <div class="card mb-3">
@@ -94,9 +117,17 @@ ob_start();
                                 <p class="mb-3"><?php echo nl2br($description); ?></p>
                             <?php endif; ?>
 
-                            <?php if ($hasImage): ?>
+                            <?php if ($mediaCount > 0): ?>
                                 <div class="mb-3">
-                                    <img src="<?php echo $imagePath; ?>" alt="Photo du post" class="img-fluid rounded" style="max-height: 500px; width: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+                                    <div class="fb-media-grid count-<?php echo $mediaCount >= 4 ? 4 : $mediaCount; ?>">
+                                        <?php foreach ($mediaItems as $index => $mediaFile): ?>
+                                            <?php if ($index >= 4) break; ?>
+                                            <?php $mediaPath = '../../public/uploads/' . htmlspecialchars($mediaFile); ?>
+                                            <div class="grid-item">
+                                                <img src="<?php echo $mediaPath; ?>" alt="Photo du post" class="img-fluid rounded">
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
                             <?php endif; ?>
 
@@ -115,17 +146,19 @@ ob_start();
                                 </div>
                             <?php endif; ?>
 
-                            <div class="d-flex gap-2 flex-wrap">
-                                <a href="addpostupdate.php?id_post=<?php echo $idPost; ?>" class="btn btn-sm btn-success">
-                                    <i class="ri-checkbox-circle-line me-1"></i> Résoudre
-                                </a>
-                                <a href="updatepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-info">
-                                    <i class="ri-edit-line me-1"></i> Modifier
-                                </a>
-                                <a href="deletepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-danger">
-                                    <i class="ri-delete-bin-line me-1"></i> Supprimer
-                                </a>
-                            </div>
+                            <?php if ($canManage): ?>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a href="addpostupdate.php?id_post=<?php echo $idPost; ?>" class="btn btn-sm btn-success">
+                                        <i class="ri-checkbox-circle-line me-1"></i> Résoudre
+                                    </a>
+                                    <a href="updatepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-info">
+                                        <i class="ri-edit-line me-1"></i> Modifier
+                                    </a>
+                                    <a href="deletepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-danger">
+                                        <i class="ri-delete-bin-line me-1"></i> Supprimer
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php
@@ -160,5 +193,5 @@ ob_start();
 </div>
 <?php
 $content = ob_get_clean();
-renderLayout('Posts', $content);
+renderLayout('Posts', $content, ['assets/css/showpost.css', 'assets/css/volunteer-view.css']);
 ?>

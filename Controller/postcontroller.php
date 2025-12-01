@@ -73,15 +73,23 @@ class PostController {
     }
 
     // Supprimer un post par ID
-    public function deletePost($id) {
+    public function deletePost($id, $ownerId = null) {
         $sql = "DELETE FROM post WHERE id_post = :id";
+        if ($ownerId !== null) {
+            $sql .= " AND id_user = :owner_id";
+        }
         $bd = Config::getConnexion();
         try {
             $rep = $bd->prepare($sql);
             $rep->bindValue(':id', $id);
+            if ($ownerId !== null) {
+                $rep->bindValue(':owner_id', (int) $ownerId, PDO::PARAM_INT);
+            }
             $rep->execute();
+            return $rep->rowCount() > 0;
         } catch (Exception $e) {
             echo 'Erreur : ' . $e->getMessage();
+            return false;
         }
     }
 
@@ -100,8 +108,75 @@ class PostController {
         }
     }
 
+    // Rechercher des posts avec filtres avancés
+    public function searchPosts($query = '', $filters = []) {
+        $bd = Config::getConnexion();
+        try {
+            $sql = "SELECT p.*, 
+                    (SELECT COUNT(*) FROM postupdate WHERE id_post = p.id_post) as updates_count
+                    FROM post p WHERE 1=1";
+            $params = [];
+            
+            // Search query
+            if (!empty($query)) {
+                $sql .= " AND (p.titre LIKE :query OR p.description LIKE :query OR p.nom LIKE :query OR p.region LIKE :query)";
+                $params[':query'] = '%' . $query . '%';
+            }
+            
+            // Region filter
+            if (!empty($filters['region'])) {
+                $sql .= " AND p.region = :region";
+                $params[':region'] = $filters['region'];
+            }
+            
+            // Date range filter
+            if (!empty($filters['date_from'])) {
+                $sql .= " AND p.date_creation >= :date_from";
+                $params[':date_from'] = $filters['date_from'];
+            }
+            if (!empty($filters['date_to'])) {
+                $sql .= " AND p.date_creation <= :date_to";
+                $params[':date_to'] = $filters['date_to'];
+            }
+            
+            // Status filter (resolved posts have updates)
+            if (isset($filters['status'])) {
+                if ($filters['status'] == 'resolved') {
+                    $sql .= " AND EXISTS (SELECT 1 FROM postupdate WHERE id_post = p.id_post)";
+                } elseif ($filters['status'] == 'active') {
+                    $sql .= " AND NOT EXISTS (SELECT 1 FROM postupdate WHERE id_post = p.id_post)";
+                }
+            }
+            
+            // Sorting
+            $sort = $filters['sort'] ?? 'date_desc';
+            switch ($sort) {
+                case 'date_asc':
+                    $sql .= " ORDER BY p.date_creation ASC";
+                    break;
+                case 'region':
+                    $sql .= " ORDER BY p.region ASC, p.date_creation DESC";
+                    break;
+                case 'popularity':
+                    $sql .= " ORDER BY updates_count DESC, p.date_creation DESC";
+                    break;
+                case 'date_desc':
+                default:
+                    $sql .= " ORDER BY p.date_creation DESC";
+                    break;
+            }
+            
+            $q = $bd->prepare($sql);
+            $q->execute($params);
+            return $q->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log('Erreur searchPosts : ' . $e->getMessage());
+            return [];
+        }
+    }
+
     // Mettre à jour un post
-    public function updatePost(Post $post, $id) {
+    public function updatePost(Post $post, $id = null, $ownerId = null) {
         $sql = "UPDATE post 
                 SET titre = :titre, 
                     nom = :nom, 
@@ -112,6 +187,9 @@ class PostController {
                     media = :media, 
                     date_creation = :date_creation
                 WHERE id_post = :id";
+        if ($ownerId !== null) {
+            $sql .= " AND id_user = :owner_id";
+        }
 
         $bd = Config::getConnexion();
 
@@ -131,7 +209,10 @@ class PostController {
             }
             
             $query = $bd->prepare($sql);
-            $result = $query->execute([
+            if ($id === null) {
+                $id = $post->getId();
+            }
+            $params = [
                 ':titre' => $post->getTitre(),
                 ':nom' => $post->getNom(),
                 ':numero' => $post->getNumero(),
@@ -141,9 +222,15 @@ class PostController {
                 ':media' => $media,
                 ':date_creation' => $dateCreation,
                 ':id' => $id
-            ]);
+            ];
+
+            if ($ownerId !== null) {
+                $params[':owner_id'] = (int) $ownerId;
+            }
             
-            return $result;
+            $result = $query->execute($params);
+            
+            return $result && $query->rowCount() > 0;
         } catch (PDOException $e) {
             error_log("Erreur PDO lors de la mise à jour du post : " . $e->getMessage());
             if (ini_get('display_errors')) {

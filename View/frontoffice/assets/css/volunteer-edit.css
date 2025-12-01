@@ -1,0 +1,27 @@
+/* Volunteer Edit Styles */
+.current-media-item {
+  position: relative;
+  display: inline-block;
+}
+
+.current-media-preview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e4e6eb;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.current-media-preview:hover {
+  transform: scale(1.05);
+  border-color: #1877f2;
+}
+
+.current-media-preview[src*=".mp4"],
+.current-media-preview[src*=".mov"],
+.current-media-preview[src*=".webm"] {
+  width: 140px;
+}
+

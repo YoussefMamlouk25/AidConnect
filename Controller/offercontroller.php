@@ -30,10 +30,21 @@ class OfferController
             $q->bindValue(':num', $offer->getNum(), PDO::PARAM_STR);
             $q->bindValue(':email', $offer->getEmail(), PDO::PARAM_STR);
             $q->bindValue(':type_don', $offer->getTypeDon(), PDO::PARAM_STR);
-            if ($q->execute()) { return $bd->lastInsertId(); }
+            if ($q->execute()) { 
+                return $bd->lastInsertId(); 
+            }
+            return false;
+        } catch (PDOException $e) {
+            error_log("Erreur PDO addOffer : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo "Erreur SQL (addOffer) : " . htmlspecialchars($e->getMessage()) . "<br>";
+            }
             return false;
         } catch (Exception $e) {
             error_log("Erreur addOffer : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo "Erreur (addOffer) : " . htmlspecialchars($e->getMessage()) . "<br>";
+            }
             return false;
         }
     }
@@ -65,20 +76,30 @@ class OfferController
         }
     }
 
-    public function deleteOffer($id)
+    public function deleteOffer($id, $ownerId = null)
     {
         $bd = Config::getConnexion();
         try {
-            $q = $bd->prepare("DELETE FROM offer WHERE id_offer = :id");
+            $sql = "DELETE FROM offer WHERE id_offer = :id";
+            if ($ownerId !== null) {
+                $sql .= " AND id_user = :owner_id";
+            }
+            $q = $bd->prepare($sql);
             $q->bindValue(':id', (int)$id, PDO::PARAM_INT);
-            return $q->execute();
+            if ($ownerId !== null) {
+                $q->bindValue(':owner_id', (int)$ownerId, PDO::PARAM_INT);
+            }
+            if (!$q->execute()) {
+                return false;
+            }
+            return $q->rowCount() > 0;
         } catch (Exception $e) {
             error_log("Erreur deleteOffer : " . $e->getMessage());
             return false;
         }
     }
 
-    public function updateOffer(Offer $offer, $id)
+    public function updateOffer(Offer $offer, $id, $ownerId = null)
     {
         $bd = Config::getConnexion();
         try {
@@ -91,6 +112,9 @@ class OfferController
                 email = :email,
                 type_don = :type_don
             WHERE id_offer = :id";
+            if ($ownerId !== null) {
+                $sql .= " AND id_user = :owner_id";
+            }
             $q = $bd->prepare($sql);
             $q->bindValue(':id_user', $offer->getIdUser(), $offer->getIdUser() === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
             $q->bindValue(':description', $offer->getDescription(), PDO::PARAM_STR);
@@ -101,6 +125,9 @@ class OfferController
             $q->bindValue(':email', $offer->getEmail(), PDO::PARAM_STR);
             $q->bindValue(':type_don', $offer->getTypeDon(), PDO::PARAM_STR);
             $q->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            if ($ownerId !== null) {
+                $q->bindValue(':owner_id', (int)$ownerId, PDO::PARAM_INT);
+            }
             return $q->execute();
         } catch (Exception $e) {
             error_log("Erreur updateOffer : " . $e->getMessage());
@@ -149,6 +176,64 @@ class OfferController
             'services' => 'Services'
         ];
         return isset($types[$type]) ? $types[$type] : $type;
+    }
+
+    // Rechercher des offres avec filtres avancés
+    public function searchOffers($query = '', $filters = []) {
+        $bd = Config::getConnexion();
+        try {
+            $sql = "SELECT o.*, 
+                    (SELECT COUNT(*) FROM update_offer WHERE id_offer = o.id_offer) as updates_count
+                    FROM offer o WHERE 1=1";
+            $params = [];
+            
+            // Search query
+            if (!empty($query)) {
+                $sql .= " AND (o.description LIKE :query OR o.nom LIKE :query)";
+                $params[':query'] = '%' . $query . '%';
+            }
+            
+            // Category filter
+            if (!empty($filters['category'])) {
+                $sql .= " AND o.type_don = :category";
+                $params[':category'] = $filters['category'];
+            }
+            
+            // Date range filter (using offer creation date if available, or default to current)
+            // Note: You may need to add a date_creation column to offer table
+            // For now, we'll skip date filtering for offers if the column doesn't exist
+            
+            // Status filter (offers with updates are considered "active" or "resolved")
+            if (isset($filters['status'])) {
+                if ($filters['status'] == 'resolved') {
+                    $sql .= " AND EXISTS (SELECT 1 FROM update_offer WHERE id_offer = o.id_offer)";
+                } elseif ($filters['status'] == 'active') {
+                    $sql .= " AND NOT EXISTS (SELECT 1 FROM update_offer WHERE id_offer = o.id_offer)";
+                }
+            }
+            
+            // Sorting
+            $sort = $filters['sort'] ?? 'date_desc';
+            switch ($sort) {
+                case 'date_asc':
+                    $sql .= " ORDER BY o.id_offer ASC";
+                    break;
+                case 'popularity':
+                    $sql .= " ORDER BY updates_count DESC, o.id_offer DESC";
+                    break;
+                case 'date_desc':
+                default:
+                    $sql .= " ORDER BY o.id_offer DESC";
+                    break;
+            }
+            
+            $q = $bd->prepare($sql);
+            $q->execute($params);
+            return $q->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Erreur searchOffers : " . $e->getMessage());
+            return [];
+        }
     }
 
 }

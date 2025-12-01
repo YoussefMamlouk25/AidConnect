@@ -4,6 +4,11 @@ ini_set('display_errors', 1);
 
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour publier un post.'));
+    exit();
+}
+
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
@@ -12,9 +17,11 @@ require_once 'layout.php';
 $postC = new PostController();
 $error = '';
 
+$accountName = trim($_SESSION['name'] ?? '');
+$accountEmail = trim($_SESSION['email'] ?? '');
+
 if (
     isset($_POST['titre']) &&
-    isset($_POST['nom']) &&
     isset($_POST['numero']) &&
     isset($_POST['email']) &&
     isset($_POST['region']) &&
@@ -22,22 +29,90 @@ if (
 ) {
     if (
         !empty($_POST['titre']) &&
-        !empty($_POST['nom']) &&
         !empty($_POST['numero']) &&
         !empty($_POST['email']) &&
         !empty($_POST['region']) &&
         !empty($_POST['description'])
     ) {
-        // Gestion de l'image
+        $authorName = $accountName;
+        if ($authorName === '') {
+            $error = "Nom du compte introuvable. Veuillez mettre à jour votre profil.";
+        }
+
+        $contactEmail = trim($_POST['email']);
+        if (empty($contactEmail) && $accountEmail !== '') {
+            $contactEmail = $accountEmail;
+        }
+
+        if (!empty($contactEmail) && !filter_var($contactEmail, FILTER_VALIDATE_EMAIL)) {
+            $error = "Adresse email invalide.";
+        }
+
+        if (!empty($error)) {
+            // skip remaining processing
+        } else {
+        // Gestion des médias (max 4 images)
         $media = '';
-        if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
+        $maxFiles = 4;
+        $allowedMime = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $uploadedMedia = [];
+        $fileCount = 0;
+
+        if (isset($_FILES['media']) && is_array($_FILES['media']['name'])) {
             $uploadDir = '../../public/uploads/';
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
-            $mediaName = basename($_FILES['media']['name']);
-            $media = $mediaName;
-            move_uploaded_file($_FILES['media']['tmp_name'], $uploadDir . $mediaName);
+
+            foreach ($_FILES['media']['name'] as $index => $originalName) {
+                $errorCode = $_FILES['media']['error'][$index];
+                if ($errorCode === UPLOAD_ERR_NO_FILE || empty($originalName)) {
+                    continue;
+                }
+
+                if ($fileCount >= $maxFiles) {
+                    $error = "Vous pouvez télécharger au maximum {$maxFiles} photos.";
+                    break;
+                }
+
+                if ($errorCode !== UPLOAD_ERR_OK) {
+                    $error = "Erreur lors du téléchargement de l'image " . htmlspecialchars($originalName);
+                    break;
+                }
+
+                $tmpName = $_FILES['media']['tmp_name'][$index];
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mimeType = finfo_file($finfo, $tmpName);
+                finfo_close($finfo);
+
+                if (!in_array($mimeType, $allowedMime, true)) {
+                    $error = "Format non pris en charge pour le fichier " . htmlspecialchars($originalName);
+                    break;
+                }
+
+                $safeName = time() . '_' . $index . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+                if (move_uploaded_file($tmpName, $uploadDir . $safeName)) {
+                    $uploadedMedia[] = $safeName;
+                    $fileCount++;
+                } else {
+                    $error = "Impossible d'enregistrer le fichier " . htmlspecialchars($originalName);
+                    break;
+                }
+            }
+
+            if (!empty($error) && count($uploadedMedia) > 0) {
+                foreach ($uploadedMedia as $fileName) {
+                    $filePath = $uploadDir . $fileName;
+                    if (is_file($filePath)) {
+                        @unlink($filePath);
+                    }
+                }
+                $uploadedMedia = [];
+            }
+
+            if (empty($error) && count($uploadedMedia) > 0) {
+                $media = json_encode($uploadedMedia);
+            }
         }
 
         // Gestion de la date de création
@@ -52,9 +127,9 @@ if (
         $post = new Post(
             null,
             $_POST['titre'],
-            $_POST['nom'],
+            $authorName,
             $_POST['numero'],
-            $_POST['email'],
+            $contactEmail,
             $_POST['region'],
             $_POST['description'],
             $media,
@@ -68,6 +143,7 @@ if (
             exit();
         } else {
             $error = "Erreur lors de l'ajout du post. Veuillez vérifier les logs d'erreur ou réessayer.";
+        }
         }
     } else {
         $error = "Veuillez remplir tous les champs obligatoires.";
@@ -96,8 +172,9 @@ ob_start();
                     </div>
 
                     <div class="mb-3">
-                        <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="nom" name="nom" required>
+                        <label class="form-label">Nom du compte</label>
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($accountName); ?>" disabled>
+                        <input type="hidden" name="nom" value="<?php echo htmlspecialchars($accountName); ?>">
                     </div>
 
                     <div class="mb-3">
@@ -107,7 +184,7 @@ ob_start();
 
                     <div class="mb-3">
                         <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($accountEmail); ?>" required>
                     </div>
 
                     <div class="mb-3">
@@ -147,9 +224,18 @@ ob_start();
                     </div>
 
                     <div class="mb-3">
-                        <label for="media" class="form-label">Photo</label>
-                        <input type="file" class="form-control" id="media" name="media" accept="image/*">
-                        <small class="text-muted">Format accepté: JPG, PNG, GIF (optionnel)</small>
+                        <label for="media" class="form-label">Media (optionnel)</label>
+                        <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreview" data-error-target="mediaError" data-max-files="4">
+                            <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*" multiple>
+                            <div class="dropzone-content">
+                                <div class="dropzone-icon">📁</div>
+                                <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                                <div class="dropzone-link">ou cliquez pour parcourir</div>
+                                <div class="dropzone-hint">Formats supportés: JPG, PNG, GIF – max 4 fichiers</div>
+                            </div>
+                        </div>
+                        <div id="mediaPreview" class="media-preview-grid mt-3" aria-live="polite"></div>
+                        <div class="invalid-feedback d-block" id="mediaError" style="display: none;"></div>
                     </div>
 
                     <div class="mb-3">
@@ -172,5 +258,15 @@ ob_start();
 </div>
 <?php
 $content = ob_get_clean();
-renderLayout('Ajouter un Post', $content);
+renderLayout(
+    'Ajouter un Post',
+    $content,
+    [
+        'assets/css/volunteer-form.css',
+        'assets/css/media-lightbox.css'
+    ],
+    [
+        'assets/js/media-dropzone.js'
+    ]
+);
 ?>

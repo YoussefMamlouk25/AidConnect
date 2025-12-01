@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/updateoffer.php';
 require_once __DIR__ . '/../../Controller/updateoffercontroller.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
+require_once __DIR__ . '/layout.php';
 
 $updateOfferC = new UpdateOfferController();
 
@@ -108,42 +109,12 @@ if (isset($_POST['texte'])) {
 $texte = isset($_POST['texte']) ? htmlspecialchars($_POST['texte']) : htmlspecialchars($updateData['texte']);
 $currentMedia = $updateData['media'];
 
+// Start output buffering to capture content
+ob_start();
 ?>
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AidConnect | Edit Reply</title>
 
-    <link rel="stylesheet" href="assets/css/libs.min.css">
-    <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0">
-    <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
-    <link rel="stylesheet" href="assets/css/custom.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="javascript.js"></script>
-  </head>
-
-  <body class="volunteer-form-body">
-    <header class="header bg-white shadow-sm">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-4">
-            <a href="update-offer-view.php<?php echo $updateData['id_offer'] ? '?id_offer=' . $updateData['id_offer'] : ''; ?>" class="d-flex align-items-center text-decoration-none">
-              <i class="fas fa-arrow-left text-primary me-2"></i>
-              <h4 class="mb-0 text-primary ms-2">AidConnect</h4>
-            </a>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="wrapper">
-      <section class="sign-up-page">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-md-6 pt-5 pb-5 d-flex align-items-center justify-content-center">
+<div class="row justify-content-center">
+  <div class="col-md-6 pt-5 pb-5 d-flex align-items-center justify-content-center">
               <form method="POST" enctype="multipart/form-data"
                     class="sign-in-from bg-white p-4 rounded shadow-lg volunteer-form-container"
                     id="updateForm">
@@ -214,26 +185,15 @@ $currentMedia = $updateData['media'];
             </div>
           </div>
         </div>
-      </section>
-    </div>
-  </body>
-  <style>
-    .media-preview {
-      max-width: 120px;
-      max-height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-right: 8px;
-      margin-bottom: 8px;
-    }
-    .media-preview-video {
-      max-width: 140px;
-      max-height: 120px;
-      border-radius: 8px;
-      margin-right: 8px;
-      margin-bottom: 8px;
-    }
-  </style>
-</html>
-</html>
+
+<?php
+$content = ob_get_clean();
+
+// Define additional styles and scripts
+$additional_styles = ['assets/css/update-offer-edit.css'];
+$additional_scripts = ['assets/js/javascript.js'];
+
+// Render the layout
+renderLayout('Edit Reply', $content, $additional_styles, $additional_scripts);
+?>
 

@@ -17,7 +17,8 @@ function renderTemplate($page_title, $content, $styles = [], $scripts = []) {
         <title><?php echo htmlspecialchars($page_title); ?> - AidConnect</title>
         
         <!-- Template CSS principal -->
-        <link rel="stylesheet" href="template.css">
+        <link rel="stylesheet" href="assets/css/template.css">
+        <link rel="stylesheet" href="assets/css/header.css">
         
         <!-- CSS additionnels -->
         <?php foreach ($styles as $style): ?>

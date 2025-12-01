@@ -4,6 +4,14 @@ ini_set('display_errors', 1);
 
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour modifier un post.'));
+    exit;
+}
+
+$currentUserId = (int) $_SESSION['id_user'];
+$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
+
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
@@ -27,6 +35,12 @@ $postData = $postController->getPostById($id);
 if (!$postData) {
     $error = "Post introuvable.";
 } else {
+    $postOwnerId = isset($postData['id_user']) ? (int) $postData['id_user'] : null;
+    if (!$isAdmin && ($postOwnerId === null || $postOwnerId !== $currentUserId)) {
+        $_SESSION['flash_error'] = "Vous ne pouvez modifier que vos propres posts.";
+        header('Location: showPosts.php');
+        exit();
+    }
     // Traitement du formulaire soumis
     if (
         isset($_POST['titre']) &&
@@ -77,7 +91,8 @@ if (!$postData) {
                 $dateCreation
             );
 
-            $result = $postController->updatePost($post);
+            $ownerConstraint = $isAdmin ? null : $currentUserId;
+            $result = $postController->updatePost($post, $id, $ownerConstraint);
             if ($result) {
                 header('Location: showPosts.php');
                 exit();

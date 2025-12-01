@@ -3,9 +3,18 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour modifier une offre.'));
+    exit();
+}
+
+$currentUserId = (int) $_SESSION['id_user'];
+$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
+
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/offer.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
+require_once __DIR__ . '/layout.php';
 
 $offerC = new OfferController();
 
@@ -19,6 +28,13 @@ if ($id <= 0) {
 $offerData = $offerC->getOfferById($id);
 
 if (!$offerData) {
+    header('Location: volunteer-view.php');
+    exit();
+}
+
+$offerOwnerId = isset($offerData['id_user']) ? (int) $offerData['id_user'] : null;
+if (!$isAdmin && ($offerOwnerId === null || $offerOwnerId !== $currentUserId)) {
+    $_SESSION['flash_error'] = "Vous ne pouvez modifier que vos propres offres.";
     header('Location: volunteer-view.php');
     exit();
 }
@@ -105,7 +121,7 @@ if (
             if (!isset($error)) {
                
                 $offer = new Offer(
-                    isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : $offerData['id_user'],
+                    $offerOwnerId ?? $currentUserId,
                     $description,
                     $media,
                     $nom,
@@ -115,7 +131,8 @@ if (
                     $id
                 );
                 
-                $result = $offerC->updateOffer($offer, $id);
+                $ownerConstraint = $isAdmin ? null : $currentUserId;
+                $result = $offerC->updateOffer($offer, $id, $ownerConstraint);
                 
                 if ($result) {
                     header('Location: volunteer-view.php?id=' . urlencode($id));
@@ -136,46 +153,13 @@ $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : htmlspecia
 $type_don = isset($_POST['type_don']) ? htmlspecialchars($_POST['type_don']) : htmlspecialchars($offerData['type_don']);
 $description = isset($_POST['description']) ? htmlspecialchars($_POST['description']) : htmlspecialchars($offerData['description']);
 $currentMedia = $offerData['media'];
+
+// Start output buffering to capture content
+ob_start();
 ?>
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AidConnect | Edit Volunteer</title>
 
-    <link rel="stylesheet" href="assets/css/libs.min.css">
-    <link rel="stylesheet" href="assets/css/socialv.css?v=4.0.0">
-    <link rel="stylesheet" href="assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="assets/vendor/remixicon/fonts/remixicon.css">
-    <link rel="stylesheet" href="assets/css/custom.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="javascript.js"></script>
-  </head>
-
-  <body class="volunteer-form-body">
-
-    <header class="header bg-white shadow-sm">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-4">
-            <a href="volunteer-view.php" class="d-flex align-items-center text-decoration-none">
-              <i class="fas fa-arrow-left text-primary me-2"></i>
-              <h4 class="mb-0 text-primary ms-2">AidConnect</h4>
-            </a>
-          </div>
-          <div class="col-4 text-center">
-            <button class="btn btn-outline-primary" onclick="window.location.href='volunteer-form.php'">Add New Volunteer</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="wrapper">
-      <section class="sign-up-page">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-md-6 pt-5 pb-5 d-flex align-items-center justify-content-center">
+<div class="row justify-content-center">
+  <div class="col-md-6 pt-5 pb-5 d-flex align-items-center justify-content-center">
 
               <form method="POST" enctype="multipart/form-data"
                     class="sign-in-from bg-white p-4 rounded shadow-lg volunteer-form-container"
@@ -260,36 +244,48 @@ $currentMedia = $offerData['media'];
                 </div>
 
                 <div class="form-group mb-4">
-                  <label for="media" class="fw-bold">Media</label>
-                  <input type="file" class="form-control" id="media" name="media[]" accept="image/*,video/*" multiple>
+                  <label for="media" class="fw-bold">Media (optionnel)</label>
+                  <div class="media-dropzone" id="mediaDropzone" data-preview-target="mediaPreview" data-error-target="mediaError" data-max-files="4">
+                    <input type="file" class="media-file-input" id="media" name="media[]" accept="image/*,video/*" multiple>
+                    <div class="dropzone-content">
+                      <div class="dropzone-icon">📁</div>
+                      <div class="dropzone-text">Glissez-déposez vos fichiers ici</div>
+                      <div class="dropzone-link">ou cliquez pour parcourir</div>
+                      <div class="dropzone-hint">Formats supportés: JPG, PNG, GIF, MP4, MOV, WEBM - max 4 fichiers</div>
+                    </div>
+                  </div>
+                  <div id="mediaPreview" class="media-preview-grid mt-3" aria-live="polite"></div>
+                  <div class="invalid-feedback d-block" id="mediaError" style="display: none;"></div>
                   <small class="text-muted d-block mt-2">
-                    Leave empty to keep current media. Upload new files to replace them.
+                    Laissez vide pour conserver les médias actuels. Téléchargez de nouveaux fichiers pour les remplacer.
                   </small>
                   <?php if (!empty($currentMedia)): ?>
                     <div class="mt-3">
-                      <label class="text-muted small">Current Media:</label>
-                      <?php
-                        $mediaFiles = json_decode($currentMedia, true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
-                          foreach ($mediaFiles as $mediaFile) {
-                            $mediaUrl = '../../public/uploads/' . $mediaFile;
-                            $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                      <label class="fw-bold text-muted small d-block mb-2">Current Media:</label>
+                      <div class="d-flex flex-wrap gap-2">
+                        <?php
+                          $mediaFiles = json_decode($currentMedia, true);
+                          if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+                            foreach ($mediaFiles as $mediaFile) {
+                              $mediaUrl = '../../public/uploads/' . htmlspecialchars($mediaFile);
+                              $ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
+                              if (in_array($ext, ['mp4','mov','webm'])) {
+                                echo '<div class="current-media-item"><video src="' . $mediaUrl . '" controls class="current-media-preview"></video></div>';
+                              } else {
+                                echo '<div class="current-media-item"><img src="' . $mediaUrl . '" alt="Current media" class="current-media-preview"></div>';
+                              }
+                            }
+                          } else {
+                            $mediaUrl = '../../public/uploads/' . htmlspecialchars($currentMedia);
+                            $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
                             if (in_array($ext, ['mp4','mov','webm'])) {
-                              echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
+                              echo '<div class="current-media-item"><video src="' . $mediaUrl . '" controls class="current-media-preview"></video></div>';
                             } else {
-                              echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
+                              echo '<div class="current-media-item"><img src="' . $mediaUrl . '" alt="Current media" class="current-media-preview"></div>';
                             }
                           }
-                        } else {
-                          $mediaUrl = '../../public/uploads/' . $currentMedia;
-                          $ext = strtolower(pathinfo($currentMedia, PATHINFO_EXTENSION));
-                          if (in_array($ext, ['mp4','mov','webm'])) {
-                            echo '<div class="mt-2"><video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-preview-video"></video></div>';
-                          } else {
-                            echo '<div class="mt-2"><img src="' . htmlspecialchars($mediaUrl) . '" alt="Current media" class="media-preview"></div>';
-                          }
-                        }
-                      ?>
+                        ?>
+                      </div>
                     </div>
                   <?php endif; ?>
                 </div>
@@ -310,29 +306,16 @@ $currentMedia = $offerData['media'];
 
               </form>
 
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+  </div>
+</div>
 
-  </body>
-  <style>
-    .media-preview {
-      max-width: 120px;
-      max-height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-right: 8px;
-      margin-bottom: 8px;
-    }
-    .media-preview-video {
-      max-width: 140px;
-      max-height: 120px;
-      border-radius: 8px;
-      margin-right: 8px;
-      margin-bottom: 8px;
-    }
-  </style>
-</html>
-</html>
+<?php
+$content = ob_get_clean();
+
+// Define additional styles and scripts
+$additional_styles = ['assets/css/volunteer-form.css', 'assets/css/volunteer-edit.css'];
+$additional_scripts = ['assets/js/javascript.js', 'assets/js/media-dropzone.js'];
+
+// Render the layout
+renderLayout('Edit Volunteer', $content, $additional_styles, $additional_scripts);
+?>

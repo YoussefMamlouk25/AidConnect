@@ -1,4 +1,13 @@
 <?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+if (!isset($_SESSION['id_user']) || ($_SESSION['role'] ?? '') !== 'admin') {
+    header('Location: ../frontoffice/login.php?error=' . urlencode('Accès administrateur requis.'));
+    exit;
+}
+
 /**
  * Layout commun basé sur SocialV-Lite pour le backoffice
  * 
@@ -36,7 +45,6 @@ function renderBackofficeLayout($page_title, $content, $additional_styles = [], 
     <link rel="stylesheet" href="<?php echo $assets_path; ?>/vendor/vanillajs-datepicker/dist/css/datepicker.min.css" />
     <link rel="stylesheet" href="<?php echo $assets_path; ?>/vendor/font-awesome-line-awesome/css/all.min.css" />
     <link rel="stylesheet" href="<?php echo $assets_path; ?>/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css" />
-    
     <!-- CSS backoffice -->
     <link rel="stylesheet" href="dashboard.css" />
     
@@ -63,7 +71,7 @@ function renderBackofficeLayout($page_title, $content, $additional_styles = [], 
         <!-- Content Page -->
         <div id="content-page" class="content-page">
             <div class="container-fluid">
-                <div id="content-area" class="content-area-centered">
+                <div id="content-area">
                     <?php echo $content; ?>
                 </div>
             </div>

@@ -4,6 +4,14 @@ ini_set('display_errors', 1);
 
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour résoudre un post.'));
+    exit();
+}
+
+$currentUserId = (int)$_SESSION['id_user'];
+$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
+
 require_once '../../config.php';
 require_once '../../Model/postupdate.php';
 require_once '../../Controller/postupdatecontroller.php';
@@ -27,6 +35,12 @@ $postData = $postController->getPostById($id_post);
 if (!$postData) {
     $error = "Post introuvable.";
 } else {
+    $postOwnerId = isset($postData['id_user']) ? (int)$postData['id_user'] : 0;
+    if (!$isAdmin && $postOwnerId !== $currentUserId) {
+        $_SESSION['flash_error'] = "Vous ne pouvez résoudre que vos propres posts.";
+        header('Location: showPosts.php');
+        exit();
+    }
     // Traitement du formulaire
     if (isset($_POST['texte']) &&
         isset($_POST['intervention']) &&
@@ -45,8 +59,6 @@ if (!$postData) {
             move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $mediaName);
         }
 
-        $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : null;
-
         // Calculer les temps de réponse et de résolution
         $datePost = new DateTime($postData['date_creation']);
         $dateNow = new DateTime();
@@ -59,7 +71,7 @@ if (!$postData) {
             $id_post, // id_post
             $_POST['texte'], // texte
             null, // id_update_post
-            $id_user, // id_user
+            $currentUserId, // id_user
             $media, // media
             $_POST['intervention'], // realiser
             $tempReponse, // temp_reponse

@@ -33,24 +33,6 @@ header a:hover {
     color: #166fe5;
 }
 
-header .btn-outline-primary {
-    border-color: #1877f2;
-    color: #1877f2;
-    border-radius: 20px;
-    font-weight: 600;
-    padding: 8px 16px;
-    transition: all 0.3s ease;
-    background-color: rgba(24, 119, 242, 0.05);
-}
-
-header .btn-outline-primary:hover {
-    background-color: #1877f2;
-    border-color: #1877f2;
-    color: #ffffff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(24, 119, 242, 0.3);
-}
-
 header .fas.fa-user-circle {
     color: #1877f2;
     font-size: 2rem;
