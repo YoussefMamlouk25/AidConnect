@@ -34,10 +34,6 @@ if (
         !empty($_POST['region']) &&
         !empty($_POST['description'])
     ) {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> b131f5e063ee0fa222fd863afa1a13331c16d1c1
         $authorName = $accountName;
         if ($authorName === '') {
             $error = "Nom du compte introuvable. Veuillez mettre à jour votre profil.";
@@ -55,11 +51,6 @@ if (
         if (!empty($error)) {
             // skip remaining processing
         } else {
-<<<<<<< HEAD
-=======
-=======
->>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
->>>>>>> b131f5e063ee0fa222fd863afa1a13331c16d1c1
         // Gestion des médias (max 4 images)
         $media = '';
         $maxFiles = 4;

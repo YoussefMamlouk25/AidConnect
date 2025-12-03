@@ -258,16 +258,11 @@ ob_start();
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <?php endif; ?>
-<<<<<<< HEAD
       <?php if (!empty($error)): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
           <?= OfferController::escape($error) ?>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-=======
-      <?php if (isset($error)): ?>
-        <div class="alert alert-danger"><?= OfferController::escape($error) ?></div>
->>>>>>> b131f5e063ee0fa222fd863afa1a13331c16d1c1
       <?php endif; ?>
       <?php if (empty($offers)): ?>
         <div class="card">
@@ -429,10 +424,6 @@ ob_start();
                       <span class="badge bg-primary ms-1"><?= $offer['updates_count'] ?></span>
                     <?php endif; ?>
                   </a>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> b131f5e063ee0fa222fd863afa1a13331c16d1c1
                   <?php if ($offer['can_manage']): ?>
                     <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-warning">
                       <i class="ri-pencil-line me-1"></i> Edit
@@ -441,17 +432,6 @@ ob_start();
                       <i class="ri-delete-bin-line me-1"></i> Delete
                     </a>
                   <?php endif; ?>
-<<<<<<< HEAD
-=======
-=======
-                  <a href="volunteer-edit.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-warning">
-                    <i class="ri-pencil-line me-1"></i> Edit
-                  </a>
-                  <a href="volunteer-delete.php?id=<?= (int)$offer['id_offer'] ?>" class="btn btn-sm btn-outline-danger">
-                    <i class="ri-delete-bin-line me-1"></i> Delete
-                  </a>
->>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
->>>>>>> b131f5e063ee0fa222fd863afa1a13331c16d1c1
                   <button class="btn btn-sm btn-outline-secondary" onclick="window.print()" title="Print this post">
                     <i class="ri-printer-line me-1"></i> Print
                   </button>
