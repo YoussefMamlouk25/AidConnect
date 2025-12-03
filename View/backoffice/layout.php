@@ -1,4 +1,13 @@
 <?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+if (!isset($_SESSION['id_user']) || ($_SESSION['role'] ?? '') !== 'admin') {
+    header('Location: ../frontoffice/login.php?error=' . urlencode('Accès administrateur requis.'));
+    exit;
+}
+
 /**
  * Layout commun basé sur SocialV-Lite pour le backoffice
  * 

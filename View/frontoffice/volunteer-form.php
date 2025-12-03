@@ -3,27 +3,35 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour créer une offre.'));
+    exit();
+}
+
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/offer.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
 
 $offerC = new OfferController();
+$accountName = trim($_SESSION['name'] ?? '');
+$accountEmail = trim($_SESSION['email'] ?? '');
 
 if (
-    isset($_POST['nom']) &&
     isset($_POST['numero']) &&
     isset($_POST['email']) &&
     isset($_POST['type_don']) &&
     isset($_POST['description'])
 ) {
     if (
-        !empty($_POST['nom']) &&
         !empty($_POST['numero']) &&
         !empty($_POST['email']) &&
         !empty($_POST['type_don']) &&
         !empty($_POST['description'])
     ) {
-        $nom = trim($_POST['nom']);
+        $nom = $accountName;
+        if ($nom === '') {
+            $error = "Nom du compte introuvable. Veuillez mettre à jour votre profil.";
+        }
         $numero = trim($_POST['numero']);
         $email = trim($_POST['email']);
         $type_don = trim($_POST['type_don']);
@@ -129,8 +137,9 @@ if (
               <?php endif; ?>
 
               <div class="form-group mb-3">
-                <label for="nom" class="fw-bold">Nom <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="nom" name="nom" required />
+                <label class="fw-bold">Nom du compte</label>
+                <input type="text" class="form-control" value="<?php echo htmlspecialchars($accountName); ?>" disabled />
+                <input type="hidden" name="nom" value="<?php echo htmlspecialchars($accountName); ?>" />
               </div>
 
               <div class="form-group mb-3">
@@ -140,7 +149,7 @@ if (
 
               <div class="form-group mb-3">
                 <label for="email" class="fw-bold">Email <span class="text-danger">*</span></label>
-                <input type="email" class="form-control" id="email" name="email" required />
+                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($accountEmail); ?>" required />
               </div>
 
               <div class="form-group mb-3">

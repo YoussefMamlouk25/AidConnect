@@ -3,6 +3,14 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour modifier une offre.'));
+    exit();
+}
+
+$currentUserId = (int) $_SESSION['id_user'];
+$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
+
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/offer.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
@@ -20,6 +28,13 @@ if ($id <= 0) {
 $offerData = $offerC->getOfferById($id);
 
 if (!$offerData) {
+    header('Location: volunteer-view.php');
+    exit();
+}
+
+$offerOwnerId = isset($offerData['id_user']) ? (int) $offerData['id_user'] : null;
+if (!$isAdmin && ($offerOwnerId === null || $offerOwnerId !== $currentUserId)) {
+    $_SESSION['flash_error'] = "Vous ne pouvez modifier que vos propres offres.";
     header('Location: volunteer-view.php');
     exit();
 }
@@ -106,7 +121,7 @@ if (
             if (!isset($error)) {
                
                 $offer = new Offer(
-                    isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : $offerData['id_user'],
+                    $offerOwnerId ?? $currentUserId,
                     $description,
                     $media,
                     $nom,
@@ -116,7 +131,8 @@ if (
                     $id
                 );
                 
-                $result = $offerC->updateOffer($offer, $id);
+                $ownerConstraint = $isAdmin ? null : $currentUserId;
+                $result = $offerC->updateOffer($offer, $id, $ownerConstraint);
                 
                 if ($result) {
                     header('Location: volunteer-view.php?id=' . urlencode($id));

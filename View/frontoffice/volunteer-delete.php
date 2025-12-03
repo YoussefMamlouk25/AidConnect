@@ -3,6 +3,14 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour supprimer une offre.'));
+    exit();
+}
+
+$currentUserId = (int) $_SESSION['id_user'];
+$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
+
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../Model/offer.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
@@ -26,21 +34,39 @@ if (!$offerData) {
     exit();
 }
 
+$offerOwnerId = isset($offerData['id_user']) ? (int) $offerData['id_user'] : null;
+if (!$isAdmin && ($offerOwnerId === null || $offerOwnerId !== $currentUserId)) {
+    $_SESSION['flash_error'] = "Vous ne pouvez supprimer que vos propres offres.";
+    header('Location: volunteer-view.php');
+    exit();
+}
+
 $error = null;
-$success = null;
 
 // Handle form submission for deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
-    // Delete the media file if it exists
+    // Delete the media file(s) if they exist
     if (!empty($offerData['media'])) {
-        $mediaPath = __DIR__ . '/../../public/uploads/' . $offerData['media'];
-        if (file_exists($mediaPath)) {
-            @unlink($mediaPath);
+        $uploadDir = __DIR__ . '/../../public/uploads/';
+        $mediaEntries = json_decode($offerData['media'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($mediaEntries)) {
+            foreach ($mediaEntries as $mediaFile) {
+                $mediaPath = $uploadDir . $mediaFile;
+                if (is_file($mediaPath)) {
+                    @unlink($mediaPath);
+                }
+            }
+        } else {
+            $mediaPath = $uploadDir . $offerData['media'];
+            if (is_file($mediaPath)) {
+                @unlink($mediaPath);
+            }
         }
     }
     
     // Delete the offer from database
-    $result = $offerC->deleteOffer($id);
+    $ownerConstraint = $isAdmin ? null : $currentUserId;
+    $result = $offerC->deleteOffer($id, $ownerConstraint);
     
     if ($result) {
         header('Location: volunteer-view.php?deleted=1');

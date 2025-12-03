@@ -73,15 +73,23 @@ class PostController {
     }
 
     // Supprimer un post par ID
-    public function deletePost($id) {
+    public function deletePost($id, $ownerId = null) {
         $sql = "DELETE FROM post WHERE id_post = :id";
+        if ($ownerId !== null) {
+            $sql .= " AND id_user = :owner_id";
+        }
         $bd = Config::getConnexion();
         try {
             $rep = $bd->prepare($sql);
             $rep->bindValue(':id', $id);
+            if ($ownerId !== null) {
+                $rep->bindValue(':owner_id', (int) $ownerId, PDO::PARAM_INT);
+            }
             $rep->execute();
+            return $rep->rowCount() > 0;
         } catch (Exception $e) {
             echo 'Erreur : ' . $e->getMessage();
+            return false;
         }
     }
 
@@ -168,7 +176,7 @@ class PostController {
     }
 
     // Mettre à jour un post
-    public function updatePost(Post $post, $id = null) {
+    public function updatePost(Post $post, $id = null, $ownerId = null) {
         $sql = "UPDATE post 
                 SET titre = :titre, 
                     nom = :nom, 
@@ -179,6 +187,9 @@ class PostController {
                     media = :media, 
                     date_creation = :date_creation
                 WHERE id_post = :id";
+        if ($ownerId !== null) {
+            $sql .= " AND id_user = :owner_id";
+        }
 
         $bd = Config::getConnexion();
 
@@ -201,7 +212,7 @@ class PostController {
             if ($id === null) {
                 $id = $post->getId();
             }
-            $result = $query->execute([
+            $params = [
                 ':titre' => $post->getTitre(),
                 ':nom' => $post->getNom(),
                 ':numero' => $post->getNumero(),
@@ -211,9 +222,15 @@ class PostController {
                 ':media' => $media,
                 ':date_creation' => $dateCreation,
                 ':id' => $id
-            ]);
+            ];
+
+            if ($ownerId !== null) {
+                $params[':owner_id'] = (int) $ownerId;
+            }
             
-            return $result;
+            $result = $query->execute($params);
+            
+            return $result && $query->rowCount() > 0;
         } catch (PDOException $e) {
             error_log("Erreur PDO lors de la mise à jour du post : " . $e->getMessage());
             if (ini_get('display_errors')) {

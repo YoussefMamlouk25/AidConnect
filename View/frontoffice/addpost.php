@@ -4,6 +4,11 @@ ini_set('display_errors', 1);
 
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour publier un post.'));
+    exit();
+}
+
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
@@ -12,9 +17,11 @@ require_once 'layout.php';
 $postC = new PostController();
 $error = '';
 
+$accountName = trim($_SESSION['name'] ?? '');
+$accountEmail = trim($_SESSION['email'] ?? '');
+
 if (
     isset($_POST['titre']) &&
-    isset($_POST['nom']) &&
     isset($_POST['numero']) &&
     isset($_POST['email']) &&
     isset($_POST['region']) &&
@@ -22,12 +29,28 @@ if (
 ) {
     if (
         !empty($_POST['titre']) &&
-        !empty($_POST['nom']) &&
         !empty($_POST['numero']) &&
         !empty($_POST['email']) &&
         !empty($_POST['region']) &&
         !empty($_POST['description'])
     ) {
+        $authorName = $accountName;
+        if ($authorName === '') {
+            $error = "Nom du compte introuvable. Veuillez mettre à jour votre profil.";
+        }
+
+        $contactEmail = trim($_POST['email']);
+        if (empty($contactEmail) && $accountEmail !== '') {
+            $contactEmail = $accountEmail;
+        }
+
+        if (!empty($contactEmail) && !filter_var($contactEmail, FILTER_VALIDATE_EMAIL)) {
+            $error = "Adresse email invalide.";
+        }
+
+        if (!empty($error)) {
+            // skip remaining processing
+        } else {
         // Gestion des médias (max 4 images)
         $media = '';
         $maxFiles = 4;
@@ -104,9 +127,9 @@ if (
         $post = new Post(
             null,
             $_POST['titre'],
-            $_POST['nom'],
+            $authorName,
             $_POST['numero'],
-            $_POST['email'],
+            $contactEmail,
             $_POST['region'],
             $_POST['description'],
             $media,
@@ -120,6 +143,7 @@ if (
             exit();
         } else {
             $error = "Erreur lors de l'ajout du post. Veuillez vérifier les logs d'erreur ou réessayer.";
+        }
         }
     } else {
         $error = "Veuillez remplir tous les champs obligatoires.";
@@ -148,8 +172,9 @@ ob_start();
                     </div>
 
                     <div class="mb-3">
-                        <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="nom" name="nom" required>
+                        <label class="form-label">Nom du compte</label>
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($accountName); ?>" disabled>
+                        <input type="hidden" name="nom" value="<?php echo htmlspecialchars($accountName); ?>">
                     </div>
 
                     <div class="mb-3">
@@ -159,7 +184,7 @@ ob_start();
 
                     <div class="mb-3">
                         <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($accountEmail); ?>" required>
                     </div>
 
                     <div class="mb-3">

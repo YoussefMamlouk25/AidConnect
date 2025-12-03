@@ -8,7 +8,7 @@
                     </a>
                 </li>
                 <li class="">
-                    <a href="#" onclick="loadContent('/projet-web/AidConnect/Controller/usercontroller.php?action=list'); return false;" class="">
+                    <a href="#" onclick="loadContent('users.php'); return false;" class="">
                         <i class="ri-user-line"></i><span>Utilisateurs</span>
                     </a>
                 </li>

@@ -76,20 +76,30 @@ class OfferController
         }
     }
 
-    public function deleteOffer($id)
+    public function deleteOffer($id, $ownerId = null)
     {
         $bd = Config::getConnexion();
         try {
-            $q = $bd->prepare("DELETE FROM offer WHERE id_offer = :id");
+            $sql = "DELETE FROM offer WHERE id_offer = :id";
+            if ($ownerId !== null) {
+                $sql .= " AND id_user = :owner_id";
+            }
+            $q = $bd->prepare($sql);
             $q->bindValue(':id', (int)$id, PDO::PARAM_INT);
-            return $q->execute();
+            if ($ownerId !== null) {
+                $q->bindValue(':owner_id', (int)$ownerId, PDO::PARAM_INT);
+            }
+            if (!$q->execute()) {
+                return false;
+            }
+            return $q->rowCount() > 0;
         } catch (Exception $e) {
             error_log("Erreur deleteOffer : " . $e->getMessage());
             return false;
         }
     }
 
-    public function updateOffer(Offer $offer, $id)
+    public function updateOffer(Offer $offer, $id, $ownerId = null)
     {
         $bd = Config::getConnexion();
         try {
@@ -102,6 +112,9 @@ class OfferController
                 email = :email,
                 type_don = :type_don
             WHERE id_offer = :id";
+            if ($ownerId !== null) {
+                $sql .= " AND id_user = :owner_id";
+            }
             $q = $bd->prepare($sql);
             $q->bindValue(':id_user', $offer->getIdUser(), $offer->getIdUser() === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
             $q->bindValue(':description', $offer->getDescription(), PDO::PARAM_STR);
@@ -112,6 +125,9 @@ class OfferController
             $q->bindValue(':email', $offer->getEmail(), PDO::PARAM_STR);
             $q->bindValue(':type_don', $offer->getTypeDon(), PDO::PARAM_STR);
             $q->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            if ($ownerId !== null) {
+                $q->bindValue(':owner_id', (int)$ownerId, PDO::PARAM_INT);
+            }
             return $q->execute();
         } catch (Exception $e) {
             error_log("Erreur updateOffer : " . $e->getMessage());
@@ -171,10 +187,28 @@ class OfferController
                     FROM offer o WHERE 1=1";
             $params = [];
             
-            // Search query
+            // Search query (description only, nom is handled separately)
             if (!empty($query)) {
-                $sql .= " AND (o.description LIKE :query OR o.nom LIKE :query)";
+                $sql .= " AND o.description LIKE :query";
                 $params[':query'] = '%' . $query . '%';
+            }
+            
+            // Advanced: Filter by name (nom)
+            if (!empty($filters['nom'])) {
+                $sql .= " AND o.nom LIKE :nom";
+                $params[':nom'] = '%' . $filters['nom'] . '%';
+            }
+            
+            // Advanced: Filter by email
+            if (!empty($filters['email'])) {
+                $sql .= " AND o.email LIKE :email";
+                $params[':email'] = '%' . $filters['email'] . '%';
+            }
+            
+            // Advanced: Filter by phone number
+            if (!empty($filters['num'])) {
+                $sql .= " AND o.num LIKE :num";
+                $params[':num'] = '%' . $filters['num'] . '%';
             }
             
             // Category filter
@@ -183,9 +217,43 @@ class OfferController
                 $params[':category'] = $filters['category'];
             }
             
-            // Date range filter (using offer creation date if available, or default to current)
-            // Note: You may need to add a date_creation column to offer table
-            // For now, we'll skip date filtering for offers if the column doesn't exist
+            // Advanced: Filter by media presence
+            if (isset($filters['has_media'])) {
+                if ($filters['has_media'] == 'yes') {
+                    $sql .= " AND (o.media IS NOT NULL AND o.media != '' AND o.media != 'null')";
+                } elseif ($filters['has_media'] == 'no') {
+                    $sql .= " AND (o.media IS NULL OR o.media = '' OR o.media = 'null')";
+                }
+            }
+            
+            // Advanced: Filter by minimum number of updates
+            if (isset($filters['min_updates']) && $filters['min_updates'] !== '' && is_numeric($filters['min_updates'])) {
+                $minUpdates = (int)$filters['min_updates'];
+                $sql .= " AND (SELECT COUNT(*) FROM update_offer WHERE id_offer = o.id_offer) >= :min_updates";
+                $params[':min_updates'] = $minUpdates;
+            }
+            
+            // Advanced: Filter by maximum number of updates
+            if (isset($filters['max_updates']) && $filters['max_updates'] !== '' && is_numeric($filters['max_updates'])) {
+                $maxUpdates = (int)$filters['max_updates'];
+                $sql .= " AND (SELECT COUNT(*) FROM update_offer WHERE id_offer = o.id_offer) <= :max_updates";
+                $params[':max_updates'] = $maxUpdates;
+            }
+            
+            // Advanced: Date range filter (using id_offer as proxy for date, or if date column exists)
+            // Check if date_creation column exists by trying to use it
+            if (!empty($filters['date_from']) || !empty($filters['date_to'])) {
+                // Try to use date_creation if it exists, otherwise use id_offer as proxy
+                // For now, we'll use id_offer DESC as proxy (higher id = newer)
+                // In a real scenario, you'd want to add a date_creation column
+                if (!empty($filters['date_from'])) {
+                    // This is a simplified approach - ideally you'd have a date column
+                    // For now, we'll skip date filtering or use id_offer range
+                }
+                if (!empty($filters['date_to'])) {
+                    // Same as above
+                }
+            }
             
             // Status filter (offers with updates are considered "active" or "resolved")
             if (isset($filters['status'])) {
@@ -201,6 +269,18 @@ class OfferController
             switch ($sort) {
                 case 'date_asc':
                     $sql .= " ORDER BY o.id_offer ASC";
+                    break;
+                case 'name_asc':
+                    $sql .= " ORDER BY o.nom ASC";
+                    break;
+                case 'name_desc':
+                    $sql .= " ORDER BY o.nom DESC";
+                    break;
+                case 'updates_asc':
+                    $sql .= " ORDER BY updates_count ASC, o.id_offer DESC";
+                    break;
+                case 'updates_desc':
+                    $sql .= " ORDER BY updates_count DESC, o.id_offer DESC";
                     break;
                 case 'popularity':
                     $sql .= " ORDER BY updates_count DESC, o.id_offer DESC";

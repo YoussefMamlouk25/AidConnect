@@ -87,7 +87,7 @@ header .btn-outline-primary:hover {
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     padding: 24px;
-    max-width: 500px;
+    max-width: 600px;
     width: 100%;
     max-height: 85vh;
     overflow-y: auto;
@@ -254,6 +254,85 @@ header .btn-outline-primary:hover {
     background-color: #ffffff;
 }
 
+/* Advanced Filters Section */
+.advanced-filters-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 2px solid #e4e6eb;
+}
+
+.advanced-toggle-btn {
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    background-color: #f0f2f5;
+    border: none;
+    border-radius: 12px;
+    color: #1877f2;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.advanced-toggle-btn:hover {
+    background-color: #e4e6eb;
+    color: #166fe5;
+}
+
+.advanced-toggle-btn i {
+    transition: transform 0.3s ease;
+}
+
+.advanced-filters-content {
+    margin-top: 16px;
+    padding: 16px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e4e6eb;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.advanced-filters-inner {
+    display: flex;
+    flex-direction: column;
+}
+
+.advanced-filters-inner .form-label {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.advanced-filters-inner .form-control,
+.advanced-filters-inner .form-select {
+    font-size: 14px;
+    padding: 10px 14px;
+}
+
+.advanced-filters-inner .row {
+    margin-left: -8px;
+    margin-right: -8px;
+}
+
+.advanced-filters-inner .row .col-6 {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
 /* Responsive adjustments for search card */
 @media (max-width: 768px) {
     .search-card {
@@ -267,6 +346,19 @@ header .btn-outline-primary:hover {
         max-width: 100%;
         border-radius: 16px;
         max-height: calc(100vh - 100px);
+    }
+    
+    .advanced-filters-content {
+        padding: 12px;
+    }
+    
+    .advanced-filters-inner .row {
+        flex-direction: column;
+    }
+    
+    .advanced-filters-inner .row .col-6 {
+        width: 100%;
+        margin-bottom: 12px;
     }
 }
 
