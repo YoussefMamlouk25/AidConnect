@@ -59,6 +59,9 @@ $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
             </div>
             <div class="col-md-3 text-end">
                 <div class="d-flex align-items-center gap-2 justify-content-end">
+                    <button type="button" class="btn btn-sm btn-outline-primary search-icon-btn" id="searchIconBtn" onclick="toggleSearchCard()">
+                        <i class="ri-search-line"></i>
+                    </button>
                     <?php if ($isAdmin): ?>
                         <a href="../backoffice/dashboard.php" class="btn btn-sm btn-backoffice">
                             <i class="ri-dashboard-line me-1"></i> Backoffice

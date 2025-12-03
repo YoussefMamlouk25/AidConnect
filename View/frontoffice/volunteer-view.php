@@ -65,6 +65,7 @@ unset($offer);
 $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
 $flashError = $_SESSION['flash_error'] ?? null;
 unset($_SESSION['flash_error']);
+$error = $_GET['error'] ?? null;
 
 // Start output buffering to capture content
 ob_start();
@@ -257,8 +258,11 @@ ob_start();
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <?php endif; ?>
-      <?php if (isset($error)): ?>
-        <div class="alert alert-danger"><?= OfferController::escape($error) ?></div>
+      <?php if (!empty($error)): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <?= OfferController::escape($error) ?>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
       <?php endif; ?>
       <?php if (empty($offers)): ?>
         <div class="card">
@@ -442,6 +446,7 @@ ob_start();
 <script>
 function toggleSearchCard() {
     const searchCard = document.getElementById('searchCard');
+    if (!searchCard) return; // Exit if search card doesn't exist on this page
     if (searchCard.style.display === 'none' || searchCard.style.display === '') {
         searchCard.style.display = 'block';
         setTimeout(() => {
