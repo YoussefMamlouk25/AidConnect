@@ -1,0 +1,42 @@
+.message-action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.message-action-buttons form {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.message-action-buttons button.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+}
+
+.message-action-buttons button.btn-sm i {
+  font-size: 1rem;
+}
+
+/* Alert edit button fix */
+.chat-item a.btn.btn-sm.btn-warning {
+  margin-left: 5px !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  color: #f0ad4e !important; /* Bootstrap warning color */
+  border: 1px solid #f0ad4e;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background-color: #fff3cd;
+  transition: background-color 0.3s ease;
+}
+
+.chat-item a.btn.btn-sm.btn-warning:hover {
+  background-color: #ffe8a1;
+  color: #d48806 !important;
+  text-decoration: none;
+  cursor: pointer;
+}
