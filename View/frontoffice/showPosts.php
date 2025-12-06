@@ -2,8 +2,6 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
-
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
@@ -11,11 +9,6 @@ require_once 'layout.php';
 
 $postController = new PostController();
 $list = $postController->getAllPosts();
-
-$currentUserId = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : 0;
-$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
-$flashError = $_SESSION['flash_error'] ?? null;
-unset($_SESSION['flash_error']);
 
 // Fonction pour obtenir les initiales d'un nom
 function getInitials($name) {
@@ -57,20 +50,11 @@ ob_start();
             </a>
         </div>
 
-        <?php if (!empty($flashError)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="ri-error-warning-line me-2"></i><?php echo htmlspecialchars($flashError); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-            </div>
-        <?php endif; ?>
-
         <?php
         if ($list && is_object($list) && method_exists($list, 'rowCount')) {
             $rowCount = $list->rowCount();
             if ($rowCount > 0) {
                 foreach ($list as $row) {
-                    $ownerId = isset($row['id_user']) ? (int)$row['id_user'] : 0;
-                    $canManage = $isAdmin || ($currentUserId > 0 && $ownerId === $currentUserId);
                     $numero = isset($row['Numéro']) ? $row['Numéro'] : (isset($row['numero']) ? $row['numero'] : '');
                     $authorName = htmlspecialchars($row['nom'] ?? 'Anonyme');
                     $initials = getInitials($authorName);
@@ -146,19 +130,17 @@ ob_start();
                                 </div>
                             <?php endif; ?>
 
-                            <?php if ($canManage): ?>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <a href="addpostupdate.php?id_post=<?php echo $idPost; ?>" class="btn btn-sm btn-success">
-                                        <i class="ri-checkbox-circle-line me-1"></i> Résoudre
-                                    </a>
-                                    <a href="updatepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-info">
-                                        <i class="ri-edit-line me-1"></i> Modifier
-                                    </a>
-                                    <a href="deletepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-danger">
-                                        <i class="ri-delete-bin-line me-1"></i> Supprimer
-                                    </a>
-                                </div>
-                            <?php endif; ?>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="addpostupdate.php?id_post=<?php echo $idPost; ?>" class="btn btn-sm btn-success">
+                                    <i class="ri-checkbox-circle-line me-1"></i> Résoudre
+                                </a>
+                                <a href="updatepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-info">
+                                    <i class="ri-edit-line me-1"></i> Modifier
+                                </a>
+                                <a href="deletepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-danger">
+                                    <i class="ri-delete-bin-line me-1"></i> Supprimer
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <?php

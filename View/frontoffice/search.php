@@ -55,9 +55,11 @@ if ($hasSearchCriteria) {
 } else {
     // If no search criteria, show all based on content type
     if ($content_type == 'posts' || $content_type == 'all') {
-        $allPosts = $postController->getAllPosts();
-        if ($allPosts && is_object($allPosts) && method_exists($allPosts, 'fetchAll')) {
-            $posts = $allPosts->fetchAll(PDO::FETCH_ASSOC);
+        $allPosts = $postController->getAllPosts(); // Now returns array directly
+        if (is_array($allPosts)) {
+            $posts = $allPosts;
+        } else {
+            $posts = [];
         }
     }
     if ($content_type == 'offers' || $content_type == 'all') {

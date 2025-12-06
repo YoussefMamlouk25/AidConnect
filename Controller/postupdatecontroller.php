@@ -65,6 +65,22 @@ class PostUpdateController {
         }
     }
     
+    public function getPostUpdatesByPostId($id_post) {
+        $sql = "SELECT * FROM update_post WHERE id_post = :id_post ORDER BY id_update_post DESC";
+        $bd = Config::getConnexion();
+        try {
+            $stmt = $bd->prepare($sql);
+            $stmt->execute([':id_post' => $id_post]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Erreur lors de la récupération des updates du post : " . $e->getMessage());
+            if (ini_get('display_errors')) {
+                echo 'Erreur : ' . $e->getMessage();
+            }
+            return [];
+        }
+    }
+    
     public function deletePostUpdate($id) {
         $sql = "DELETE FROM update_post WHERE id_update_post = :id";
         $bd = Config::getConnexion();

@@ -60,15 +60,14 @@ class PostController {
 
     // Récupérer tous les posts
     public function getAllPosts() {
-        $sql = "SELECT * FROM post ORDER BY id_post DESC";
         $bd = Config::getConnexion();
         try {
-            $list = $bd->query($sql);
-            return $list;
+            $q = $bd->prepare("SELECT * FROM post ORDER BY id_post DESC");
+            $q->execute();
+            return $q->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log('Erreur getAllPosts : ' . $e->getMessage());
-            // Retourner un PDOStatement vide plutôt qu'un tableau
-            return $bd->query("SELECT * FROM post WHERE 1=0");
+            error_log("Erreur getAllPosts : " . $e->getMessage());
+            return [];
         }
     }
 
@@ -95,15 +94,14 @@ class PostController {
 
     // Récupérer un post par ID
     public function getPostById($id) {
-        $sql = "SELECT * FROM post WHERE id_post = :id";
         $bd = Config::getConnexion();
         try {
-            $query = $bd->prepare($sql);
-            $query->bindValue(':id', $id);
-            $query->execute();
-            return $query->fetch(); // retourne un seul post
+            $q = $bd->prepare("SELECT * FROM post WHERE id_post = :id");
+            $q->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            $q->execute();
+            return $q->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            echo 'Erreur : ' . $e->getMessage();
+            error_log("Erreur getPostById : " . $e->getMessage());
             return false;
         }
     }

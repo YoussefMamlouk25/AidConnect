@@ -7,16 +7,11 @@ require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
 
 $postController = new PostController();
-$list = $postController->getAllPosts();
+$posts = $postController->getAllPosts(); // Now returns array directly
 
-// Convertir $list en tableau
-$posts = [];
-if ($list) {
-    if (is_object($list) && method_exists($list, 'fetchAll')) {
-        $posts = $list->fetchAll(PDO::FETCH_ASSOC);
-    } elseif (is_array($list)) {
-        $posts = $list;
-    }
+// Ensure it's an array
+if (!is_array($posts)) {
+    $posts = [];
 }
 
 $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
