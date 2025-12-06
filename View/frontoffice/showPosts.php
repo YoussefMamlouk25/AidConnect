@@ -7,15 +7,21 @@ session_start();
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
+require_once '../../Controller/postlikecontroller.php';
+require_once '../../Controller/postcommentcontroller.php';
 require_once 'layout.php';
 
-$postController = new PostController();
-$list = $postController->getAllPosts();
-
-$currentUserId = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : 0;
+// Récupérer les informations de l'utilisateur connecté
+$current_user_id = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : 0;
 $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
-$flashError = $_SESSION['flash_error'] ?? null;
-unset($_SESSION['flash_error']);
+
+$postController = new PostController();
+$likeController = new PostLikeController();
+$commentController = new PostCommentController();
+// Créer les tables si elles n'existent pas
+$likeController->createTableIfNotExists();
+$commentController->createTableIfNotExists();
+$list = $postController->getAllPosts();
 
 // Fonction pour obtenir les initiales d'un nom
 function getInitials($name) {
@@ -56,21 +62,39 @@ ob_start();
                 <i class="ri-add-circle-line me-2"></i> Ajouter un Post
             </a>
         </div>
-
-        <?php if (!empty($flashError)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="ri-error-warning-line me-2"></i><?php echo htmlspecialchars($flashError); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        
+        <!-- Search Bar -->
+        <div class="mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="ri-search-line"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               id="postSearchInput" 
+                               placeholder="Rechercher un post par titre..." 
+                               autocomplete="off">
+                        <button class="btn btn-outline-secondary" 
+                                type="button" 
+                                id="clearSearchBtn" 
+                                onclick="clearSearch()" 
+                                style="display: none;">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        <i class="ri-information-line me-1"></i>
+                        Tapez pour filtrer les posts par titre
+                    </small>
+                </div>
             </div>
-        <?php endif; ?>
+        </div>
 
         <?php
-        if ($list && is_object($list) && method_exists($list, 'rowCount')) {
-            $rowCount = $list->rowCount();
-            if ($rowCount > 0) {
-                foreach ($list as $row) {
-                    $ownerId = isset($row['id_user']) ? (int)$row['id_user'] : 0;
-                    $canManage = $isAdmin || ($currentUserId > 0 && $ownerId === $currentUserId);
+        if ($list && is_array($list) && count($list) > 0) {
+            foreach ($list as $row) {
                     $numero = isset($row['Numéro']) ? $row['Numéro'] : (isset($row['numero']) ? $row['numero'] : '');
                     $authorName = htmlspecialchars($row['nom'] ?? 'Anonyme');
                     $initials = getInitials($authorName);
@@ -91,8 +115,23 @@ ob_start();
                     }
                     $mediaCount = count($mediaItems);
                     $idPost = $row['id_post'];
+                    
+                    // Vérifier si l'utilisateur peut gérer ce post (auteur ou admin)
+                    $postOwnerId = isset($row['id_user']) ? (int)$row['id_user'] : 0;
+                    $isCreator = ($current_user_id > 0 && $postOwnerId > 0 && $postOwnerId == $current_user_id);
+                    $canManage = $isCreator || $isAdmin;
+                    
+                    // Vérifier si l'utilisateur a liké ce post
+                    $isLiked = false;
+                    if ($current_user_id > 0) {
+                        $isLiked = $likeController->isLiked($idPost, $current_user_id);
+                    }
+                    $likesCount = isset($row['likes_count']) ? (int)$row['likes_count'] : 0;
+                    $commentsCount = isset($row['comments_count']) ? (int)$row['comments_count'] : 0;
                     ?>
-                    <div class="card mb-3">
+                    <div class="card mb-3 post-item" 
+                         data-post-id="<?php echo $idPost; ?>" 
+                         data-post-title="<?php echo htmlspecialchars(strtolower($titre)); ?>">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="avatar avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-weight: 600;">
@@ -146,37 +185,112 @@ ob_start();
                                 </div>
                             <?php endif; ?>
 
-                            <?php if ($canManage): ?>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <a href="addpostupdate.php?id_post=<?php echo $idPost; ?>" class="btn btn-sm btn-success">
-                                        <i class="ri-checkbox-circle-line me-1"></i> Résoudre
-                                    </a>
-                                    <a href="updatepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-info">
-                                        <i class="ri-edit-line me-1"></i> Modifier
-                                    </a>
-                                    <a href="deletepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-danger">
-                                        <i class="ri-delete-bin-line me-1"></i> Supprimer
-                                    </a>
+                            <!-- Engagement Bar -->
+                            <div class="post-engagement mb-3">
+                                <div class="engagement-stats d-flex gap-3">
+                                    <?php if ($current_user_id > 0): ?>
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 like-post-btn <?php echo $isLiked ? 'liked' : ''; ?>" 
+                                            data-post-id="<?php echo $idPost; ?>" 
+                                            title="J'aime ce post"
+                                            style="color: <?php echo $isLiked ? '#e74c3c' : '#6c757d'; ?>; cursor: pointer; position: relative; z-index: 10; border: none; background: transparent;">
+                                        <i class="ri-heart-<?php echo $isLiked ? 'fill' : 'line'; ?> me-1"></i>J'aime
+                                        <span class="like-count ms-1" data-post-id="<?php echo $idPost; ?>">
+                                            <?php echo $likesCount; ?>
+                                        </span>
+                                    </button>
+                                    <?php else: ?>
+                                    <span class="btn btn-sm btn-link text-decoration-none p-0" 
+                                          title="Connectez-vous pour aimer ce post"
+                                          style="color: #6c757d; cursor: not-allowed;">
+                                        <i class="ri-heart-line me-1"></i>J'aime
+                                        <span class="like-count ms-1">
+                                            <?php echo $likesCount; ?>
+                                        </span>
+                                    </span>
+                                    <?php endif; ?>
+                                    <?php if ($current_user_id > 0): ?>
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 comment-post-btn" 
+                                            data-post-id="<?php echo $idPost; ?>" 
+                                            onclick="showComments(<?php echo $idPost; ?>); return false;" 
+                                            title="Commenter ce post"
+                                            style="color: #6c757d; cursor: pointer;">
+                                        <i class="ri-chat-3-line me-1"></i> Commenter
+                                        <span class="comment-count ms-1" data-post-id="<?php echo $idPost; ?>">
+                                            <?php echo $commentsCount; ?>
+                                        </span>
+                                    </button>
+                                    <?php else: ?>
+                                    <span class="btn btn-sm btn-link text-decoration-none p-0" 
+                                          title="Connectez-vous pour commenter"
+                                          style="color: #6c757d; cursor: not-allowed;">
+                                        <i class="ri-chat-3-line me-1"></i> Commenter
+                                        <span class="comment-count ms-1">
+                                            <?php echo $commentsCount; ?>
+                                        </span>
+                                    </span>
+                                    <?php endif; ?>
+                                    <button class="btn btn-sm btn-link text-decoration-none p-0" 
+                                            onclick="sharePost(<?php echo $idPost; ?>)" 
+                                            title="Partager ce post"
+                                            style="color: #6c757d;">
+                                        <i class="ri-share-line me-1"></i>Partager
+                                    </button>
                                 </div>
-                            <?php endif; ?>
+                            </div>
+                            
+                            <!-- Comments Section (hidden by default) -->
+                            <div class="comments-section" id="comments-<?php echo $idPost; ?>" style="display: none;">
+                                <div class="border-top pt-3 mt-3">
+                                    <h6 class="mb-3"><i class="ri-chat-3-line me-2"></i>Commentaires</h6>
+                                    <div class="comments-list" id="comments-list-<?php echo $idPost; ?>">
+                                        <!-- Comments will be loaded here -->
+                                    </div>
+                                    <div class="add-comment mt-3">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="comment-input-<?php echo $idPost; ?>" 
+                                                   placeholder="Écrivez un commentaire..." 
+                                                   onkeypress="if(event.key === 'Enter') addComment(<?php echo $idPost; ?>);">
+                                            <button class="btn btn-primary" type="button" onclick="addComment(<?php echo $idPost; ?>)">
+                                                <i class="ri-send-plane-line"></i> Envoyer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap align-items-center post-actions">
+                                <?php if ($canManage): ?>
+                                <a href="addpostupdate.php?id_post=<?php echo $idPost; ?>" class="btn btn-sm btn-success">
+                                    <i class="ri-checkbox-circle-line me-1"></i> Résoudre
+                                </a>
+                                <a href="updatepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-info">
+                                    <i class="ri-edit-line me-1"></i> Modifier
+                                </a>
+                                <a href="deletepost.php?id=<?php echo $idPost; ?>" class="btn btn-sm btn-danger">
+                                    <i class="ri-delete-bin-line me-1"></i> Supprimer
+                                </a>
+                                <?php endif; ?>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="printPost(<?php echo $idPost; ?>)" title="Imprimer ce post">
+                                    <i class="ri-printer-line me-1"></i> Imprimer
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <?php
                 }
-            } else {
-                ?>
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="ri-inbox-line" style="font-size: 4rem; color: #ccc;"></i>
-                        <h5 class="mt-3">Aucun post pour le moment</h5>
-                        <p class="text-muted">Soyez le premier à créer un post !</p>
-                        <a href="addpost.php" class="btn btn-primary">
-                            <i class="ri-add-circle-line me-2"></i> Créer le premier post
-                        </a>
-                    </div>
+        } elseif ($list && is_array($list) && count($list) === 0) {
+            ?>
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="ri-inbox-line" style="font-size: 4rem; color: #ccc;"></i>
+                    <h5 class="mt-3">Aucun post pour le moment</h5>
+                    <p class="text-muted">Soyez le premier à créer un post !</p>
+                    <a href="addpost.php" class="btn btn-primary">
+                        <i class="ri-add-circle-line me-2"></i> Créer le premier post
+                    </a>
                 </div>
-                <?php
-            }
+            </div>
+            <?php
         } else {
             ?>
             <div class="card">
@@ -193,5 +307,5 @@ ob_start();
 </div>
 <?php
 $content = ob_get_clean();
-renderLayout('Posts', $content, ['assets/css/showpost.css', 'assets/css/volunteer-view.css']);
+renderLayout('Posts', $content, ['assets/css/showpost.css', 'assets/css/volunteer-view.css'], ['assets/js/showpost.js']);
 ?>

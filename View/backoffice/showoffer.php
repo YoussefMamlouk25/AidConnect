@@ -5,9 +5,13 @@ ini_set('display_errors', 1);
 require_once '../../config.php';
 require_once '../../Model/offer.php';
 require_once '../../Controller/offercontroller.php';
+require_once '../../Controller/offerlikecontroller.php';
 require_once 'layout.php';
 // no updateoffercontroller here; we only list offers
 $offerController = new OfferController();
+$likeController = new OfferLikeController();
+// Créer la table si elle n'existe pas
+$likeController->createTableIfNotExists();
 $list = $offerController->getAllOffers();
 
 $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
@@ -38,6 +42,7 @@ if ($showFullPage) {
 <div class="offers-fragment">
 	<div id="addOfferFormContainer" style="display: none; margin-bottom: 1.5rem;"></div>
 	<div id="editOfferFormContainer" style="display: none; margin-bottom: 1.5rem;"></div>
+	<div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
 		<table class="post-table">
 			<thead>
 				<tr>
@@ -48,6 +53,7 @@ if ($showFullPage) {
 					<th>Type de Don</th>
 					<th>Description</th>
 					<th>Média</th>
+					<th>Likes</th>
 					<th>Actions</th>
 				</tr>
 			</thead>
@@ -61,6 +67,9 @@ if ($showFullPage) {
 					$typeDon = isset($offer['type_don']) ? $offerController->getTypeDonLabel($offer['type_don']) : 'N/A';
 					$description = isset($offer['description']) ? substr(htmlspecialchars($offer['description']), 0, 100) . '...' : 'N/A';
 					$media = isset($offer['media']) ? htmlspecialchars($offer['media']) : 'Aucun';
+					
+					// Récupérer le nombre de likes pour cette offre
+					$likesCount = $likeController->getLikeCount($idOffer);
 				?>
 				<tr>
 					<td><?= htmlspecialchars($idOffer) ?></td>
@@ -95,7 +104,15 @@ if ($showFullPage) {
 						}
 					?>
 					</td>
+					<td class="text-center">
+						<span class="badge bg-danger">
+							<i class="ri-heart-fill me-1"></i><?= $likesCount ?>
+						</span>
+					</td>
 					<td class="table-actions">
+						<a href="offer_likes.php?id_offer=<?= urlencode($idOffer) ?>&embed=1" class="btn btn-sm btn-info" onclick="if(typeof loadContent==='function'){ loadContent('offer_likes.php?id_offer=<?= urlencode($idOffer) ?>&embed=1'); return false; }" title="Voir les likes">
+							<i class="ri-heart-fill me-1"></i> Likes (<?= $likesCount ?>)
+						</a>
 						<a href="updateoffer.php?id_offer=<?= urlencode($idOffer) ?>" class="btn btn-sm btn-primary" onclick="openEditOffer(<?= (int)$idOffer ?>); return false;">
 							<i class="ri-edit-line me-1"></i> Éditer
 						</a>
@@ -106,10 +123,11 @@ if ($showFullPage) {
 				</tr>
 				<?php endforeach; ?>
 			<?php else: ?>
-				<tr><td colspan="8" class="no-data">Aucune offre trouvée</td></tr>
+				<tr><td colspan="9" class="no-data">Aucune offre trouvée</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>
+	</div>
 </div>
             </div>
         </div>

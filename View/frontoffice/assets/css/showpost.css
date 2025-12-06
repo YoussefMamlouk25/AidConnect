@@ -443,3 +443,67 @@ body {
     padding: 0 20px;
 } */
 
+/* Post Engagement Styles */
+.post-engagement {
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid #e4e6eb;
+}
+
+.engagement-stats {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.like-post-btn {
+    transition: all 0.2s ease;
+    cursor: pointer !important;
+    border: none !important;
+    background: none !important;
+    pointer-events: auto !important;
+    z-index: 10;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.like-post-btn:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.like-post-btn:active {
+    transform: scale(0.95);
+}
+
+.like-post-btn:disabled {
+    opacity: 0.6;
+    cursor: wait !important;
+    pointer-events: none !important;
+}
+
+.like-post-btn * {
+    pointer-events: none;
+}
+
+.like-post-btn.liked {
+    color: #e74c3c !important;
+}
+
+.like-post-btn.liked i {
+    color: #e74c3c !important;
+}
+
+.like-count {
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.like-post-btn.liked .like-count {
+    color: #e74c3c;
+}
+

@@ -5,18 +5,20 @@ ini_set('display_errors', 1);
 require_once '../../config.php';
 require_once '../../Model/post.php';
 require_once '../../Controller/postcontroller.php';
+require_once '../../Controller/postlikecontroller.php';
+require_once '../../Controller/postcommentcontroller.php';
 
 $postController = new PostController();
-$list = $postController->getAllPosts();
+$likeController = new PostLikeController();
+$commentController = new PostCommentController();
+// Créer les tables si elles n'existent pas
+$likeController->createTableIfNotExists();
+$commentController->createTableIfNotExists();
+$posts = $postController->getAllPosts(); // Now returns array directly
 
-// Convertir $list en tableau
-$posts = [];
-if ($list) {
-    if (is_object($list) && method_exists($list, 'fetchAll')) {
-        $posts = $list->fetchAll(PDO::FETCH_ASSOC);
-    } elseif (is_array($list)) {
-        $posts = $list;
-    }
+// Ensure it's an array
+if (!is_array($posts)) {
+    $posts = [];
 }
 
 $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
@@ -46,6 +48,7 @@ if ($showFullPage) {
             </div>
 <div class="offers-fragment">
 	<div id="addPostFormContainer" style="display: none; margin-bottom: 1.5rem;"></div>
+	<div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
 		<table class="post-table">
 			<thead>
 				<tr>
@@ -58,6 +61,8 @@ if ($showFullPage) {
 					<th>Description</th>
 					<th>Média</th>
 					<th>Date</th>
+					<th>Likes</th>
+					<th>Commentaires</th>
 					<th>Actions</th>
 				</tr>
 			</thead>
@@ -73,6 +78,10 @@ if ($showFullPage) {
 					$description = isset($post['description']) ? substr(htmlspecialchars($post['description']), 0, 100) . '...' : 'N/A';
 					$dateCreation = isset($post['date_creation']) ? htmlspecialchars($post['date_creation']) : 'N/A';
 					$media = isset($post['media']) ? $post['media'] : '';
+					
+					// Récupérer le nombre de likes et commentaires pour ce post
+					$likesCount = $likeController->getLikeCount($idPost);
+					$commentsCount = isset($post['comments_count']) ? (int)$post['comments_count'] : $commentController->getCommentCount($idPost);
 				?>
 				<tr>
 					<td><?= htmlspecialchars($idPost) ?></td>
@@ -113,7 +122,23 @@ if ($showFullPage) {
 					?>
 					</td>
 					<td><?= $dateCreation ?></td>
+					<td class="text-center">
+						<span class="badge bg-danger">
+							<i class="ri-heart-fill me-1"></i><?= $likesCount ?>
+						</span>
+					</td>
+					<td class="text-center">
+						<span class="badge bg-primary">
+							<i class="ri-chat-3-fill me-1"></i><?= $commentsCount ?>
+						</span>
+					</td>
 					<td class="table-actions">
+						<a href="post_likes.php?id_post=<?= urlencode($idPost) ?>&embed=1" class="btn btn-sm btn-info" onclick="if(typeof loadContent==='function'){ loadContent('post_likes.php?id_post=<?= urlencode($idPost) ?>&embed=1'); return false; }" title="Voir les likes">
+							<i class="ri-heart-fill me-1"></i> Likes (<?= $likesCount ?>)
+						</a>
+						<a href="post_comments.php?id_post=<?= urlencode($idPost) ?>&embed=1" class="btn btn-sm btn-primary" onclick="if(typeof loadContent==='function'){ loadContent('post_comments.php?id_post=<?= urlencode($idPost) ?>&embed=1'); return false; }" title="Voir les commentaires">
+							<i class="ri-chat-3-fill me-1"></i> Commentaires (<?= $commentsCount ?>)
+						</a>
 						<a href="addpostupdate.php?id_post=<?= urlencode($idPost) ?>" class="btn btn-sm btn-success" onclick="if(typeof loadContent==='function'){ loadContent('addpostupdate.php?id_post=<?= urlencode($idPost) ?>'); return false; }">
 							<i class="ri-checkbox-circle-line me-1"></i> Résoudre
 						</a>
@@ -127,10 +152,11 @@ if ($showFullPage) {
 				</tr>
 				<?php endforeach; ?>
 			<?php else: ?>
-				<tr><td colspan="10" class="no-data">Aucun post trouvé</td></tr>
+				<tr><td colspan="12" class="no-data">Aucun post trouvé</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>
+	</div>
 </div>
             </div>
         </div>

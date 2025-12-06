@@ -34,7 +34,6 @@ if (
         !empty($_POST['region']) &&
         !empty($_POST['description'])
     ) {
-<<<<<<< HEAD
         $authorName = $accountName;
         if ($authorName === '') {
             $error = "Nom du compte introuvable. Veuillez mettre à jour votre profil.";
@@ -52,8 +51,6 @@ if (
         if (!empty($error)) {
             // skip remaining processing
         } else {
-=======
->>>>>>> f7906b3475c8aebfef6357d1f7f030c593b879fb
         // Gestion des médias (max 4 images)
         $media = '';
         $maxFiles = 4;
