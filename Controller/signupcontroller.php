@@ -11,18 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$name           = trim($_POST['name']);
-$email          = trim($_POST['email']);
-$cin            = trim($_POST['cin']);
-$date_naissance = trim($_POST['date_naissance']);
-$password       = trim($_POST['password']);
-$tel            = trim($_POST['tel']);
-$region         = trim($_POST['region']);
+$name           = $_POST['name'];
+$email          = $_POST['email'];
+$cin            = $_POST['cin'];
+$date_naissance = $_POST['date_naissance'];
+$password       = $_POST['password'];
+$tel            = $_POST['tel'];
+$region         = $_POST['region'];
 
 $result = $model->signup($name, $email, $cin, $date_naissance, $password, $tel, $region);
 
 if ($result['success']) {
-    header("Location: ../View/frontoffice/login.php?success=Compte créé");
+    header("Location: ../View/frontoffice/login.php?success=" . urlencode("Compte créé ! Vérifiez votre email."));
     exit;
 }
 

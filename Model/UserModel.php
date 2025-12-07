@@ -4,47 +4,57 @@ class UserModel {
 
     private $conn;
 
-    public function __construct($conn) {
-        $this->conn = $conn;
+    public function __construct($db)
+    {
+        $this->conn = $db;
     }
 
-    // SIGNUP
-    public function signup($name, $email, $cin, $date_naissance, $password, $tel, $region) {
-
-        // Check email exists
-        $sql = "SELECT * FROM user WHERE email = ?";
-        $stmt = $this->conn->prepare($sql);
+    // SIGN UP
+    public function signup($name, $email, $cin, $date_naissance, $password, $tel, $region)
+    {
+        // Check if email exists
+        $stmt = $this->conn->prepare("SELECT * FROM user WHERE email = ?");
         $stmt->execute([$email]);
+
         if ($stmt->rowCount() > 0) {
-            return ['success' => false, 'error' => 'Email déjà utilisé.'];
+            return ['success' => false, 'error' => 'Email déjà utilisé'];
         }
 
-        $hash = password_hash($password, PASSWORD_BCRYPT);
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+        $token = bin2hex(random_bytes(32));
 
-        $sql = "INSERT INTO user 
-                (name, email, password_hash, cin, date_naissance, tel, region, role, date_creation)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'volunteer', NOW())";
+        // Insert new user
+        $stmt = $this->conn->prepare("
+            INSERT INTO user (name, email, cin, date_naissance, password, tel, region, verified, verify_token)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)
+        ");
+        $stmt->execute([$name, $email, $cin, $date_naissance, $hashed, $tel, $region, $token]);
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$name, $email, $hash, $cin, $date_naissance, $tel, $region]);
+        // Send email
+        require_once '../Controller/send_mail.php';
+        sendVerificationEmail($email, $name, $token);
 
         return ['success' => true];
     }
 
     // LOGIN
-    public function login($email, $password) {
-        $sql = "SELECT * FROM user WHERE email = ?";
-        $stmt = $this->conn->prepare($sql);
+    public function login($email, $password)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM user WHERE email = ?");
         $stmt->execute([$email]);
 
         if ($stmt->rowCount() == 0) {
-            return ['success' => false, 'error' => 'Email incorrect.'];
+            return ['success' => false, 'error' => 'Email incorrect'];
         }
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!password_verify($password, $user['password_hash'])) {
-            return ['success' => false, 'error' => 'Mot de passe incorrect.'];
+        if ($user['verified'] == 0) {
+            return ['success' => false, 'error' => 'Veuillez vérifier votre email avant de vous connecter.'];
+        }
+
+        if (!password_verify($password, $user['password'])) {
+            return ['success' => false, 'error' => 'Mot de passe incorrect'];
         }
 
         return ['success' => true, 'user' => $user];

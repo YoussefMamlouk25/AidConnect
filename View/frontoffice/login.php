@@ -1,7 +1,7 @@
 <?php
 session_start();
-$error = $_GET['error'] ?? '';
 $success = $_GET['success'] ?? '';
+$error = $_GET['error'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -34,6 +34,13 @@ $success = $_GET['success'] ?? '';
 
             <button class="btn btn-primary w-100">Se connecter</button>
         </form>
+        <?php if ($success): ?>
+    <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+<?php endif; ?>
+
+<?php if ($error): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
 
         <p class="mt-3 text-center">
             Pas de compte ? <a href="signup.php">Créer un compte</a>

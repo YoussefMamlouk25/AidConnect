@@ -14,14 +14,22 @@ $stmt = $conn->prepare("SELECT * FROM user WHERE id_user = ?");
 $stmt->execute([$userId]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+if (!$user) {
+    die("Utilisateur introuvable.");
+}
+
 // CORRECT PROFILE PIC PATH
 if (!empty($user['profile_pic'])) {
-    // Uploaded picture
     $profilePic = "../../" . $user['profile_pic'];
 } else {
-    // Default picture
     $profilePic = "assets/default_profile.png";
 }
+
+// FIX created_at (in your DB you have created_at, not date_creation)
+$memberSince = !empty($user['created_at']) ? $user['created_at'] : "Non spécifié";
+
+// FIX role (avoid empty role)
+$role = !empty($user['role']) ? $user['role'] : "Utilisateur";
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -52,7 +60,7 @@ if (!empty($user['profile_pic'])) {
         </div>
 
         <h2 class="text-center"><?= htmlspecialchars($user['name']) ?></h2>
-        <p class="text-center text-muted">Membre depuis : <?= htmlspecialchars($user['date_creation']) ?></p>
+        <p class="text-center text-muted">Membre depuis : <?= htmlspecialchars($memberSince) ?></p>
 
         <hr>
 
@@ -62,11 +70,11 @@ if (!empty($user['profile_pic'])) {
             <tr><th>CIN</th><td><?= htmlspecialchars($user['cin']) ?></td></tr>
             <tr><th>Région</th><td><?= htmlspecialchars($user['region']) ?></td></tr>
             <tr><th>Date de naissance</th><td><?= htmlspecialchars($user['date_naissance']) ?></td></tr>
-            <tr><th>Rôle</th><td><?= htmlspecialchars($user['role']) ?></td></tr>
+            <tr><th>Rôle</th><td><?= htmlspecialchars($role) ?></td></tr>
         </table>
 
         <div class="d-flex justify-content-between mt-4">
-            <a href="index.php" class="btn btn-secondary">Retour</a>
+            <a href="../../index.php" class="btn btn-secondary">Retour</a>
             <a href="profile_edit.php" class="btn btn-primary">Modifier mon profil</a>
         </div>
 
