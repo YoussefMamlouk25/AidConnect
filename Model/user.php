@@ -121,9 +121,23 @@ class UserModel
         }
 
         $passwordField = $this->passwordColumn;
+        $storedPassword = $user[$passwordField] ?? '';
 
-        if (empty($user[$passwordField]) || !password_verify($password, $user[$passwordField])) {
+        if (empty($storedPassword)) {
             return ['success' => false, 'error' => 'Mot de passe incorrect'];
+        }
+
+        // Check if password is hashed (starts with $2y$) or plain text
+        if (strpos($storedPassword, '$2y$') === 0) {
+            // Hashed password - verify using password_verify
+            if (!password_verify($password, $storedPassword)) {
+                return ['success' => false, 'error' => 'Mot de passe incorrect'];
+            }
+        } else {
+            // Plain text password - direct comparison
+            if ($password !== $storedPassword) {
+                return ['success' => false, 'error' => 'Mot de passe incorrect'];
+            }
         }
 
         return ['success' => true, 'user' => $user];
@@ -196,6 +210,21 @@ class UserModel
         ]);
     }
 
+    // Store password in plain text (for admin viewing)
+    public function changePasswordPlainText($id, $password)
+    {
+        $stmt = $this->db->prepare(sprintf("
+            UPDATE user
+            SET %s = :password
+            WHERE id_user = :id
+        ", $this->passwordColumn));
+
+        return $stmt->execute([
+            ':id'       => $id,
+            ':password' => $password
+        ]);
+    }
+
     public function updateUserByAdmin($id, $name, $email, $tel, $region, $role)
     {
         $stmt = $this->db->prepare("
@@ -222,5 +251,10 @@ class UserModel
     {
         $stmt = $this->db->prepare("DELETE FROM user WHERE id_user = :id");
         return $stmt->execute([':id' => $id]);
+    }
+
+    public function getPasswordColumn()
+    {
+        return $this->passwordColumn;
     }
 }

@@ -62,7 +62,10 @@ class PostController {
     public function getAllPosts() {
         $bd = Config::getConnexion();
         try {
-            $q = $bd->prepare("SELECT * FROM post ORDER BY id_post DESC");
+            $q = $bd->prepare("SELECT p.*, 
+                    (SELECT COUNT(*) FROM post_like WHERE id_post = p.id_post) as likes_count,
+                    (SELECT COUNT(*) FROM post_comment WHERE id_post = p.id_post) as comments_count
+                    FROM post p ORDER BY p.id_post DESC");
             $q->execute();
             return $q->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {

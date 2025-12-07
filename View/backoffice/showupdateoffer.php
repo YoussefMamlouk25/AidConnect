@@ -6,7 +6,16 @@ require_once '../../Controller/offercontroller.php';
 
 $updateCtrl = new UpdateOfferController();
 $offerCtrl  = new OfferController();
-$updates    = $updateCtrl->getAllUpdateOffers();
+
+// Filter by offer ID if provided
+$id_offer = isset($_GET['id_offer']) ? (int)$_GET['id_offer'] : 0;
+if ($id_offer > 0) {
+    $updates = $updateCtrl->getUpdateOffersByOfferId($id_offer);
+    $offer = $offerCtrl->getOfferById($id_offer);
+} else {
+    $updates = $updateCtrl->getAllUpdateOffers();
+    $offer = null;
+}
 
 $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 // Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
@@ -35,7 +44,7 @@ endif;
 ?>
 <link rel="stylesheet" href="showofferback.css">
 <div class="offers-fragment">
-  <h2>Mises à jour / Réponses</h2>
+  <h2>Mises à jour / Réponses<?php if ($id_offer > 0 && $offer): ?> - Offre #<?= htmlspecialchars($id_offer) ?> (<?= htmlspecialchars($offer['nom']) ?>)<?php endif; ?></h2>
   <div class="container">
     <table class="post-table">
       <thead>
@@ -50,12 +59,12 @@ endif;
       </thead>
       <tbody>
         <?php foreach ($updates as $update): 
-          $offer = $update['id_offer'] ? $offerCtrl->getOfferById($update['id_offer']) : null; ?>
+          $updateOffer = ($id_offer > 0 && $offer) ? $offer : ($update['id_offer'] ? $offerCtrl->getOfferById($update['id_offer']) : null); ?>
         <tr>
           <td><?= htmlspecialchars($update['id_update_offer']) ?></td>
           <td>
             <?= htmlspecialchars($update['id_offer'] ?? '—') ?>
-            <?php if ($offer): ?><br><small><?= htmlspecialchars($offer['nom']) ?></small><?php endif; ?>
+            <?php if ($updateOffer): ?><br><small><?= htmlspecialchars($updateOffer['nom']) ?></small><?php endif; ?>
           </td>
           <td><?= $update['id_user'] ? 'User #'.(int)$update['id_user'] : 'Anonyme' ?></td>
           <td><?= nl2br(htmlspecialchars(mb_strimwidth($update['texte'],0,120,'…'))) ?></td>

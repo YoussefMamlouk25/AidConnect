@@ -260,6 +260,10 @@ h5.mb-3.text-center {
   text-decoration: none;
   display: flex;
   align-items: center;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .post-engagement .btn-link:hover {
@@ -267,16 +271,52 @@ h5.mb-3.text-center {
   color: #1877f2;
 }
 
-.like-post-btn {
+.like-post-btn,
+.like-offer-btn {
   transition: all 0.2s ease;
+  cursor: pointer !important;
+  border: none !important;
+  background: none !important;
+  pointer-events: auto !important;
+  z-index: 10;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
-.like-post-btn.liked {
-  color: #e74c3c;
+.like-post-btn:hover,
+.like-offer-btn:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
 }
 
-.like-post-btn.liked i {
-  color: #e74c3c;
+.like-post-btn:active,
+.like-offer-btn:active {
+  transform: scale(0.95);
+}
+
+.like-post-btn:disabled,
+.like-offer-btn:disabled {
+  opacity: 0.6;
+  cursor: wait !important;
+  pointer-events: none !important;
+}
+
+.like-post-btn *,
+.like-offer-btn * {
+  pointer-events: none;
+}
+
+.like-post-btn.liked,
+.like-offer-btn.liked {
+  color: #e74c3c !important;
+}
+
+.like-post-btn.liked i,
+.like-offer-btn.liked i {
+  color: #e74c3c !important;
 }
 
 .like-count {
@@ -287,7 +327,8 @@ h5.mb-3.text-center {
   margin-left: 4px;
 }
 
-.like-post-btn.liked .like-count {
+.like-post-btn.liked .like-count,
+.like-offer-btn.liked .like-count {
   color: #e74c3c;
 }
 

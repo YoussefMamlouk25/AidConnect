@@ -12,6 +12,9 @@ if (!isset($_SESSION['id_user']) || ($_SESSION['role'] ?? '') !== 'admin') {
 $userModel = new UserModel();
 $users = $userModel->getAllUsers();
 
+// Get password column name for checking if password is set
+$passwordColumnName = $userModel->getPasswordColumn();
+
 $successUpdated = isset($_GET['updated']);
 $successDeleted = isset($_GET['deleted']);
 $errorMessage = $_GET['error'] ?? '';
@@ -61,13 +64,14 @@ ob_start();
                                 <th scope="col">Téléphone</th>
                                 <th scope="col">Région</th>
                                 <th scope="col">Rôle</th>
+                                <th scope="col">Mot de passe</th>
                                 <th scope="col" class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($users)): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
+                                    <td colspan="8" class="text-center text-muted py-4">
                                         Aucun utilisateur pour le moment.
                                     </td>
                                 </tr>
@@ -84,11 +88,21 @@ ob_start();
                                                 $profilePic = $relativePath;
                                             }
                                         }
+                                        
+                                        // Get password value (hash)
+                                        $passwordValue = $user[$passwordColumnName] ?? '';
+                                        $hasPassword = !empty($passwordValue);
+                                        if ($hasPassword) {
+                                            // Show the full password hash
+                                            $passwordDisplay = htmlspecialchars($passwordValue);
+                                        } else {
+                                            $passwordDisplay = '<span class="text-muted">Non défini</span>';
+                                        }
                                     ?>
                                     <tr>
                                         <td>
                                             <img
-                                                src="<?= htmlspecialchars($profilePic) ?>"
+                                                src="<?= htmlspecialchars($profilePic) ?>" 
                                                 alt="Profil de <?= htmlspecialchars($user['name']) ?>"
                                                 class="rounded-circle border"
                                                 style="width:52px;height:52px;object-fit:cover;">
@@ -102,14 +116,32 @@ ob_start();
                                                 <?= htmlspecialchars($user['role'] ?? 'volunteer') ?>
                                             </span>
                                         </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="password-display" style="font-family: monospace; font-size: 11px; word-break: break-all; max-width: 250px; display: inline-block;">
+                                                    <?= $passwordDisplay ?>
+                                                </span>
+                                                <?php if ($hasPassword): ?>
+                                                    <span class="badge bg-success" title="Mot de passe défini">
+                                                        <i class="ri-check-line"></i>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning" title="Mot de passe non défini">
+                                                        <i class="ri-alert-line"></i>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
                                         <td class="text-end">
                                             <a href="edit_user.php?id=<?= urlencode($user['id_user']) ?>"
-                                               class="btn btn-sm btn-outline-primary me-1">
+                                               class="btn btn-sm btn-outline-primary me-1"
+                                               title="Modifier">
                                                 <i class="ri-edit-line"></i>
                                             </a>
                                             <a href="../../Controller/delete_user.php?id=<?= urlencode($user['id_user']) ?>"
                                                class="btn btn-sm btn-outline-danger"
-                                               onclick="return confirm('Supprimer cet utilisateur ?');">
+                                               onclick="return confirm('Supprimer cet utilisateur ?');"
+                                               title="Supprimer">
                                                 <i class="ri-delete-bin-line"></i>
                                             </a>
                                         </td>

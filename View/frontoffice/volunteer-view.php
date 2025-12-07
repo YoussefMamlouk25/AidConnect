@@ -2,10 +2,14 @@
 session_start();
 require_once __DIR__ . '/../../Controller/offercontroller.php';
 require_once __DIR__ . '/../../Controller/updateoffercontroller.php';
+require_once __DIR__ . '/../../Controller/offerlikecontroller.php';
 require_once __DIR__ . '/layout.php';
 
 $offerC = new OfferController();
 $updateOfferC = new UpdateOfferController();
+$likeController = new OfferLikeController();
+// Créer la table si elle n'existe pas
+$likeController->createTableIfNotExists();
 
 // Get filter parameters for offers only
 $query = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -314,6 +318,17 @@ ob_start();
                 }
               }
               $mediaCount = count($mediaFiles);
+              
+              // Récupérer les informations de l'utilisateur connecté
+              $current_user_id = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : 0;
+              $idOffer = (int)$offer['id_offer'];
+              
+              // Vérifier si l'utilisateur a liké cette offre
+              $isLiked = false;
+              if ($current_user_id > 0) {
+                  $isLiked = $likeController->isLiked($idOffer, $current_user_id);
+              }
+              $likesCount = isset($offer['likes_count']) ? (int)$offer['likes_count'] : 0;
             ?>
               <div class="post-card mb-3">
                 <!-- Post Header -->
@@ -390,10 +405,26 @@ ob_start();
                 <!-- Engagement Bar -->
                 <div class="post-engagement">
                   <div class="engagement-stats">
-                    <button class="btn-link like-post-btn" data-offer-id="<?= (int)$offer['id_offer'] ?>" onclick="likePost(<?= (int)$offer['id_offer'] ?>)" title="Like this post">
-                      <i class="ri-heart-line me-1"></i>Like
-                      <span class="like-count" data-offer-id="<?= (int)$offer['id_offer'] ?>">0</span>
+                    <?php if ($current_user_id > 0): ?>
+                    <button type="button" class="btn-link like-offer-btn <?php echo $isLiked ? 'liked' : ''; ?>" 
+                            data-offer-id="<?= $idOffer ?>" 
+                            title="J'aime cette offre"
+                            style="color: <?php echo $isLiked ? '#e74c3c' : '#6c757d'; ?>; cursor: pointer; position: relative; z-index: 10; border: none; background: transparent;">
+                      <i class="ri-heart-<?php echo $isLiked ? 'fill' : 'line'; ?> me-1"></i>J'aime
+                      <span class="like-count ms-1" data-offer-id="<?= $idOffer ?>">
+                        <?php echo $likesCount; ?>
+                      </span>
                     </button>
+                    <?php else: ?>
+                    <span class="btn-link" 
+                          title="Connectez-vous pour aimer cette offre"
+                          style="color: #6c757d; cursor: not-allowed;">
+                      <i class="ri-heart-line me-1"></i>J'aime
+                      <span class="like-count ms-1">
+                        <?php echo $likesCount; ?>
+                      </span>
+                    </span>
+                    <?php endif; ?>
                     <button class="btn-link" onclick="sharePost(<?= (int)$offer['id_offer'] ?>)" title="Share this post">
                       <i class="ri-share-line me-1"></i>Share
                     </button>

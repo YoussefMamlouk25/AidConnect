@@ -6,6 +6,16 @@
   border-radius: 1rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
+  overflow: hidden;
+}
+
+.offers-fragment .table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 .offers-fragment h2 {
@@ -25,11 +35,13 @@
 
 .post-table {
   width: 100%;
+  min-width: 1200px; /* Minimum width to ensure all columns are visible */
   border-collapse: separate;
   border-spacing: 0;
   background: #f9fafb;
   border-radius: 0.75rem;
   overflow: hidden;
+  table-layout: auto;
 }
 
 .post-table thead th {
