@@ -71,7 +71,6 @@ session_start();
             margin: auto;
         }
 
-        /* Blue gradient for icons */
         .bg-gradient-primary {
             background: linear-gradient(135deg, #3c8bfd, #1a62e8);
             box-shadow: 0 6px 14px rgba(44, 108, 255, 0.35);
@@ -96,24 +95,50 @@ session_start();
     </button>
 
     <div class="collapse navbar-collapse" id="navMenu">
+
         <ul class="navbar-nav mx-auto">
-            <li class="nav-item"><a class="btn btn-outline-primary btn-main mx-1" href="View/frontoffice/showPosts.php">Posts</a></li>
-            <li class="nav-item"><a class="btn btn-outline-primary btn-main mx-1" href="View/frontoffice/showResolu.php">Posts Résolus</a></li>
-            <li class="nav-item"><a class="btn btn-outline-primary btn-main mx-1" href="View/frontoffice/showOffers.php">Offres</a></li>
-            <li class="nav-item"><a class="btn btn-outline-primary btn-main mx-1" href="View/frontoffice/showUpdates.php">Updates Offres</a></li>
+
+            <!-- POSTS DROPDOWN -->
+            <li class="nav-item dropdown mx-1">
+                <a class="btn btn-outline-primary btn-main dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-file-text"></i> Posts
+                </a>
+                <ul class="dropdown-menu shadow-sm">
+                    <li><a class="dropdown-item" href="View/frontoffice/showPosts.php">
+                        <i class="bi bi-file-earmark-text"></i> Tous les Posts
+                    </a></li>
+                    <li><a class="dropdown-item" href="View/frontoffice/showResolu.php">
+                        <i class="bi bi-check-circle"></i> Posts Résolus
+                    </a></li>
+                </ul>
+            </li>
+
+            <!-- OFFRES DROPDOWN -->
+            <li class="nav-item dropdown mx-1">
+                <a class="btn btn-outline-primary btn-main dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-geo-alt"></i> Offres
+                </a>
+                <ul class="dropdown-menu shadow-sm">
+                    <li><a class="dropdown-item" href="View/frontoffice/showOffers.php">
+                        <i class="bi bi-geo"></i> Toutes les Offres
+                    </a></li>
+                    <li><a class="dropdown-item" href="View/frontoffice/showUpdates.php">
+                        <i class="bi bi-pencil-square"></i> Updates Offres
+                    </a></li>
+                </ul>
+            </li>
+
         </ul>
 
         <div class="d-flex">
             <?php if (isset($_SESSION['user_id'])): ?>
 
-                <!-- ADMIN ONLY BUTTON -->
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <a href="View/backoffice/users.php" class="btn btn-warning btn-main mx-1">
+                    <a href="View/backoffice/dashboard.php" class="btn btn-warning btn-main mx-1">
                         <i class="bi bi-speedometer2"></i> Dashboard
                     </a>
                 <?php endif; ?>
 
-                <!-- USER BUTTONS -->
                 <a href="View/frontoffice/profile.php" class="btn btn-primary btn-main mx-1">
                     <i class="bi bi-person-circle"></i> Profile
                 </a>
@@ -125,6 +150,7 @@ session_start();
                 <a href="View/frontoffice/signup.php" class="btn btn-success btn-main mx-1">Sign Up</a>
             <?php endif; ?>
         </div>
+
     </div>
 </nav>
 
