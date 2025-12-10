@@ -76,7 +76,6 @@ $error = $_GET['error'] ?? '';
     </div>
 </div>
 
-<!-- INCLUDE YOUR JS FILE -->
 <script src="js/control.js"></script>
 
 </body>

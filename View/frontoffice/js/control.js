@@ -17,9 +17,9 @@ document.getElementById('signupForm').addEventListener('submit', function(e) {
     }
 
     // EMAIL must contain @ and .com
-    if (!email.includes("@") || !email.endsWith(".com")) {
+    if (!email.includes("@") || !email.endsWith(".")) {
         e.preventDefault();
-        alert("L'email doit contenir '@' et se terminer par '.com'");
+        alert("L'email doit contenir '@' et se terminer par '.'");
         return;
     }
 
