@@ -31,7 +31,7 @@ function sendVerificationEmail($email, $name, $token) {
         $mail->Subject = "Vérifiez votre email - AidConnect";
 
         // ADRESSE ACCESSIBLE PAR AUTRES APPAREILS DU RÉSEAU
-        $serverIP = "192.168.1.165";
+        $serverIP = "10.75.147.103";
         $verifyUrl = "http://".$serverIP."/AidConnect/Controller/verify.php?token=$token";
 
         // HTML EMAIL
