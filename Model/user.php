@@ -3,258 +3,245 @@ require_once __DIR__ . '/../config.php';
 
 class UserModel
 {
-    private $db;
-    private $passwordColumn;
-    private $profileColumn;
-    private $columnsCache = null;
+    private PDO $db;
 
     public function __construct()
     {
         $this->db = Config::getConnexion();
-        $this->passwordColumn = $this->detectColumn(['password_hash', 'password'], true);
-        $this->profileColumn  = $this->detectColumn(
-            ['profile_pic', 'profile_picture', 'avatar', 'photo', 'picture', 'image'],
-            false,
-            '/profile|avatar|photo|picture|image/i'
+    }
+
+    /* ================= GET ALL USERS ================= */
+    public function getAllUsers()
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM user ORDER BY id_user DESC"
         );
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
-    private function getUserColumns()
+    /* ================= GET PASSWORD COLUMN NAME ================= */
+    public function getPasswordColumn(): string
     {
-        if ($this->columnsCache === null) {
-            $stmt = $this->db->query("SHOW COLUMNS FROM user");
-            $this->columnsCache = array_map(
-                static fn($row) => $row['Field'] ?? '',
-                $stmt->fetchAll()
-            );
-        }
-
-        return $this->columnsCache;
+        // Since we know the column name is 'password', we can return it directly
+        return 'password';
+        
+        // Or if you want to be dynamic and check the actual column name:
+        // $stmt = $this->db->query("SHOW COLUMNS FROM user LIKE 'password'");
+        // $columnInfo = $stmt->fetch();
+        // return $columnInfo['Field'] ?? 'password';
     }
 
-    private function detectColumn(array $candidates, $required = true, $fallbackPattern = null)
+    /* ================= GET USER ================= */
+    public function getUserById(int $id)
     {
-        foreach ($candidates as $column) {
-            $stmt = $this->db->prepare("SHOW COLUMNS FROM user LIKE :column");
-            $stmt->execute([':column' => $column]);
-            if ($stmt->fetch()) {
-                return $column;
-            }
-        }
-
-        if (!$required && $fallbackPattern !== null) {
-            foreach ($this->getUserColumns() as $columnName) {
-                if ($columnName !== '' && preg_match($fallbackPattern, $columnName)) {
-                    return $columnName;
-                }
-            }
-        }
-
-        if ($required) {
-            throw new RuntimeException("Colonne introuvable dans la table user.");
-        }
-
-        return null;
+        $stmt = $this->db->prepare(
+            "SELECT * FROM user WHERE id_user = ?"
+        );
+        $stmt->execute([$id]);
+        return $stmt->fetch();
     }
 
-    private function normalizeProfileField(array $user = null)
-    {
-        if ($user === null || $this->profileColumn === null) {
-            return $user;
-        }
+    /* ================= SIGNUP ================= */
+    public function signup(
+        string $name,
+        string $email,
+        string $password,
+        ?string $cin,
+        ?string $date_naissance,
+        ?string $tel,
+        ?string $region,
+        string $token
+    ): array {
+        $check = $this->db->prepare(
+            "SELECT id_user FROM user WHERE email = ?"
+        );
+        $check->execute([$email]);
 
-        $user['profile_pic'] = $user[$this->profileColumn] ?? ($user['profile_pic'] ?? null);
-
-        return $user;
-    }
-
-    private function normalizeProfileFieldList(array $users)
-    {
-        if ($this->profileColumn === null) {
-            return $users;
-        }
-
-        foreach ($users as &$user) {
-            $user = $this->normalizeProfileField($user);
-        }
-
-        return $users;
-    }
-
-    public function signup($name, $email, $password, $cin, $date_naissance, $tel, $region)
-    {
-        // Vérifier si email existe déjà
-        $check = $this->db->prepare("SELECT id_user FROM user WHERE email = :email");
-        $check->execute([':email' => $email]);
         if ($check->fetch()) {
-            return ['success' => false, 'error' => 'Email déjà utilisé'];
+            return ['success' => false, 'error' => 'Email déjà utilisé.'];
         }
 
-        $hash = password_hash($password, PASSWORD_BCRYPT);
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt = $this->db->prepare(sprintf("
-            INSERT INTO user (name, email, %s, cin, date_naissance, tel, region, date_creation, role)
-            VALUES (:name, :email, :hash, :cin, :date_naissance, :tel, :region, NOW(), 'volunteer')
-        ", $this->passwordColumn));
+        $sql = "
+            INSERT INTO user
+            (name, email, password, cin, date_naissance, tel, region, verify_token, verified, role)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'user')
+        ";
 
-        $stmt->execute([
-            ':name'           => $name,
-            ':email'          => $email,
-            ':hash'           => $hash,
-            ':cin'            => $cin ?: null,
-            ':date_naissance' => $date_naissance ?: null,
-            ':tel'            => $tel ?: null,
-            ':region'         => $region ?: null
+        $stmt = $this->db->prepare($sql);
+        $ok = $stmt->execute([
+            $name,
+            $email,
+            $hashed,
+            $cin ?: null,
+            $date_naissance ?: null,
+            $tel ?: null,
+            $region ?: null,
+            $token
         ]);
 
-        return ['success' => true];
+        return ['success' => $ok];
     }
 
-    public function login($email, $password)
+    /* ================= LOGIN ================= */
+    public function login(string $email, string $password): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM user WHERE email = :email LIMIT 1");
-        $stmt->execute([':email' => $email]);
+        $stmt = $this->db->prepare(
+            "SELECT * FROM user WHERE email = ?"
+        );
+        $stmt->execute([$email]);
         $user = $stmt->fetch();
 
-        if (!$user) {
-            return ['success' => false, 'error' => 'Email introuvable'];
-        }
-
-        $passwordField = $this->passwordColumn;
-        $storedPassword = $user[$passwordField] ?? '';
-
-        if (empty($storedPassword)) {
-            return ['success' => false, 'error' => 'Mot de passe incorrect'];
-        }
-
-        // Check if password is hashed (starts with $2y$) or plain text
-        if (strpos($storedPassword, '$2y$') === 0) {
-            // Hashed password - verify using password_verify
-            if (!password_verify($password, $storedPassword)) {
-                return ['success' => false, 'error' => 'Mot de passe incorrect'];
-            }
-        } else {
-            // Plain text password - direct comparison
-            if ($password !== $storedPassword) {
-                return ['success' => false, 'error' => 'Mot de passe incorrect'];
-            }
+        if (!$user || !password_verify($password, $user['password'])) {
+            return ['success' => false, 'error' => 'Email ou mot de passe incorrect.'];
         }
 
         return ['success' => true, 'user' => $user];
     }
 
-    public function getUserById($id)
+    /* ================= VERIFY EMAIL ================= */
+    public function verifyEmail(string $token): bool
     {
-        $stmt = $this->db->prepare("SELECT * FROM user WHERE id_user = :id LIMIT 1");
-        $stmt->execute([':id' => $id]);
-        $user = $stmt->fetch();
-        return $this->normalizeProfileField($user);
+        $stmt = $this->db->prepare(
+            "UPDATE user
+             SET verified = 1, verify_token = NULL
+             WHERE verify_token = ?"
+        );
+        $stmt->execute([$token]);
+
+        return $stmt->rowCount() > 0;
     }
 
-    public function getAllUsers()
-    {
-        $stmt = $this->db->query("SELECT * FROM user ORDER BY id_user DESC");
-        $users = $stmt->fetchAll();
-        return $this->normalizeProfileFieldList($users);
-    }
-
-    public function updateProfile($id, $name, $email, $tel, $region, $cin = null, $date_naissance = null, $profile_pic = null)
-    {
-        $fields = [
-            'name = :name',
-            'email = :email',
-            'tel = :tel',
-            'region = :region',
-            'cin = :cin',
-            'date_naissance = :date_naissance'
-        ];
-
-        if ($this->profileColumn !== null) {
-            $fields[] = $this->profileColumn . ' = :profile_pic';
-        }
-
-        $sql = "UPDATE user SET " . implode(",\n                ", $fields) . "\n            WHERE id_user = :id";
+    /* ================= UPDATE PROFILE (FINAL, SAFE) ================= */
+    public function updateProfile(
+        int $id,
+        string $name,
+        string $email,
+        ?string $tel,
+        ?string $region,
+        ?string $cin,
+        ?string $date_naissance,
+        ?string $profile_pic
+    ): bool {
+        $sql = "
+            UPDATE user SET
+                name = ?,
+                email = ?,
+                tel = ?,
+                region = ?,
+                cin = ?,
+                date_naissance = ?,
+                profile_pic = ?
+            WHERE id_user = ?
+        ";
 
         $stmt = $this->db->prepare($sql);
 
-        $params = [
-            ':id'             => $id,
-            ':name'           => $name,
-            ':email'          => $email,
-            ':tel'            => $tel ?: null,
-            ':region'         => $region ?: null,
-            ':cin'            => $cin ?: null,
-            ':date_naissance' => $date_naissance ?: null
+        return $stmt->execute([
+            $name,
+            $email,
+            $tel,
+            $region,
+            $cin,
+            $date_naissance,
+            $profile_pic,
+            $id
+        ]);
+    }
+
+    /* ================= ADMIN UPDATE USER ================= */
+    public function updateUserByAdmin(
+        int $id,
+        string $name,
+        string $email,
+        ?string $tel,
+        ?string $region,
+        string $role
+    ): bool {
+        $sql = "
+            UPDATE user SET
+                name = ?,
+                email = ?,
+                tel = ?,
+                region = ?,
+                role = ?
+            WHERE id_user = ?
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            $name,
+            $email,
+            $tel,
+            $region,
+            $role,
+            $id
+        ]);
+    }
+
+    /* ================= CHANGE PASSWORD ================= */
+    public function changePassword(int $id, string $password): bool
+    {
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+
+        $stmt = $this->db->prepare(
+            "UPDATE user SET password = ? WHERE id_user = ?"
+        );
+
+        return $stmt->execute([$hashed, $id]);
+    }
+
+    /* ================= USER STATISTICS ================= */
+    public function getUserStats(int $userId): array
+    {
+        // Posts count
+        $stmtPost = $this->db->prepare(
+            "SELECT COUNT(*) FROM post WHERE id_user = ?"
+        );
+        $stmtPost->execute([$userId]);
+        $posts = (int) $stmtPost->fetchColumn();
+
+        // Offers count
+        $stmtOffer = $this->db->prepare(
+            "SELECT COUNT(*) FROM offer WHERE id_user = ?"
+        );
+        $stmtOffer->execute([$userId]);
+        $offers = (int) $stmtOffer->fetchColumn();
+
+        return [
+            'posts'  => $posts,
+            'offers' => $offers
         ];
+    }
 
-        if ($this->profileColumn !== null) {
-            $params[':profile_pic'] = $profile_pic;
+    /* ================= DELETE USER ================= */
+    public function deleteUser(int $id): bool
+    {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM user WHERE id_user = ?");
+            return $stmt->execute([$id]);
+        } catch (Exception $e) {
+            error_log("Error deleting user $id: " . $e->getMessage());
+            return false;
         }
-
-        return $stmt->execute($params);
     }
 
-    public function changePassword($id, $password)
+    /* ================= CHECK IF EMAIL EXISTS (EXCEPT CURRENT USER) ================= */
+    public function emailExistsExceptUser(string $email, int $excludeUserId): bool
     {
-        $hash = password_hash($password, PASSWORD_BCRYPT);
-
-        $stmt = $this->db->prepare(sprintf("
-            UPDATE user
-            SET %s = :hash
-            WHERE id_user = :id
-        ", $this->passwordColumn));
-
-        return $stmt->execute([
-            ':id'   => $id,
-            ':hash' => $hash
-        ]);
+        $stmt = $this->db->prepare(
+            "SELECT id_user FROM user WHERE email = ? AND id_user != ?"
+        );
+        $stmt->execute([$email, $excludeUserId]);
+        return $stmt->fetch() !== false;
     }
 
-    // Store password in plain text (for admin viewing)
-    public function changePasswordPlainText($id, $password)
+    /* ================= GET USER COUNT ================= */
+    public function getUserCount(): int
     {
-        $stmt = $this->db->prepare(sprintf("
-            UPDATE user
-            SET %s = :password
-            WHERE id_user = :id
-        ", $this->passwordColumn));
-
-        return $stmt->execute([
-            ':id'       => $id,
-            ':password' => $password
-        ]);
-    }
-
-    public function updateUserByAdmin($id, $name, $email, $tel, $region, $role)
-    {
-        $stmt = $this->db->prepare("
-            UPDATE user
-            SET name = :name,
-                email = :email,
-                tel = :tel,
-                region = :region,
-                role = :role
-            WHERE id_user = :id
-        ");
-
-        return $stmt->execute([
-            ':id'     => $id,
-            ':name'   => $name,
-            ':email'  => $email,
-            ':tel'    => $tel ?: null,
-            ':region' => $region ?: null,
-            ':role'   => $role
-        ]);
-    }
-
-    public function deleteUser($id)
-    {
-        $stmt = $this->db->prepare("DELETE FROM user WHERE id_user = :id");
-        return $stmt->execute([':id' => $id]);
-    }
-
-    public function getPasswordColumn()
-    {
-        return $this->passwordColumn;
+        $stmt = $this->db->query("SELECT COUNT(*) FROM user");
+        return (int) $stmt->fetchColumn();
     }
 }

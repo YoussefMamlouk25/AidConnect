@@ -3,6 +3,7 @@ session_start();
 
 require_once '../Model/user.php';
 
+// Only admin can access
 if (!isset($_SESSION['id_user']) || ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: ../View/frontoffice/login.php?error=' . urlencode('Accès refusé.'));
     exit;
@@ -18,7 +19,8 @@ $name   = trim($_POST['name'] ?? '');
 $email  = trim($_POST['email'] ?? '');
 $tel    = trim($_POST['tel'] ?? '');
 $region = trim($_POST['region'] ?? '');
-$role   = trim($_POST['role'] ?? 'volunteer');
+$role   = ($_POST['role'] ?? 'user') === 'admin' ? 'admin' : 'user';
+
 $password = trim($_POST['password'] ?? '');
 $password_confirm = trim($_POST['password_confirm'] ?? '');
 
@@ -27,13 +29,18 @@ if ($id <= 0 || $name === '' || $email === '') {
     exit;
 }
 
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    header('Location: ../View/backoffice/edit_user.php?id=' . $id . '&error=' . urlencode('Email invalide.'));
+    exit;
+}
+
 // Validate password if provided
-if (!empty($password)) {
+if ($password !== '') {
     if (strlen($password) < 6) {
-        header('Location: ../View/backoffice/edit_user.php?id=' . $id . '&error=' . urlencode('Le mot de passe doit contenir au moins 6 caractères.'));
+        header('Location: ../View/backoffice/edit_user.php?id=' . $id . '&error=' . urlencode('Mot de passe trop court.'));
         exit;
     }
-    
+
     if ($password !== $password_confirm) {
         header('Location: ../View/backoffice/edit_user.php?id=' . $id . '&error=' . urlencode('Les mots de passe ne correspondent pas.'));
         exit;
@@ -41,11 +48,13 @@ if (!empty($password)) {
 }
 
 $userModel = new UserModel();
+
+// Update basic info
 $userModel->updateUserByAdmin($id, $name, $email, $tel, $region, $role);
 
-// Update password if provided (store in plain text for admin viewing)
-if (!empty($password)) {
-    $userModel->changePasswordPlainText($id, $password);
+// Update password if provided (HASHED)
+if ($password !== '') {
+    $userModel->changePassword($id, $password);
 }
 
 header('Location: ../View/backoffice/users.php?updated=1');
