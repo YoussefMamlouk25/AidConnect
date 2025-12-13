@@ -1,0 +1,171 @@
+/* CSS pour backoffice avec template socialv-lite */
+
+/* Override pour centrer le main-content et le rendre plus petit */
+.wrapper {
+    position: relative;
+}
+
+/* Sidebar socialv-lite - s'affiche à gauche */
+.iq-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+}
+
+/* Content page - centré et limité en largeur */
+.content-page {
+    margin-left: 260px; /* Espace pour la sidebar socialv-lite */
+    width: calc(100% - 260px);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Navbar ajustée */
+.iq-top-navbar {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 999;
+}
+
+/* Ajuster le content-page pour tenir compte de la navbar */
+.content-page {
+    margin-top: 60px; /* Hauteur approximative de la navbar */
+}
+
+/* Footer ajusté */
+.iq-footer {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+}
+
+/* Cards plus compactes */
+.card {
+    margin-bottom: 15px;
+}
+
+.content-page .container-fluid > .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.content-page .container-fluid > .row > [class^="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.card-header {
+    padding: 12px 15px;
+}
+
+/* Tables */
+.table {
+    font-size: 13px;
+}
+
+.table th,
+.table td {
+    padding: 8px 10px;
+}
+
+/* Boutons */
+.btn {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* Formulaires */
+.form-control {
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .iq-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .iq-sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .content-page,
+    .iq-top-navbar,
+    .iq-footer {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .content-page {
+        margin-top: 60px;
+    }
+}
+
+/* Styles pour les éléments spécifiques du backoffice */
+.offers-fragment {
+    width: 100%;
+}
+
+.post-table {
+    width: 100%;
+    font-size: 12px;
+}
+
+.media-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.table-actions {
+    white-space: nowrap;
+}
+
+.table-actions .btn {
+    margin: 0 2px;
+    border: none;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+/* Unified edit/delete button styling in all backoffice tables */
+.table-actions .btn.btn-sm.btn-primary,
+.table-actions .btn.btn-primary {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+}
+
+.table-actions .btn.btn-sm.btn-danger,
+.table-actions .btn.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+.table-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+}
+
+.table-actions .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.2);
+}
+
+/* (Add Post / Add Offer form styles now live in addform.css) */

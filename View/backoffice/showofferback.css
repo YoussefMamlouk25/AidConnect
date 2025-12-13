@@ -1,0 +1,126 @@
+/* Styles for the offer fragment table and action buttons */
+
+.offers-fragment {
+  padding: 1.5rem 0.5rem; /* reduce side padding so table area is wider */
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
+  overflow: hidden;
+}
+
+.offers-fragment .table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.offers-fragment h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.offers-fragment .container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+}
+
+.post-table {
+  width: 100%;
+  min-width: 1200px; /* Minimum width to ensure all columns are visible */
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  table-layout: auto;
+}
+
+.post-table thead th {
+  background: #111827;
+  color: #f9fafb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  padding: 0.85rem 1rem;
+  text-align: left;
+}
+
+.post-table tbody td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.post-table tbody tr:nth-child(even) td {
+  background: #f3f4f6;
+}
+
+.post-table tbody tr:hover td {
+  background: #e0f2fe;
+}
+
+/* Make media column narrower */
+.post-table th:nth-child(7),
+.post-table td:nth-child(7) {
+  width: 120px;
+}
+
+/* Align actions column */
+.post-table th:last-child,
+.post-table td:last-child {
+  text-align: center;
+}
+
+.offers-fragment .table-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  white-space: normal; /* override global nowrap so buttons can stack */
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: #fff;
+}
+
+.btn-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.btn-edit {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.no-data {
+  text-align: center;
+  padding: 1rem;
+  color: #9ca3af;
+  font-style: italic;
+}

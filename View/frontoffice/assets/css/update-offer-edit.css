@@ -1,0 +1,18 @@
+/* Update Offer Edit Styles */
+.media-preview {
+  max-width: 120px;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.media-preview-video {
+  max-width: 140px;
+  max-height: 120px;
+  border-radius: 8px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
