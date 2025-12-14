@@ -385,4 +385,5 @@ class UserModel
         
         return $user && $user['email_verified'] == 1;
     }
+    
 }
