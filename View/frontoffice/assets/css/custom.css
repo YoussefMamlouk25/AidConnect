@@ -1,0 +1,452 @@
+/* Custom CSS for AidConnect - Facebook-Inspired Professional Design */
+
+/* General Styles */
+body {
+    background: linear-gradient(135deg, #f0f2f5 0%, #ffffff 100%);
+    color: #1c1e21;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+
+/* Header Styles */
+header.header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dadde1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header .row {
+    padding: 12px 0;
+    align-items: center;
+}
+
+header a {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+header a:hover {
+    color: #166fe5;
+}
+
+header .fas.fa-user-circle {
+    color: #1877f2;
+    font-size: 2rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: rgba(24, 119, 242, 0.05);
+}
+
+header .fas.fa-user-circle:hover {
+    color: #166fe5;
+    background-color: rgba(24, 119, 242, 0.1);
+    transform: scale(1.1);
+}
+
+/* Main Content Styles */
+.wrapper {
+    min-height: calc(100vh - 200px);
+    padding: 20px 0;
+}
+
+.sign-up-page, .volunteer-display-page {
+    padding: 40px 0;
+}
+
+.sign-in-from, .card {
+    background-color: #ffffff;
+    border: 1px solid #dadde1;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.form-label {
+    color: #1c1e21;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    border: 1px solid #dadde1;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 16px;
+}
+
+.form-control:focus {
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+    outline: none;
+}
+
+.btn-primary {
+    background-color: #1877f2;
+    border-color: #1877f2;
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 12px 24px;
+}
+
+.btn-primary:hover {
+    background-color: #166fe5;
+    border-color: #166fe5;
+}
+
+.btn-outline-primary {
+    border-color: #1877f2;
+    color: #1877f2;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background-color: #1877f2;
+    border-color: #1877f2;
+    color: #ffffff;
+}
+
+/* Keyframes for Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 6px 25px rgba(24, 119, 242, 0.15);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+}
+
+@keyframes buttonHover {
+    from {
+        transform: scale(1);
+        background-color: #1877f2;
+    }
+    to {
+        transform: scale(1.05);
+        background-color: #166fe5;
+    }
+}
+
+/* Card Styles for Volunteer Display */
+.card {
+    transition: all 0.3s ease;
+    margin-bottom: 30px;
+    border: none;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    border-radius: 16px;
+    overflow: hidden;
+    min-height: 300px;
+    animation: fadeInUp 0.6s ease-out;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.card.loading {
+    animation: pulse 2s infinite;
+}
+
+.card:hover {
+    box-shadow: 0 8px 25px rgba(24, 119, 242, 0.2);
+    transform: translateY(-5px);
+    border: 1px solid rgba(24, 119, 242, 0.1);
+}
+
+/* Scrollable Posts Container */
+#postDisplay {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+#postDisplay::-webkit-scrollbar {
+    width: 8px;
+}
+
+#postDisplay::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#postDisplay::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+#postDisplay::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.card-body {
+    background-color: transparent;
+    padding: 25px;
+    position: relative;
+}
+
+.card-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1877f2, #42a5f5);
+}
+
+.card h6 {
+    color: #1c1e21;
+    font-weight: 700;
+    margin-bottom: 6px;
+    font-size: 1.1rem;
+}
+
+.card small {
+    color: #65676b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.card .btn-link {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.card .btn-link:hover {
+    color: #166fe5;
+    text-decoration: none;
+    transform: scale(1.05);
+}
+
+/* Post Content */
+.post-content {
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+.post-content p {
+    margin-bottom: 10px;
+    color: #1c1e21;
+    font-size: 15px;
+}
+
+.post-content i {
+    margin-right: 6px;
+    opacity: 0.8;
+}
+
+/* Post Stats */
+.post-stats {
+    margin-bottom: 12px;
+    padding: 8px 0;
+    border-top: 1px solid #dadde1;
+    border-bottom: 1px solid #dadde1;
+}
+
+.post-stats small {
+    color: #65676b;
+}
+
+/* Action Buttons */
+.d-flex.justify-content-around {
+    padding: 12px 0;
+    gap: 8px;
+}
+
+.d-flex.justify-content-around .btn {
+    flex: 1;
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.d-flex.justify-content-around .btn:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 2px 8px rgba(24, 119, 242, 0.2);
+    background-color: rgba(24, 119, 242, 0.1);
+}
+
+.d-flex.justify-content-around .btn i {
+    margin-right: 6px;
+}
+
+/* Comments Section */
+.comments-section {
+    border-top: 1px solid #dadde1;
+    padding-top: 12px;
+}
+
+.comment-item {
+    margin-bottom: 12px;
+}
+
+.comment-item img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.comment-item .bg-light {
+    background-color: #f0f2f5 !important;
+    border-radius: 18px;
+    padding: 8px 12px;
+}
+
+.comment-text {
+    color: #1c1e21;
+    margin-bottom: 4px;
+}
+
+.comment-edit input {
+    border-radius: 6px;
+}
+
+/* Footer Styles */
+footer {
+    background-color: #ffffff;
+    border-top: 1px solid #dadde1;
+    color: #65676b;
+    padding: 20px 0;
+}
+
+footer a {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+footer a:hover {
+    color: #166fe5;
+    text-decoration: underline;
+}
+
+/* Search Bar */
+#searchInput {
+    border: 1px solid #dadde1;
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-size: 16px;
+    width: 100%;
+    position: relative;
+}
+
+#searchInput:focus {
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+    outline: none;
+}
+
+.position-absolute {
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #65676b;
+}
+
+/* Modal Styles */
+.modal-content {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dadde1;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    border-top: 1px solid #dadde1;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #dadde1;
+    margin-bottom: 16px;
+}
+
+.empty-state h4 {
+    color: #1c1e21;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #65676b;
+    margin-bottom: 20px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    header .col-4 {
+        text-align: center !important;
+    }
+
+    .sign-in-from, .card {
+        margin: 10px;
+        border-radius: 6px;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .card-body::before {
+        height: 3px;
+    }
+
+    .card h6 {
+        font-size: 1rem;
+    }
+
+    .post-content p {
+        font-size: 14px;
+    }
+
+    .d-flex.justify-content-around .btn {
+        font-size: 13px;
+        padding: 8px 6px;
+    }
+
+    .d-flex.justify-content-around .btn i {
+        margin-right: 4px;
+    }
+}
