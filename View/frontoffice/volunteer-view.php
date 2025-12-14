@@ -71,6 +71,21 @@ $flashError = $_SESSION['flash_error'] ?? null;
 unset($_SESSION['flash_error']);
 $error = $_GET['error'] ?? null;
 
+// Fonction pour obtenir le chemin de la photo de profil
+function getProfilePic($storedProfile) {
+    $defaultPic = 'assets/images/default_profile.png';
+    if (empty($storedProfile)) {
+        return $defaultPic;
+    }
+    $normalized = ltrim(trim($storedProfile), '/');
+    $relativePath = '../../' . $normalized;
+    $absolutePath = realpath(__DIR__ . '/../../' . $normalized);
+    if ($absolutePath !== false && file_exists($absolutePath)) {
+        return $relativePath;
+    }
+    return $defaultPic;
+}
+
 // Start output buffering to capture content
 ob_start();
 ?>
@@ -82,7 +97,7 @@ ob_start();
           <a href="volunteer-form.php" class="btn-add-offer">
             <i class="ri-add-circle-line me-2"></i> Ajouter une Offre
           </a>
-          <button type="button" class="btn btn-primary search-icon-btn" id="searchIconBtn" onclick="toggleSearchCard()">
+          <button type="button" class="btn btn-primary search-icon-btn" id="searchIconBtn" onclick="toggleSearchCard(event)">
             <i class="ri-search-line me-2"></i>Rechercher des Offres
           </button>
         </div>
@@ -96,7 +111,7 @@ ob_start();
           <form action="volunteer-view.php" method="GET" class="search-form">
             <div class="search-header mb-3">
               <h5 class="mb-0"><i class="ri-search-line me-2"></i>Rechercher des Offres</h5>
-              <button type="button" class="btn-close-search" onclick="toggleSearchCard()">
+              <button type="button" class="btn-close-search" onclick="toggleSearchCard(event)">
                 <i class="ri-close-line"></i>
               </button>
             </div>
@@ -307,6 +322,10 @@ ob_start();
               $description = OfferController::escape($offer['description']);
               $initials = strtoupper(substr($nom, 0, 1));
               
+              // Récupérer la photo de profil
+              $storedProfile = trim($offer['profile_pic'] ?? '');
+              $profilePic = getProfilePic($storedProfile);
+              
               // Parse media files
               $mediaFiles = [];
               if (!empty($offer['media'])) {
@@ -333,7 +352,14 @@ ob_start();
               <div class="post-card mb-3">
                 <!-- Post Header -->
                 <div class="post-header">
+                  <?php if ($profilePic !== 'assets/images/default_profile.png' && file_exists(realpath(__DIR__ . '/../../' . ltrim($storedProfile, '/')))): ?>
+                    <img src="<?= htmlspecialchars($profilePic) ?>" 
+                         alt="<?= htmlspecialchars($nom) ?>" 
+                         class="avatar rounded-circle" 
+                         style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #e0e0e0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                  <?php else: ?>
                   <div class="avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"><?= $initials ?></div>
+                  <?php endif; ?>
                   <div class="post-info">
                     <div class="post-author">
                       <?= $nom ?>
@@ -475,11 +501,35 @@ ob_start();
 </div>
 
 <script>
-function toggleSearchCard() {
+// Flag to prevent immediate closing
+let searchCardJustOpened = false;
+let searchCardCloseTimeout = null;
+
+function toggleSearchCard(event) {
+    // Prevent event from bubbling up
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
     const searchCard = document.getElementById('searchCard');
     if (!searchCard) return; // Exit if search card doesn't exist on this page
+    
+    // Clear any pending close timeout
+    if (searchCardCloseTimeout) {
+        clearTimeout(searchCardCloseTimeout);
+        searchCardCloseTimeout = null;
+    }
+    
     if (searchCard.style.display === 'none' || searchCard.style.display === '') {
+        // Open the card
         searchCard.style.display = 'block';
+        searchCard.style.visibility = 'visible';
+        searchCard.style.opacity = '1';
+        
+        // Set flag to prevent immediate closing
+        searchCardJustOpened = true;
+        
         setTimeout(() => {
             searchCard.classList.add('active');
             const searchInput = document.getElementById('headerSearchInput');
@@ -487,25 +537,48 @@ function toggleSearchCard() {
                 searchInput.focus();
             }
         }, 10);
-    } else {
-        searchCard.classList.remove('active');
+        
+        // Reset flag after a short delay to allow click events to settle
         setTimeout(() => {
+            searchCardJustOpened = false;
+        }, 300);
+    } else {
+        // Close the card
+        searchCard.classList.remove('active');
+        searchCardCloseTimeout = setTimeout(() => {
             searchCard.style.display = 'none';
+            searchCard.style.visibility = 'hidden';
+            searchCard.style.opacity = '0';
         }, 300);
     }
 }
 
-// Close search card when clicking outside
+// Close search card when clicking outside (with protection)
 document.addEventListener('click', function(event) {
+    // Don't close if card just opened
+    if (searchCardJustOpened) {
+        return;
+    }
+    
     const searchCard = document.getElementById('searchCard');
     const searchIconBtn = document.getElementById('searchIconBtn');
     
-    if (searchCard && searchCard.style.display !== 'none') {
-        if (!searchCard.contains(event.target) && !searchIconBtn.contains(event.target)) {
-            toggleSearchCard();
-        }
+    if (searchCard && searchCard.style.display !== 'none' && searchCard.classList.contains('active')) {
+        // Check if click is outside both the card and the button
+        const clickedInsideCard = searchCard.contains(event.target);
+        const clickedOnButton = searchIconBtn && searchIconBtn.contains(event.target);
+        const clickedOnCloseButton = event.target.closest('.btn-close-search');
+        
+        if (!clickedInsideCard && !clickedOnButton && !clickedOnCloseButton) {
+            searchCard.classList.remove('active');
+            searchCardCloseTimeout = setTimeout(() => {
+                searchCard.style.display = 'none';
+                searchCard.style.visibility = 'hidden';
+                searchCard.style.opacity = '0';
+            }, 300);
     }
-});
+    }
+}, true); // Use capture phase to catch events early
 
 // Close search card with Escape key
 document.addEventListener('keydown', function(event) {

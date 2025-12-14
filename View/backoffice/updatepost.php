@@ -125,13 +125,30 @@ if (!$postData) {
             // Mettre à jour le post
             $result = $postController->updatePost($post, $id);
             if ($result) {
-                header('Location: showpostback.php');
-                exit();
+                // Si c'est une requête AJAX, retourner un JSON pour rediriger
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'redirect' => 'showpostback.php']);
+                    exit();
+                } else {
+                    header('Location: showpostback.php');
+                    exit();
+                }
             } else {
                 $error = "Erreur lors de la mise à jour du post. Veuillez réessayer.";
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => $error]);
+                    exit();
+                }
             }
         } else {
             $error = "Veuillez remplir tous les champs obligatoires.";
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => $error]);
+                exit();
+            }
         }
     }
 }
@@ -161,7 +178,7 @@ ob_start();
         </div>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data" action="updatepost.php?id=<?php echo urlencode($id); ?><?php echo $isAjax ? '&ajax=1' : ''; ?>">
+    <form method="POST" enctype="multipart/form-data" action="updatepost.php?id=<?php echo urlencode($id); ?><?php echo $isAjax ? '&ajax=1' : ''; ?>" id="editPostForm">
         <input type="hidden" name="id" value="<?php echo $id; ?>">
         
         <p>
@@ -285,9 +302,9 @@ ob_start();
 
         <p class="form-actions">
             <button type="submit" class="btn btn-primary btn-submit">
-                <i class="ri-save-line me-1"></i> Mettre à jour
+                <i class="ri-save-line me-1"></i> Valider
             </button>
-            <a href="showpostback.php" class="btn btn-secondary btn-cancel" onclick="if(typeof loadContent === 'function'){ loadContent('showpostback.php'); return false; }">
+            <a href="showpostback.php" class="btn btn-secondary btn-cancel" onclick="if(typeof loadContent === 'function'){ event.preventDefault(); loadContent('showpostback.php?ajax=1'); return false; }">
                 <i class="ri-close-line me-1"></i> Annuler
             </a>
         </p>
@@ -297,8 +314,44 @@ ob_start();
 $content = ob_get_clean();
 
 if ($isAjax) {
+    echo '<link rel="stylesheet" href="assets/css/addform.css">';
     echo $content;
-    echo '<script src="media-dropzone.js"></script>';
+    echo '<script src="assets/js/media-dropzone.js"></script>';
+    echo "<script>
+    document.addEventListener(\"DOMContentLoaded\", function() {
+        const form = document.getElementById(\"editPostForm\");
+        if (form && typeof loadContent === \"function\") {
+            form.addEventListener(\"submit\", function(e) {
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: \"POST\",
+                    body: formData,
+                    headers: {
+                        \"X-Requested-With\": \"XMLHttpRequest\"
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(\"Erreur HTTP: \" + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.redirect) {
+                        loadContent(data.redirect + \"?ajax=1\");
+                    } else {
+                        alert(data.error || \"Erreur lors de la mise à jour\");
+                    }
+                })
+                .catch(error => {
+                    console.error(\"Erreur:\", error);
+                    alert(\"Erreur lors de la mise à jour. Veuillez réessayer.\");
+                });
+                e.preventDefault();
+            });
+        }
+    });
+    </script>";
 } else {
-    renderBackofficeLayout('Modifier un Post', $content, ['addform.css'], ['addpost.js', 'media-dropzone.js']);
+    renderBackofficeLayout('Modifier un Post', $content, ['assets/css/addform.css'], ['assets/js/addpost.js', 'assets/js/media-dropzone.js']);
 }

@@ -15,7 +15,7 @@ if (!$isAjax) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suppression de mise à jour post</title>
-    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 <body>
 <div class="layout">
@@ -39,7 +39,7 @@ if (isset($_GET['id'])) {
 <?php if (!$isAjax): ?>
     </div>
 </div>
-    <script src="dashboard.js"></script>
+    <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
 <?php endif; ?>

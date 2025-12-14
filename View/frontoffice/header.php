@@ -6,28 +6,41 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 // Déterminer la page actuelle pour mettre en évidence le lien actif
 $current_page = basename($_SERVER['PHP_SELF']);
 $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
+
+// Détecter si on est sur une page d'événement
+$isEventPage = ($current_page == 'event.php');
+$eventController = isset($_GET['controller']) ? $_GET['controller'] : '';
+$eventAction = isset($_GET['action']) ? $_GET['action'] : '';
+$isEventList = ($isEventPage && $eventController == 'event' && $eventAction == 'liste');
+$isMesInscriptions = ($isEventPage && $eventController == 'inscription' && $eventAction == 'mes_inscriptions');
 ?>
-<header class="header bg-white shadow-sm p-3 mb-4">
-    <div class="container-fluid">
-        <div class="row align-items-center">
-            <div class="col-md-3">
+<header class="header bg-white shadow-sm mb-4" id="mainHeader" style="position: relative; z-index: 1000; overflow: visible !important;">
+    <div class="container-fluid" style="overflow: visible !important;">
+        <div class="row align-items-center" style="position: relative; overflow: visible;">
+            <div class="col-12 col-md-3">
+                <div class="d-flex align-items-center gap-2">
                 <a href="index.php" class="text-decoration-none d-flex align-items-center header-logo">
                     <div class="logo-icon-header">
                         <i class="ri-heart-pulse-fill"></i>
                     </div>
-                    <h4 class="text-primary mb-0 ms-2">AidConnect</h4>
+                        <h4 class="text-primary mb-0 ms-2 d-none d-sm-inline">AidConnect</h4>
+                        <h5 class="text-primary mb-0 ms-2 d-sm-none">AidConnect</h5>
                 </a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary theme-toggle-btn" id="themeToggleBtn" title="Basculer entre mode clair et mode sombre">
+                        <i class="ri-moon-line" id="themeIcon"></i>
+                    </button>
+                </div>
             </div>
-            <div class="col-md-6">
-                <nav class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+            <div class="col-12 col-md-6" style="position: relative; overflow: visible;">
+                <nav class="d-flex justify-content-center align-items-center flex-wrap gap-1 gap-md-2 header-nav" style="position: relative; overflow: visible;">
                     <a href="index.php" class="btn btn-sm <?php echo ($current_page == 'index.php') ? 'btn-primary' : 'btn-outline-primary'; ?>">
-                        <i class="ri-home-line me-1"></i> Accueil
+                        <i class="ri-home-line me-1"></i> <span class="d-none d-sm-inline">Accueil</span>
                     </a>
                     
                     <!-- Posts Dropdown -->
                     <div class="nav-dropdown">
                         <button class="btn btn-sm <?php echo (in_array($current_page, ['showPosts.php', 'showpostupdate.php'])) ? 'btn-primary' : 'btn-outline-primary'; ?> nav-dropdown-toggle" type="button">
-                            <i class="ri-file-list-3-line me-1"></i> Posts
+                            <i class="ri-file-list-3-line me-1"></i> <span class="d-none d-sm-inline">Posts</span>
                             <i class="ri-arrow-down-s-line ms-1"></i>
                         </button>
                         <div class="nav-dropdown-menu">
@@ -43,7 +56,7 @@ $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
                     <!-- Offres Dropdown -->
                     <div class="nav-dropdown">
                         <button class="btn btn-sm <?php echo (in_array($current_page, ['volunteer-view.php', 'update-offer-view.php'])) ? 'btn-primary' : 'btn-outline-primary'; ?> nav-dropdown-toggle" type="button">
-                            <i class="ri-price-tag-3-line me-1"></i> Offres
+                            <i class="ri-price-tag-3-line me-1"></i> <span class="d-none d-sm-inline">Offres</span>
                             <i class="ri-arrow-down-s-line ms-1"></i>
                         </button>
                         <div class="nav-dropdown-menu">
@@ -55,20 +68,36 @@ $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
                             </a>
                         </div>
                     </div>
+                    
+                    <!-- Événements Dropdown -->
+                    <div class="nav-dropdown">
+                        <button class="btn btn-sm <?php echo ($isEventList || $isMesInscriptions) ? 'btn-primary' : 'btn-outline-primary'; ?> nav-dropdown-toggle" type="button">
+                            <i class="ri-calendar-line me-1"></i> <span class="d-none d-sm-inline">Événements</span>
+                            <i class="ri-arrow-down-s-line ms-1"></i>
+                        </button>
+                        <div class="nav-dropdown-menu">
+                            <a href="event.php?controller=event&action=liste" class="nav-dropdown-item <?php echo $isEventList ? 'active' : ''; ?>">
+                                <i class="ri-calendar-line me-2"></i> Liste des événements
+                            </a>
+                            <a href="event.php?controller=inscription&action=mes_inscriptions" class="nav-dropdown-item <?php echo $isMesInscriptions ? 'active' : ''; ?>">
+                                <i class="ri-file-list-3-line me-2"></i> Mes Inscriptions
+                            </a>
+                        </div>
+                    </div>
                 </nav>
             </div>
-            <div class="col-md-3 text-end">
-                <div class="d-flex align-items-center gap-2 justify-content-end">
+            <div class="col-12 col-md-3">
+                <div class="d-flex align-items-center gap-1 gap-md-2 justify-content-end header-actions">
                     <button type="button" class="btn btn-sm btn-outline-primary search-icon-btn" id="searchIconBtn" onclick="toggleSearchCard()">
                         <i class="ri-search-line"></i>
                     </button>
                     <?php if ($isAdmin): ?>
                         <a href="../backoffice/dashboard.php" class="btn btn-sm btn-backoffice">
-                            <i class="ri-dashboard-line me-1"></i> Backoffice
+                            <i class="ri-dashboard-line me-1"></i> <span class="d-none d-lg-inline">Backoffice</span>
                         </a>
                     <?php endif; ?>
                     <a href="profile.php" class="btn btn-sm btn-outline-primary">
-                        <i class="ri-user-line me-1"></i> Profile
+                        <i class="ri-user-line me-1"></i> <span class="d-none d-sm-inline">Profile</span>
                     </a>
                 </div>
             </div>
@@ -173,10 +202,52 @@ $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
     color: #0d4fb0 !important;
 }
 
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border: 2px solid #e4e6eb !important;
+    background-color: #ffffff !important;
+}
+
+.theme-toggle-btn:hover {
+    background-color: #f0f2f5 !important;
+    border-color: #0f5fcc !important;
+    transform: scale(1.05);
+}
+
+.theme-toggle-btn i {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover i {
+    transform: rotate(15deg);
+}
+
+/* Dark mode styles for theme button */
+body.dark-mode .theme-toggle-btn {
+    background-color: #242526 !important;
+    border-color: #3a3b3c !important;
+    color: #e4e6eb !important;
+}
+
+body.dark-mode .theme-toggle-btn:hover {
+    background-color: #3a3b3c !important;
+    border-color: #0f5fcc !important;
+}
+
 /* Navigation Dropdown Styles */
 .nav-dropdown {
     position: relative;
     display: inline-block;
+    z-index: 10000;
 }
 
 .nav-dropdown-toggle {
@@ -204,15 +275,17 @@ $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1000;
+    z-index: 9999 !important;
     padding: 8px 0;
     border: 1px solid #e4e6eb;
+    pointer-events: none;
 }
 
 .nav-dropdown.active .nav-dropdown-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    pointer-events: auto;
 }
 
 .nav-dropdown-item {
@@ -250,47 +323,94 @@ $isAdmin = (($_SESSION['role'] ?? '') === 'admin');
 
 <script>
 // Navigation Dropdown Toggle
-document.addEventListener('DOMContentLoaded', function() {
-    const dropdownToggles = document.querySelectorAll('.nav-dropdown-toggle');
+(function() {
+    'use strict';
     
-    dropdownToggles.forEach(function(toggle) {
-        toggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const dropdown = this.closest('.nav-dropdown');
-            const isActive = dropdown.classList.contains('active');
+    function initDropdowns() {
+        const dropdownToggles = document.querySelectorAll('.nav-dropdown-toggle');
+        
+        if (dropdownToggles.length === 0) {
+            console.warn('No dropdown toggles found');
+            return;
+        }
+        
+        dropdownToggles.forEach(function(toggle) {
+            // Remove any existing event listeners by cloning
+            const newToggle = toggle.cloneNode(true);
+            toggle.parentNode.replaceChild(newToggle, toggle);
             
-            // Close all other dropdowns
-            document.querySelectorAll('.nav-dropdown').forEach(function(dd) {
-                if (dd !== dropdown) {
-                    dd.classList.remove('active');
+            newToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                const dropdown = this.closest('.nav-dropdown');
+                if (!dropdown) {
+                    console.warn('Dropdown container not found');
+                    return;
+                }
+                
+                const isActive = dropdown.classList.contains('active');
+                
+                // Close all other dropdowns
+                document.querySelectorAll('.nav-dropdown').forEach(function(dd) {
+                    if (dd !== dropdown) {
+                        dd.classList.remove('active');
+                    }
+                });
+                
+                // Toggle current dropdown
+                if (isActive) {
+                    dropdown.classList.remove('active');
+                } else {
+                    dropdown.classList.add('active');
                 }
             });
-            
-            // Toggle current dropdown
-            if (isActive) {
-                dropdown.classList.remove('active');
-            } else {
-                dropdown.classList.add('active');
+        });
+        
+        // Ensure dropdown menu items are clickable
+        const dropdownItems = document.querySelectorAll('.nav-dropdown-item');
+        dropdownItems.forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                // Allow the link to work normally
+                const dropdown = this.closest('.nav-dropdown');
+                if (dropdown) {
+                    setTimeout(function() {
+                        dropdown.classList.remove('active');
+                    }, 100);
+                }
+            });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const clickedInside = event.target.closest('.nav-dropdown');
+            if (!clickedInside) {
+                document.querySelectorAll('.nav-dropdown').forEach(function(dropdown) {
+                    dropdown.classList.remove('active');
+                });
             }
         });
-    });
+        
+        // Close dropdowns on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.nav-dropdown').forEach(function(dropdown) {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+    }
     
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(event) {
-        if (!event.target.closest('.nav-dropdown')) {
-            document.querySelectorAll('.nav-dropdown').forEach(function(dropdown) {
-                dropdown.classList.remove('active');
-            });
-        }
-    });
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDropdowns);
+    } else {
+        // DOM already loaded
+        initDropdowns();
+    }
     
-    // Close dropdowns on Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            document.querySelectorAll('.nav-dropdown').forEach(function(dropdown) {
-                dropdown.classList.remove('active');
-            });
-        }
-    });
-});
+    // Also try after a short delay in case of dynamic content
+    setTimeout(initDropdowns, 100);
+})();
 </script>

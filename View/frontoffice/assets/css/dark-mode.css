@@ -1,0 +1,560 @@
+/**
+ * Dark Mode Styles for AidConnect
+ * Styles pour le mode sombre (night mode)
+ */
+
+/* Variables CSS pour le dark mode */
+:root[data-theme="dark"],
+body.dark-mode {
+    --bg-color: #18191a;
+    --card-bg: #242526;
+    --text-color: #e4e6eb;
+    --text-muted: #b0b3b8;
+    --border-color: #3a3b3c;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Règle globale pour forcer tous les blancs à devenir noirs */
+body.dark-mode * {
+    /* Override tous les backgrounds blancs */
+}
+
+/* Règle très spécifique pour forcer tous les blancs */
+body.dark-mode * {
+    /* Surcharger tous les backgrounds blancs avec !important via les sélecteurs spécifiques ci-dessous */
+}
+
+/* Surcharger tous les styles inline blancs */
+body.dark-mode [style*="background: white"],
+body.dark-mode [style*="background: #fff"],
+body.dark-mode [style*="background: #ffffff"],
+body.dark-mode [style*="background-color: white"],
+body.dark-mode [style*="background-color: #fff"],
+body.dark-mode [style*="background-color: #ffffff"],
+body.dark-mode [style*="background:rgb(255,255,255)"],
+body.dark-mode [style*="background:rgb(255, 255, 255)"],
+body.dark-mode [style*="background-color:rgb(255,255,255)"],
+body.dark-mode [style*="background-color:rgb(255, 255, 255)"] {
+    background: var(--card-bg) !important;
+    background-color: var(--card-bg) !important;
+}
+
+/* Body et background */
+body.dark-mode {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Smooth transitions for all elements */
+body.dark-mode *,
+body.dark-mode *::before,
+body.dark-mode *::after {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Header - Forcer le noir pour tous les headers */
+body.dark-mode .header,
+body.dark-mode header.header,
+body.dark-mode header,
+body.dark-mode #mainHeader,
+body.dark-mode .header.bg-white {
+    background-color: var(--card-bg) !important;
+    background: var(--card-bg) !important;
+    border-bottom-color: var(--border-color) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* Forcer tous les éléments du header */
+body.dark-mode .header *,
+body.dark-mode header * {
+    /* S'assurer que les enfants du header héritent des bonnes couleurs */
+}
+
+body.dark-mode .header h4,
+body.dark-mode .header h5 {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .header .text-primary {
+    color: #4a9eff !important;
+}
+
+/* Cards */
+body.dark-mode .card,
+body.dark-mode .iq-card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .card-body,
+body.dark-mode .iq-card-body {
+    color: var(--text-color) !important;
+}
+
+/* Buttons */
+body.dark-mode .btn-outline-primary {
+    border-color: #4a9eff !important;
+    color: #4a9eff !important;
+    background-color: rgba(74, 158, 255, 0.1) !important;
+}
+
+body.dark-mode .btn-outline-primary:hover {
+    background-color: #4a9eff !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-primary {
+    background-color: #4a9eff !important;
+    border-color: #4a9eff !important;
+}
+
+body.dark-mode .btn-outline-secondary {
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+    background-color: transparent !important;
+}
+
+body.dark-mode .btn-outline-secondary:hover {
+    background-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Form controls */
+body.dark-mode .form-control,
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+    background-color: var(--card-bg) !important;
+    border-color: #4a9eff !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* Text colors */
+body.dark-mode .text-muted {
+    color: var(--text-muted) !important;
+}
+
+body.dark-mode .text-dark {
+    color: var(--text-color) !important;
+}
+
+/* Alerts */
+body.dark-mode .alert {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .alert-success {
+    background-color: rgba(40, 167, 69, 0.2) !important;
+    border-color: #28a745 !important;
+    color: #90ee90 !important;
+}
+
+body.dark-mode .alert-danger {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    border-color: #dc3545 !important;
+    color: #ff6b7a !important;
+}
+
+body.dark-mode .alert-info {
+    background-color: rgba(23, 162, 184, 0.2) !important;
+    border-color: #17a2b8 !important;
+    color: #7dd3e0 !important;
+}
+
+/* Badges */
+body.dark-mode .badge {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .badge.bg-primary {
+    background-color: #4a9eff !important;
+}
+
+body.dark-mode .badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+/* Dropdown menus */
+body.dark-mode .nav-dropdown-menu {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .nav-dropdown-item {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .nav-dropdown-item:hover {
+    background-color: var(--border-color) !important;
+    color: #4a9eff !important;
+}
+
+body.dark-mode .nav-dropdown-item.active {
+    background-color: rgba(74, 158, 255, 0.2) !important;
+    color: #4a9eff !important;
+}
+
+/* Wrapper and container */
+body.dark-mode .wrapper {
+    background-color: transparent !important;
+}
+
+body.dark-mode .container-fluid {
+    background-color: transparent !important;
+}
+
+/* Links */
+body.dark-mode a {
+    color: #4a9eff !important;
+}
+
+body.dark-mode a:hover {
+    color: #6bb0ff !important;
+}
+
+/* Search card */
+body.dark-mode .search-card-content {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Tables */
+body.dark-mode table {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .table {
+    background-color: var(--card-bg) !important;
+}
+
+body.dark-mode .table td,
+body.dark-mode .table th {
+    border-color: var(--border-color) !important;
+}
+
+/* Borders */
+body.dark-mode .border,
+body.dark-mode .border-top,
+body.dark-mode .border-bottom,
+body.dark-mode .border-left,
+body.dark-mode .border-right {
+    border-color: var(--border-color) !important;
+}
+
+/* Background utilities - Tous les blancs deviennent noirs */
+body.dark-mode .bg-white,
+body.dark-mode [class*="bg-white"],
+body.dark-mode [style*="background: white"],
+body.dark-mode [style*="background: #fff"],
+body.dark-mode [style*="background: #ffffff"],
+body.dark-mode [style*="background-color: white"],
+body.dark-mode [style*="background-color: #fff"],
+body.dark-mode [style*="background-color: #ffffff"] {
+    background-color: var(--card-bg) !important;
+    background: var(--card-bg) !important;
+}
+
+body.dark-mode .bg-light,
+body.dark-mode [class*="bg-light"] {
+    background-color: var(--border-color) !important;
+}
+
+/* Tous les éléments avec fond blanc */
+body.dark-mode div[style*="background: white"],
+body.dark-mode div[style*="background: #fff"],
+body.dark-mode div[style*="background: #ffffff"],
+body.dark-mode div[style*="background-color: white"],
+body.dark-mode div[style*="background-color: #fff"],
+body.dark-mode div[style*="background-color: #ffffff"],
+body.dark-mode section[style*="background: white"],
+body.dark-mode section[style*="background: #fff"],
+body.dark-mode section[style*="background: #ffffff"],
+body.dark-mode section[style*="background-color: white"],
+body.dark-mode section[style*="background-color: #fff"],
+body.dark-mode section[style*="background-color: #ffffff"] {
+    background-color: var(--card-bg) !important;
+    background: var(--card-bg) !important;
+}
+
+/* Shadows */
+body.dark-mode .shadow-sm {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+body.dark-mode .shadow {
+    box-shadow: var(--shadow-md) !important;
+}
+
+body.dark-mode .shadow-lg {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Logo icon in dark mode */
+body.dark-mode .logo-icon-header {
+    box-shadow: 0 3px 10px rgba(74, 158, 255, 0.3) !important;
+}
+
+/* Footer */
+body.dark-mode footer {
+    background-color: var(--card-bg) !important;
+    border-top-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Card headers avec bg-white */
+body.dark-mode .card-header.bg-white,
+body.dark-mode .card-header[class*="bg-white"] {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Tous les éléments avec couleur blanche en texte */
+body.dark-mode .text-white,
+body.dark-mode [class*="text-white"],
+body.dark-mode [style*="color: white"],
+body.dark-mode [style*="color: #fff"],
+body.dark-mode [style*="color: #ffffff"] {
+    color: var(--text-color) !important;
+}
+
+/* Images et médias avec fond blanc */
+body.dark-mode img[style*="background: white"],
+body.dark-mode img[style*="background: #fff"],
+body.dark-mode img[style*="background: #ffffff"],
+body.dark-mode img[style*="background-color: white"],
+body.dark-mode img[style*="background-color: #fff"],
+body.dark-mode img[style*="background-color: #ffffff"] {
+    background-color: var(--card-bg) !important;
+    background: var(--card-bg) !important;
+}
+
+/* QR Code wrapper et autres wrappers blancs */
+body.dark-mode .qr-code-wrapper.bg-white,
+body.dark-mode .qr-code-wrapper[class*="bg-white"],
+body.dark-mode [class*="wrapper"][class*="bg-white"] {
+    background-color: var(--card-bg) !important;
+}
+
+/* SocialV-Lite specific elements */
+body.dark-mode .iq-card,
+body.dark-mode .iq-card-body,
+body.dark-mode .iq-card-header {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Modals et popups */
+body.dark-mode .modal-content,
+body.dark-mode .modal-header,
+body.dark-mode .modal-body,
+body.dark-mode .modal-footer {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Dropdowns */
+body.dark-mode .dropdown-menu {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .dropdown-item {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* List groups */
+body.dark-mode .list-group-item {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Pagination */
+body.dark-mode .page-link {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .page-item.active .page-link {
+    background-color: #4a9eff !important;
+    border-color: #4a9eff !important;
+}
+
+/* Breadcrumbs */
+body.dark-mode .breadcrumb {
+    background-color: var(--card-bg) !important;
+}
+
+body.dark-mode .breadcrumb-item a {
+    color: #4a9eff !important;
+}
+
+/* Progress bars */
+body.dark-mode .progress {
+    background-color: var(--border-color) !important;
+}
+
+/* Tooltips */
+body.dark-mode .tooltip-inner {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Popovers */
+body.dark-mode .popover {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .popover-header {
+    background-color: var(--border-color) !important;
+    border-bottom-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .popover-body {
+    color: var(--text-color) !important;
+}
+
+/* Spinners */
+body.dark-mode .spinner-border,
+body.dark-mode .spinner-grow {
+    color: #4a9eff !important;
+}
+
+/* Nav tabs */
+body.dark-mode .nav-tabs {
+    border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-mode .nav-tabs .nav-link {
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .nav-tabs .nav-link.active {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) var(--border-color) var(--card-bg) !important;
+    color: #4a9eff !important;
+}
+
+/* Accordion */
+body.dark-mode .accordion-item {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .accordion-button {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .accordion-button:not(.collapsed) {
+    background-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .accordion-body {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Carousel */
+body.dark-mode .carousel-item {
+    background-color: var(--card-bg) !important;
+}
+
+/* Offcanvas */
+body.dark-mode .offcanvas {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .offcanvas-header {
+    border-bottom-color: var(--border-color) !important;
+}
+
+/* Toast notifications */
+body.dark-mode .toast {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .toast-header {
+    background-color: var(--border-color) !important;
+    border-bottom-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Code blocks */
+body.dark-mode code,
+body.dark-mode pre {
+    background-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Blockquotes */
+body.dark-mode blockquote {
+    border-left-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Horizontal rules */
+body.dark-mode hr {
+    border-color: var(--border-color) !important;
+    opacity: 0.5;
+}
+
+/* Input groups */
+body.dark-mode .input-group-text {
+    background-color: var(--border-color) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Custom scrollbar for dark mode */
+body.dark-mode ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #4a4b4c;
+}
+

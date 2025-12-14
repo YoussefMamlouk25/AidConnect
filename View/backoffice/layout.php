@@ -29,6 +29,8 @@ function renderBackofficeLayout($page_title, $content, $additional_styles = [], 
     
     // Chemin relatif vers les assets de socialv-lite (depuis backoffice vers frontoffice/assets)
     $assets_path = '../frontoffice/assets';
+    // Chemin vers les assets du backoffice
+    $backoffice_assets = 'assets';
     ?>
 <!doctype html>
 <html lang="fr">
@@ -46,7 +48,7 @@ function renderBackofficeLayout($page_title, $content, $additional_styles = [], 
     <link rel="stylesheet" href="<?php echo $assets_path; ?>/vendor/font-awesome-line-awesome/css/all.min.css" />
     <link rel="stylesheet" href="<?php echo $assets_path; ?>/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css" />
     <!-- CSS backoffice -->
-    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="<?php echo $backoffice_assets; ?>/css/dashboard.css" />
     
     <!-- CSS additionnels -->
     <?php foreach ($additional_styles as $style): ?>
@@ -101,7 +103,7 @@ function renderBackofficeLayout($page_title, $content, $additional_styles = [], 
     <script src="<?php echo $assets_path; ?>/js/app.js"></script>
     
     <!-- Dashboard JS -->
-    <script src="dashboard.js"></script>
+    <script src="<?php echo $backoffice_assets; ?>/js/dashboard.js"></script>
     
     <!-- Scripts additionnels -->
     <?php foreach ($additional_scripts as $script): ?>

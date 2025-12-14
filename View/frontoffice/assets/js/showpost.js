@@ -248,7 +248,7 @@ function likePost(postId) {
   btn.style.opacity = '0.6';
   
   // Make AJAX request - use relative path
-  const apiUrl = '../../Model/post_like.php';
+  const apiUrl = 'api/post_like.php';
   
   console.log('Fetching from:', apiUrl, 'Current path:', window.location.pathname);
   
@@ -369,7 +369,10 @@ document.addEventListener('DOMContentLoaded', function() {
   likeButtons.forEach(btn => {
     const postId = btn.getAttribute('data-post-id');
     
-    const apiUrl = '../../Model/post_like.php';
+    let apiUrl = 'api/post_like.php';
+    if (!window.location.pathname.includes('/View/frontoffice/')) {
+      apiUrl = 'View/frontoffice/api/post_like.php';
+    }
     
     fetch(apiUrl, {
       method: 'POST',
@@ -432,7 +435,7 @@ function loadComments(postId) {
   
   commentsList.innerHTML = '<div class="text-center py-3"><i class="ri-loader-4-line spin"></i> Chargement...</div>';
   
-  fetch('../../Model/post_comment.php', {
+  fetch('api/post_comment.php', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -513,7 +516,7 @@ function addComment(postId) {
   // Disable input during request
   input.disabled = true;
   
-  fetch('../../Model/post_comment.php', {
+  fetch('api/post_comment.php', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

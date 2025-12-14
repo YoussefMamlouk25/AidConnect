@@ -35,6 +35,21 @@ function getInitials($name) {
     return substr($initials, 0, 2);
 }
 
+// Fonction pour obtenir le chemin de la photo de profil
+function getProfilePic($storedProfile) {
+    $defaultPic = 'assets/images/default_profile.png';
+    if (empty($storedProfile)) {
+        return $defaultPic;
+    }
+    $normalized = ltrim(trim($storedProfile), '/');
+    $relativePath = '../../' . $normalized;
+    $absolutePath = realpath(__DIR__ . '/../../' . $normalized);
+    if ($absolutePath !== false && file_exists($absolutePath)) {
+        return $relativePath;
+    }
+    return $defaultPic;
+}
+
 // Fonction pour formater la date
 function formatDate($date) {
     if (empty($date)) return '';
@@ -94,7 +109,7 @@ ob_start();
 
         <?php
         if ($list && is_array($list) && count($list) > 0) {
-            foreach ($list as $row) {
+                foreach ($list as $row) {
                     $numero = isset($row['Numéro']) ? $row['Numéro'] : (isset($row['numero']) ? $row['numero'] : '');
                     $authorName = htmlspecialchars($row['nom'] ?? 'Anonyme');
                     $initials = getInitials($authorName);
@@ -116,6 +131,10 @@ ob_start();
                     $mediaCount = count($mediaItems);
                     $idPost = $row['id_post'];
                     
+                    // Récupérer la photo de profil
+                    $storedProfile = trim($row['profile_pic'] ?? '');
+                    $profilePic = getProfilePic($storedProfile);
+                    
                     // Vérifier si l'utilisateur peut gérer ce post (auteur ou admin)
                     $postOwnerId = isset($row['id_user']) ? (int)$row['id_user'] : 0;
                     $isCreator = ($current_user_id > 0 && $postOwnerId > 0 && $postOwnerId == $current_user_id);
@@ -134,9 +153,16 @@ ob_start();
                          data-post-title="<?php echo htmlspecialchars(strtolower($titre)); ?>">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
+                                <?php if ($profilePic !== 'assets/images/default_profile.png' && file_exists(realpath(__DIR__ . '/../../' . ltrim($storedProfile, '/')))): ?>
+                                    <img src="<?php echo htmlspecialchars($profilePic); ?>" 
+                                         alt="<?php echo htmlspecialchars($authorName); ?>" 
+                                         class="rounded-circle me-3" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #e0e0e0;">
+                                <?php else: ?>
                                 <div class="avatar avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-weight: 600;">
                                     <?php echo $initials; ?>
                                 </div>
+                                <?php endif; ?>
                                 <div>
                                     <h6 class="mb-0"><?php echo $authorName; ?></h6>
                                     <small class="text-muted">
@@ -279,18 +305,18 @@ ob_start();
                     <?php
                 }
         } elseif ($list && is_array($list) && count($list) === 0) {
-            ?>
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="ri-inbox-line" style="font-size: 4rem; color: #ccc;"></i>
-                    <h5 class="mt-3">Aucun post pour le moment</h5>
-                    <p class="text-muted">Soyez le premier à créer un post !</p>
-                    <a href="addpost.php" class="btn btn-primary">
-                        <i class="ri-add-circle-line me-2"></i> Créer le premier post
-                    </a>
+                ?>
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="ri-inbox-line" style="font-size: 4rem; color: #ccc;"></i>
+                        <h5 class="mt-3">Aucun post pour le moment</h5>
+                        <p class="text-muted">Soyez le premier à créer un post !</p>
+                        <a href="addpost.php" class="btn btn-primary">
+                            <i class="ri-add-circle-line me-2"></i> Créer le premier post
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <?php
+                <?php
         } else {
             ?>
             <div class="card">

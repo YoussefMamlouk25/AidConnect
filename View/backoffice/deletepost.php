@@ -74,7 +74,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
 ?>
-<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="assets/css/dashboard.css">
 
 <?php if ($embed || $isAjax): ?>
 <div class="fragment-delete-post">
@@ -85,7 +85,7 @@ $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supprimer le Post</title>
-    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 <body class="delete-post-page">
     <div class="layout">

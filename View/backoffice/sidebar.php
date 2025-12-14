@@ -38,7 +38,7 @@
                     </a>
                 </li>
                 <li class="">
-                    <a href="#" onclick="loadContent('/projet-web/AidConnect/Controller/eventcontroller.php?action=list'); return false;" class="">
+                    <a href="#" onclick="loadContent('showevent.php'); return false;" class="">
                         <i class="ri-calendar-line"></i><span>Événements</span>
                     </a>
                 </li>

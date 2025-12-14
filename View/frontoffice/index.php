@@ -4,6 +4,28 @@ ini_set('display_errors', 1);
 
 require_once '../../config.php';
 require_once 'layout.php';
+require_once '../../Model/Event.php';
+
+// Récupérer les événements à venir (limite à 3)
+$db = Config::getConnexion();
+$eventModel = new Event($db);
+
+// Requête pour récupérer les événements à venir, triés par date croissante
+$query = "SELECT * FROM events 
+          WHERE statut = 'actif' 
+          AND date_event > NOW()
+          ORDER BY date_event ASC 
+          LIMIT 3";
+$stmt = $db->prepare($query);
+$stmt->execute();
+$upcomingEvents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Ajouter le nombre d'inscriptions et places restantes pour chaque événement
+foreach($upcomingEvents as &$event) {
+    $eventModel->setIdEvent($event['id_event']);
+    $event['inscriptions_count'] = $eventModel->countInscriptions();
+    $event['places_restantes'] = $event['nombre_places'] - $event['inscriptions_count'];
+}
 
 ob_start();
 ?>
@@ -27,6 +49,10 @@ ob_start();
             <a href="volunteer-view.php" class="btn-hero btn-hero-outline">
                 <i class="ri-price-tag-3-line"></i>
                 Voir les Offres
+            </a>
+            <a href="event.php?controller=event&action=liste" class="btn-hero btn-hero-outline">
+                <i class="ri-calendar-event-line"></i>
+                Voir les Événements
             </a>
         </div>
     </div>
@@ -139,6 +165,117 @@ ob_start();
         </div>
     </div>
 </div>
+
+<!-- Events Section -->
+<?php if(!empty($upcomingEvents)): ?>
+<div class="events-section" style="background: #f8f9fa; padding: 60px 0; margin-top: 60px;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title" style="color: #333; margin-bottom: 15px;">
+                <i class="ri-calendar-event-fill me-2" style="color: #667eea;"></i>
+                Événements à Venir
+            </h2>
+            <p class="text-muted">Découvrez les prochains événements organisés par notre communauté</p>
+        </div>
+        
+        <div class="row">
+            <?php foreach($upcomingEvents as $event): 
+                $dateEvent = new DateTime($event['date_event']);
+                $placesClass = 'text-success';
+                if($event['places_restantes'] <= 0) {
+                    $placesClass = 'text-danger';
+                } elseif($event['places_restantes'] <= 10) {
+                    $placesClass = 'text-warning';
+                }
+                
+                // Chemin de l'image
+                // Always use public/uploads/events/ directory
+                $image_path = '';
+                $image_full_path = '';
+                if(!empty($event['image'])) {
+                    // Extract filename from any path format
+                    $imagePath = str_replace('\\', '/', $event['image']);
+                    $filename = basename($imagePath); // Get just the filename
+                    
+                    // Always use public/uploads/events/ path
+                    $image_path = '../public/uploads/events/' . $filename;
+                    $image_full_path = __DIR__ . '/../../public/uploads/events/' . $filename;
+                }
+            ?>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm" style="border: none; border-radius: 15px; overflow: hidden; transition: transform 0.3s;">
+                        <div style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative; overflow: hidden;">
+                            <!-- Placeholder (background layer) -->
+                            <div class="d-flex align-items-center justify-content-center h-100 text-white" style="font-size: 4rem; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="ri-calendar-event-line"></i>
+                            </div>
+                            <!-- Event Image (foreground layer) -->
+                            <?php if(!empty($image_path)): ?>
+                                <img src="<?php echo htmlspecialchars($image_path); ?>" 
+                                     alt="<?php echo htmlspecialchars($event['titre']); ?>"
+                                     style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2;"
+                                     onerror="this.style.display='none';">
+                            <?php endif; ?>
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-light text-dark">
+                                    <?php echo htmlspecialchars($event['type_event']); ?>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: #333; font-weight: 600; margin-bottom: 15px;">
+                                <?php echo htmlspecialchars($event['titre']); ?>
+                            </h5>
+                            <p class="card-text text-muted" style="font-size: 14px; margin-bottom: 20px;">
+                                <?php 
+                                $description = htmlspecialchars($event['description']);
+                                echo strlen($description) > 100 ? substr($description, 0, 100) . '...' : $description;
+                                ?>
+                            </p>
+                            <div class="event-details mb-3" style="font-size: 13px;">
+                                <div class="mb-2">
+                                    <i class="ri-calendar-line me-2" style="color: #667eea;"></i>
+                                    <strong>Date:</strong> <?php echo $dateEvent->format('d/m/Y à H:i'); ?>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="ri-map-pin-line me-2" style="color: #667eea;"></i>
+                                    <strong>Lieu:</strong> <?php echo htmlspecialchars($event['lieu']); ?>
+                                </div>
+                                <div>
+                                    <i class="ri-group-line me-2" style="color: #667eea;"></i>
+                                    <strong>Places:</strong> 
+                                    <span class="<?php echo $placesClass; ?>">
+                                        <?php if($event['places_restantes'] > 0): ?>
+                                            <?php echo $event['places_restantes']; ?> restantes sur <?php echo $event['nombre_places']; ?>
+                                        <?php else: ?>
+                                            Complet
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <a href="event.php?controller=event&action=detail&id=<?php echo $event['id_event']; ?>" 
+                               class="btn btn-primary w-100" 
+                               style="background: #667eea; border: none; border-radius: 8px; padding: 10px;">
+                                <i class="ri-eye-line me-1"></i>
+                                Voir les détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="event.php?controller=event&action=liste" 
+               class="btn btn-outline-primary" 
+               style="padding: 12px 30px; border-radius: 8px; border-color: #667eea; color: #667eea;">
+                <i class="ri-calendar-event-line me-2"></i>
+                Voir tous les événements
+            </a>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php
 $content = ob_get_clean();

@@ -51,8 +51,8 @@ $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
 $showFullPage = !$embed && !$isAjax;
 ?>
-<link rel="stylesheet" href="dashboard.css">
-<link rel="stylesheet" href="offer_actions.css">
+<link rel="stylesheet" href="assets/css/dashboard.css">
+<link rel="stylesheet" href="assets/css/offer_actions.css">
 
 <?php if ($embed || $isAjax): ?>
 <div class="fragment-delete-offer">
@@ -63,8 +63,8 @@ $showFullPage = !$embed && !$isAjax;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supprimer l'offre</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="offer_actions.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/offer_actions.css">
 </head>
 <body class="delete-offer-page">
     <div class="layout">
@@ -145,7 +145,7 @@ $showFullPage = !$embed && !$isAjax;
         </div>
     </div>
 </div>
-<script src="offer.js"></script>
+<script src="assets/js/offer.js"></script>
 <?php if ($showFullPage): ?>
         </main>
     </div>

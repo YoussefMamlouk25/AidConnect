@@ -54,8 +54,11 @@ class OfferController
         $bd = Config::getConnexion();
         try {
             $q = $bd->prepare("SELECT o.*, 
+                    u.profile_pic,
                     (SELECT COUNT(*) FROM offer_like WHERE id_offer = o.id_offer) as likes_count
-                    FROM offer o ORDER BY o.id_offer DESC");
+                    FROM offer o 
+                    LEFT JOIN user u ON o.id_user = u.id_user
+                    ORDER BY o.id_offer DESC");
             $q->execute();
             return $q->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
@@ -185,9 +188,12 @@ class OfferController
         $bd = Config::getConnexion();
         try {
             $sql = "SELECT o.*, 
+                    u.profile_pic,
                     (SELECT COUNT(*) FROM update_offer WHERE id_offer = o.id_offer) as updates_count,
                     (SELECT COUNT(*) FROM offer_like WHERE id_offer = o.id_offer) as likes_count
-                    FROM offer o WHERE 1=1";
+                    FROM offer o 
+                    LEFT JOIN user u ON o.id_user = u.id_user
+                    WHERE 1=1";
             $params = [];
             
             // Search query (description only, nom is handled separately)

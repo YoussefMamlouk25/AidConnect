@@ -1,11 +1,16 @@
 <?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
 session_start();
+}
 require_once __DIR__ . '/../../Controller/updateoffercontroller.php';
 require_once __DIR__ . '/../../Controller/offercontroller.php';
 require_once __DIR__ . '/layout.php';
 
 $updateOfferC = new UpdateOfferController();
 $offerC = new OfferController();
+
+// Récupérer l'ID de l'utilisateur connecté
+$currentUserId = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : null;
 
 // Get the offer ID from URL (optional - to filter by offer)
 $id_offer = isset($_GET['id_offer']) ? (int)$_GET['id_offer'] : 0;
@@ -21,6 +26,21 @@ if ($id_offer > 0) {
 
 // Check if deletion was successful
 $deleted = isset($_GET['deleted']) && $_GET['deleted'] == '1';
+
+// Fonction pour obtenir le chemin de la photo de profil
+function getProfilePic($storedProfile) {
+    $defaultPic = 'assets/images/default_profile.png';
+    if (empty($storedProfile)) {
+        return $defaultPic;
+    }
+    $normalized = ltrim(trim($storedProfile), '/');
+    $relativePath = '../../' . $normalized;
+    $absolutePath = realpath(__DIR__ . '/../../' . $normalized);
+    if ($absolutePath !== false && file_exists($absolutePath)) {
+        return $relativePath;
+    }
+    return $defaultPic;
+}
 
 // Start output buffering to capture content
 ob_start();
@@ -167,6 +187,16 @@ ob_start();
             ?>
             <div class="facebook-post reply-card-enhanced <?php echo $is_creator_update ? '' : 'reply-type'; ?>">
               <div class="post-header">
+                <?php 
+                  $storedProfile = trim($update['profile_pic'] ?? '');
+                  $profilePic = getProfilePic($storedProfile);
+                  if ($profilePic !== 'assets/images/default_profile.png' && file_exists(realpath(__DIR__ . '/../../' . ltrim($storedProfile, '/')))):
+                ?>
+                  <img src="<?php echo htmlspecialchars($profilePic); ?>" 
+                       alt="Profile" 
+                       class="post-avatar rounded-circle" 
+                       style="width: 50px; height: 50px; object-fit: cover; border: 2px solid <?php echo $is_creator_update ? '#667eea' : '#28a745'; ?>; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <?php else: ?>
                 <div class="post-avatar" style="background: linear-gradient(135deg, <?php echo $is_creator_update ? '#667eea 0%, #764ba2 100%' : '#28a745 0%, #20c997 100%'; ?>); box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                   <?php if ($is_creator_update): ?>
                     <i class="ri-user-star-fill" style="font-size: 1.5rem;"></i>
@@ -174,6 +204,7 @@ ob_start();
                     <i class="ri-user-heart-fill" style="font-size: 1.5rem;"></i>
                   <?php endif; ?>
                 </div>
+                <?php endif; ?>
                 <div style="flex: 1;">
                   <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                     <strong class="text-dark d-flex align-items-center gap-1" style="font-size: 1.1rem;">
@@ -271,6 +302,12 @@ ob_start();
                   </button>
                 </div>
               </div>
+              <?php 
+                // Vérifier si l'utilisateur connecté est l'auteur de l'update
+                $updateUserId = isset($update['id_user']) ? (int)$update['id_user'] : null;
+                $isOwner = ($currentUserId !== null && $updateUserId !== null && $currentUserId === $updateUserId);
+              ?>
+              <?php if ($isOwner): ?>
               <div class="post-footer">
                 <a href="update-offer-edit.php?id=<?= (int)$update['id_update_offer'] ?>" class="btn btn-sm btn-outline-primary btn-action">
                   <i class="ri-edit-line"></i>
@@ -285,6 +322,14 @@ ob_start();
                   Print
                 </button>
               </div>
+              <?php else: ?>
+              <div class="post-footer">
+                <button class="btn btn-sm btn-outline-info btn-action" onclick="window.print()" title="Print this reply">
+                  <i class="ri-printer-line"></i>
+                  Print
+                </button>
+              </div>
+              <?php endif; ?>
             </div>
           <?php endforeach; ?>
         </div>
