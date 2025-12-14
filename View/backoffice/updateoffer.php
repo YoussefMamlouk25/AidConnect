@@ -102,13 +102,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $type_don
             );
 
+            // Désactiver l'affichage des erreurs pour éviter de corrompre le JSON
+            $oldDisplayErrors = ini_get('display_errors');
+            ini_set('display_errors', '0');
+            
+            // Capturer toute sortie du contrôleur
+            ob_start();
             $result = $offerController->updateOffer($offer, $id_offer);
+            $controllerOutput = ob_get_clean();
+            
+            // Réactiver l'affichage des erreurs
+            ini_set('display_errors', $oldDisplayErrors);
+            
             if ($result) {
-                $success = "Offre mise à jour avec succès.";
-                // Refresh data
-                $offerData = $offerController->getOfferById($id_offer);
+                // Si c'est une requête AJAX, retourner un JSON pour rediriger
+                if ($isAjax) {
+                    // Nettoyer toute sortie précédente
+                    while (ob_get_level()) {
+                        ob_end_clean();
+                    }
+                    header('Content-Type: application/json; charset=utf-8');
+                    header('Cache-Control: no-cache, must-revalidate');
+                    $response = array('success' => true, 'redirect' => 'showoffer.php');
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit();
+                } else {
+                    $success = "Offre mise à jour avec succès.";
+                    // Refresh data
+                    $offerData = $offerController->getOfferById($id_offer);
+                }
             } else {
                 $error = "Erreur lors de la mise à jour.";
+                if ($isAjax) {
+                    // Nettoyer toute sortie précédente
+                    while (ob_get_level()) {
+                        ob_end_clean();
+                    }
+                    header('Content-Type: application/json; charset=utf-8');
+                    header('Cache-Control: no-cache, must-revalidate');
+                    $response = array('success' => false, 'error' => $error);
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit();
+                }
             }
         }
     }
@@ -137,7 +172,7 @@ ob_start();
         </div>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data" action="updateoffer.php?id_offer=<?php echo urlencode($id_offer); ?><?php echo $isAjax ? '&ajax=1' : ''; ?>">
+    <form method="POST" enctype="multipart/form-data" action="updateoffer.php?id_offer=<?php echo urlencode($id_offer); ?><?php echo $isAjax ? '&ajax=1' : ''; ?>" id="editOfferForm">
         <p>
             <label>Nom :
                 <input type="text" name="nom" value="<?php echo e($offerData['nom']); ?>" required>
@@ -225,10 +260,10 @@ ob_start();
         </p>
 
         <p class="form-actions">
-            <button type="submit" class="btn btn-primary btn-submit">
-                <i class="ri-save-line me-1"></i> Mettre à jour
+            <button type="submit" class="btn btn-primary btn-submit" id="btnValidateOffer">
+                <i class="ri-save-line me-1"></i> Valider
             </button>
-            <a href="showoffer.php" class="btn btn-secondary btn-cancel" onclick="if(typeof loadContent === 'function'){ loadContent('showoffer.php'); return false; }">
+            <a href="showoffer.php" class="btn btn-secondary btn-cancel" onclick="if(typeof loadContent === 'function'){ event.preventDefault(); loadContent('showoffer.php?ajax=1'); return false; }">
                 <i class="ri-close-line me-1"></i> Annuler
             </a>
         </p>
@@ -238,8 +273,63 @@ ob_start();
 $content = ob_get_clean();
 
 if ($isAjax) {
+    echo '<link rel="stylesheet" href="assets/css/addform.css">';
     echo $content;
     echo '<script src="assets/js/media-dropzone.js"></script>';
+    echo "<script>
+    document.addEventListener(\"DOMContentLoaded\", function() {
+        const form = document.getElementById('editOfferForm');
+        const btnValidate = document.getElementById('btnValidateOffer');
+        
+        if (form && btnValidate && typeof loadContent === \"function\") {
+            form.addEventListener(\"submit\", function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const btn = btnValidate;
+                
+                // Désactiver le bouton et afficher le chargement
+                btn.disabled = true;
+                btn.innerHTML = '<i class=\"ri-loader-4-line me-1\"></i> Traitement...';
+                
+                fetch(form.action, {
+                    method: \"POST\",
+                    body: formData,
+                    headers: {
+                        \"X-Requested-With\": \"XMLHttpRequest\"
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(\"Erreur HTTP: \" + response.status);
+                    }
+                    const contentType = response.headers.get(\"content-type\");
+                    if (!contentType || !contentType.includes(\"application/json\")) {
+                        return response.text().then(text => {
+                            console.error(\"Réponse non-JSON reçue:\", text);
+                            throw new Error(\"Réponse invalide du serveur\");
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.redirect) {
+                        loadContent(data.redirect + \"?ajax=1\");
+                    } else {
+                        alert(data.error || \"Erreur lors de la mise à jour\");
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class=\"ri-save-line me-1\"></i> Valider';
+                    }
+                })
+                .catch(error => {
+                    console.error(\"Erreur:\", error);
+                    alert(\"Erreur lors de la mise à jour. Veuillez réessayer.\");
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class=\"ri-save-line me-1\"></i> Valider';
+                });
+            });
+        }
+    });
+    </script>";
 } else {
     renderBackofficeLayout('Modifier une Offre', $content, ['assets/css/addform.css'], ['assets/js/media-dropzone.js']);
 }
