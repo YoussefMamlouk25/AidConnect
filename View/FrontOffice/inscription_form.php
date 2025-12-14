@@ -1,10 +1,10 @@
-<!-- View/FrontOffice/inscription_form.php - VERSION FINALE -->
+<!-- View/FrontOffice/inscription_form.php - VERSION CORRIGÉE -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - <?php echo htmlspecialchars($this->event->getTitre()); ?></title>
+    <title>Inscription - <?php echo htmlspecialchars($event->getTitre()); ?></title>
     <style>
         * {
             margin: 0;
@@ -244,27 +244,27 @@
         
         <!-- Informations sur l'événement -->
         <div class="event-info">
-            <h2><?php echo htmlspecialchars($this->event->getTitre()); ?></h2>
+            <h2><?php echo htmlspecialchars($event->getTitre()); ?></h2>
             
             <div class="event-detail">
                 <span class="label">📅 Date :</span>
-                <?php echo date('d/m/Y', strtotime($this->event->getDateEvent())); ?>
+                <?php echo date('d/m/Y', strtotime($event->getDateEvent())); ?>
             </div>
             
             <div class="event-detail">
                 <span class="label">📍 Lieu :</span>
-                <?php echo htmlspecialchars($this->event->getLieu()); ?>
+                <?php echo htmlspecialchars($event->getLieu()); ?>
             </div>
             
             <div class="event-detail">
                 <span class="label">🎯 Type :</span>
-                <?php echo htmlspecialchars($this->event->getTypeEvent()); ?>
+                <?php echo htmlspecialchars($event->getTypeEvent()); ?>
             </div>
             
             <div class="event-detail">
                 <span class="label">👥 Places restantes :</span>
                 <strong style="color: <?php echo $places_restantes > 10 ? 'green' : 'orange'; ?>">
-                    <?php echo $places_restantes; ?> / <?php echo $this->event->getNombrePlaces(); ?>
+                    <?php echo $places_restantes; ?> / <?php echo $event->getNombrePlaces(); ?>
                 </strong>
             </div>
         </div>
@@ -294,7 +294,7 @@
             </div>
             
             <form id="inscription-form" method="POST" action="index.php?controller=inscription&action=store" novalidate>
-                <input type="hidden" name="id_event" value="<?php echo $this->event->getIdEvent(); ?>">
+                <input type="hidden" name="id_event" value="<?php echo $event->getIdEvent(); ?>">
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -370,7 +370,7 @@
                         maxlength="500"
                         required><?php echo htmlspecialchars($_SESSION['old_data']['pourquoi'] ?? ''); ?></textarea>
                     <small style="color: #666; font-size: 0.85rem;">
-                        ✍️ Minimum 20 caractères, maximum 500 caractères
+                        ✏️ Minimum 20 caractères, maximum 500 caractères
                     </small>
                 </div>
                 
@@ -378,15 +378,17 @@
                     <button type="submit" class="btn">
                         ✅ Confirmer mon inscription
                     </button>
-                    <a href="index.php?controller=event&action=detail&id=<?php echo $this->event->getIdEvent(); ?>" class="btn btn-secondary">
+                    <a href="index.php?controller=event&action=detail&id=<?php echo $event->getIdEvent(); ?>" class="btn btn-secondary">
                         ❌ Annuler
                     </a>
                 </div>
             </form>
         </div>
     </div>
-<!-- À ajouter avant </body> dans CHAQUE page -->
-<script src="assets/js/notifications.js"></script>
-<script src="assets/js/confirmation-handler.js"></script>
-<script src="assets/js/inscription_validation.js"></script></body>
+
+    <!-- Scripts JS -->
+    <script src="assets/js/notifications.js"></script>
+    <script src="assets/js/confirmation-handler.js"></script>
+    <script src="assets/js/inscription_validation.js"></script>
+</body>
 </html>

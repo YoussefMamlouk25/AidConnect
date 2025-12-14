@@ -1,7 +1,6 @@
 /**
- * assets/js/validation.js
- * ✅ VALIDATION COMPLÈTE - Tous les formulaires
- * Corrige les problèmes d'encodage et améliore l'UX
+ * assets/js/inscription_validation.js
+ * ✅ VALIDATION COMPLÈTE avec notification de succès d'inscription
  */
 
 // ============================================
@@ -76,7 +75,6 @@ class FormValidator {
     validateField(field) {
         const value = field.value.trim();
         const name = field.name;
-        const type = field.type;
         
         // Champs requis
         if (field.hasAttribute('required') && !value) {
@@ -405,7 +403,7 @@ class FormValidator {
 // PRÉVISUALISATION D'IMAGE
 // ============================================
 class ImagePreview {
-    constructor(inputId, previewContainerId = null) {
+    constructor(inputId) {
         this.input = document.getElementById(inputId);
         if (!this.input) return;
         
@@ -450,6 +448,37 @@ class ImagePreview {
 }
 
 // ============================================
+// 🎉 NOTIFICATION DE SUCCÈS D'INSCRIPTION
+// ============================================
+function checkInscriptionSuccess() {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get('success') === 'inscription') {
+        // Attendre que notificationManager soit prêt
+        const checkInterval = setInterval(() => {
+            if (window.notificationManager) {
+                clearInterval(checkInterval);
+                
+                setTimeout(() => {
+                    window.notificationManager.success(
+                        '🎉 Inscription réussie ! Vous recevrez une confirmation par email.',
+                        8000
+                    );
+                }, 500);
+                
+                // Nettoyer l'URL
+                const url = new URL(window.location);
+                url.searchParams.delete('success');
+                window.history.replaceState({}, document.title, url.pathname + url.search);
+            }
+        }, 100);
+        
+        // Timeout après 3 secondes
+        setTimeout(() => clearInterval(checkInterval), 3000);
+    }
+}
+
+// ============================================
 // INITIALISATION AUTOMATIQUE
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
@@ -474,6 +503,9 @@ document.addEventListener('DOMContentLoaded', function() {
         new ImagePreview('image');
         console.log('✅ Prévisualisation image initialisée');
     }
+    
+    // ✅ Vérifier succès d'inscription
+    checkInscriptionSuccess();
     
     console.log('✅ Système de validation prêt');
 });

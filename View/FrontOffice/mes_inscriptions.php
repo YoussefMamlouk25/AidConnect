@@ -2,7 +2,7 @@
 /**
  * View/FrontOffice/mes_inscriptions.php
  * 📋 Page où le client peut voir, modifier et supprimer ses inscriptions
- * ✅ CORRECTION COMPLÈTE: Tous les liens corrigés
+ * ✅ VERSION FINALE - Messages de notifications intégrés
  */
 
 
@@ -37,7 +37,7 @@ if (empty($email)) {
             
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background:white; 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 min-height: 100vh;
                 display: flex;
                 align-items: center;
@@ -158,7 +158,6 @@ if (empty($email)) {
                 </ul>
             </div>
             
-            <!-- ✅ CORRECTION: Formulaire qui soumet à lui-même -->
             <form method="GET" action="" novalidate>
                 <div class="form-group">
                     <label for="email">
@@ -177,7 +176,6 @@ if (empty($email)) {
                 </button>
             </form>
             
-            <!-- ✅ CORRECTION: Lien vers le routeur principal -->
             <a href="../../index.php?controller=event&action=liste" class="back-link">
                 ← Retour aux événements
             </a>
@@ -193,7 +191,7 @@ $inscriptionModel->setEmail($email);
 $stmt = $inscriptionModel->readByEmail();
 $inscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Stocker l'email en session pour faciliter la navigation
+// Stocker l'email en session
 $_SESSION['user_email'] = $email;
 ?>
 <!DOCTYPE html>
@@ -268,24 +266,6 @@ $_SESSION['user_email'] = $email;
             color: #1976d2;
             font-weight: 600;
             margin-top: 10px;
-        }
-        
-        .alert {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
         }
         
         .inscriptions-grid {
@@ -468,7 +448,7 @@ $_SESSION['user_email'] = $email;
 </head>
 <body>
     <div class="container">
-        <!-- ✅ CORRECTION: Navigation avec liens corrects -->
+        <!-- Navigation -->
         <div class="nav-links">
             <a href="../../index.php?controller=event&action=liste" class="nav-link">
                 📅 Liste des événements
@@ -476,7 +456,6 @@ $_SESSION['user_email'] = $email;
             <a href="mes_inscriptions.php?email=<?php echo urlencode($email); ?>" class="nav-link active">
                 📋 Mes inscriptions
             </a>
-            <!-- ✅ CORRECTION: Lien pour changer d'email -->
             <a href="mes_inscriptions.php" class="nav-link">
                 🔄 Changer d'email
             </a>
@@ -490,21 +469,6 @@ $_SESSION['user_email'] = $email;
                 📧 <?php echo htmlspecialchars($email); ?>
             </div>
         </div>
-        
-        <!-- Messages -->
-        <?php if(isset($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                ✅ <?php echo htmlspecialchars($_SESSION['success']); ?>
-            </div>
-            <?php unset($_SESSION['success']); ?>
-        <?php endif; ?>
-        
-        <?php if(isset($_SESSION['error'])): ?>
-            <div class="alert alert-error">
-                ❌ <?php echo htmlspecialchars($_SESSION['error']); ?>
-            </div>
-            <?php unset($_SESSION['error']); ?>
-        <?php endif; ?>
         
         <!-- Liste des inscriptions -->
         <?php if (!empty($inscriptions)): ?>
@@ -584,12 +548,9 @@ $_SESSION['user_email'] = $email;
                                 <p><?php echo nl2br(htmlspecialchars($inscription['pourquoi'])); ?></p>
                             </div>
                             
-                            <!-- ✅ CORRECTION: Actions avec les bons liens -->
+                            <!-- Actions -->
                             <div class="card-actions">
-                                
-                                
                                 <?php if (!$is_past && $inscription['statut'] !== 'annule'): ?>
-                                    <!-- ✅ CORRECTION: Liens vers les fichiers avec email encodé -->
                                     <a href="modifier_inscription.php?id=<?php echo $inscription['id_inscription']; ?>&email=<?php echo urlencode($email); ?>" 
                                        class="btn btn-warning">
                                         ✏️ Modifier
@@ -597,7 +558,7 @@ $_SESSION['user_email'] = $email;
                                     
                                     <a href="annuler_inscription.php?id=<?php echo $inscription['id_inscription']; ?>&email=<?php echo urlencode($email); ?>" 
                                        class="btn btn-danger"
-                                       onclick="return confirm('Êtes-vous sûr de vouloir annuler cette inscription ?')">
+                                      >
                                         🗑️ Annuler
                                     </a>
                                 <?php endif; ?>
@@ -616,8 +577,9 @@ $_SESSION['user_email'] = $email;
             </div>
         <?php endif; ?>
     </div>
- <!-- REMPLACER les lignes 380-381 par : -->
-<script src="/assets/js/notifications.js"></script>
-<script src="/assets/js/confirmation-handler.js"></script>
+
+    <!-- ✅ SCRIPTS JS POUR LES NOTIFICATIONS -->
+    <script src="../../assets/js/notifications.js"></script>
+    <script src="../../assets/js/confirmation-handler.js"></script>
 </body>
 </html>

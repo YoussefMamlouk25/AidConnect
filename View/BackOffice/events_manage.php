@@ -257,12 +257,9 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         <!-- Messages -->
         <?php if(isset($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                ✅ <?php echo htmlspecialchars($_SESSION['success']); ?>
-            </div>
+            
             <?php unset($_SESSION['success']); ?>
         <?php endif; ?>
-        
         <?php if(isset($_SESSION['error'])): ?>
             <div class="alert alert-error">
                 ❌ <?php echo htmlspecialchars($_SESSION['error']); ?>
@@ -366,5 +363,6 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endif; ?>
         </div>
     </div>
+  
 </body>
 </html>

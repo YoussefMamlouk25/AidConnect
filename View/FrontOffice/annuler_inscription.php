@@ -2,7 +2,7 @@
 /**
  * View/FrontOffice/annuler_inscription.php
  * 🗑️ Page pour annuler (supprimer) une inscription
- * ✅ CORRECTION: Chemins relatifs corrigés
+ * ✅ CORRECTION COMPLÈTE - Redirection avec success=inscription_cancelled
  */
 
 session_start();
@@ -56,7 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($inscriptionModel->delete()) {
             $_SESSION['success'] = "✅ Votre inscription a été annulée avec succès";
-            header('Location: mes_inscriptions.php?email=' . urlencode($email));
+            // ✅ CORRECTION: Ajouter le paramètre success=inscription_cancelled
+            header('Location: mes_inscriptions.php?email=' . urlencode($email) . '&success=inscription_cancelled');
             exit;
         } else {
             $_SESSION['error'] = "❌ Erreur lors de l'annulation de l'inscription";
@@ -325,5 +326,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+    
+    <!-- Scripts JS -->
+    <script src="../../assets/js/notifications.js"></script>
 </body>
 </html>

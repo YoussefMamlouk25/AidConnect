@@ -434,8 +434,6 @@ $submitAction = $isEdit ? 'update' : 'store';
 
 <!-- ✅ SCRIPT DE VALIDATION INLINE CORRIGÉ -->
 <!-- À ajouter avant </body> dans CHAQUE page -->
-<script src="assets/js/notifications.js"></script>
-<script src="assets/js/confirmation-handler.js"></script>
 <script src="assets/js/inscription_validation.js"></script>
 </body>
 </html>

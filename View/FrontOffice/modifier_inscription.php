@@ -2,7 +2,7 @@
 /**
  * View/FrontOffice/modifier_inscription.php
  * ✏️ Formulaire pour modifier une inscription
- * ✅ CORRECTION: Chemins relatifs corrigés
+ * ✅ CORRECTION COMPLÈTE - Redirection avec success=inscription_updated
  */
 
 session_start();
@@ -69,7 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($inscriptionModel->update()) {
             $_SESSION['success'] = "✅ Inscription modifiée avec succès !";
-            header('Location: mes_inscriptions.php?email=' . urlencode($email));
+            // ✅ CORRECTION: Ajouter le paramètre success=inscription_updated
+            header('Location: mes_inscriptions.php?email=' . urlencode($email) . '&success=inscription_updated');
             exit;
         } else {
             $errors[] = "Erreur lors de la modification";
@@ -284,21 +285,6 @@ if ($is_past) {
             margin-top: 30px;
         }
         
-        .field-error {
-            display: block;
-            color: #e74c3c;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            font-weight: 600;
-        }
-        
-        .char-counter {
-            text-align: right;
-            font-size: 0.9em;
-            margin-top: 5px;
-            font-weight: 600;
-        }
-        
         .info-box {
             background: #fff3cd;
             border-left: 4px solid #ffc107;
@@ -432,7 +418,7 @@ if ($is_past) {
                         maxlength="500"
                         required><?php echo htmlspecialchars($inscriptionModel->getPourquoi()); ?></textarea>
                     <small style="color: #666; font-size: 0.85rem;">
-                        ✏️ Minimum 20 caractères, maximum 500 caractères
+                        ✍️ Minimum 20 caractères, maximum 500 caractères
                     </small>
                 </div>
                 
@@ -447,8 +433,9 @@ if ($is_past) {
             </form>
         </div>
     </div>
-<!-- À ajouter avant </body> dans CHAQUE page -->
-<script src="assets/js/notifications.js"></script>
-<script src="assets/js/confirmation-handler.js"></script>
-<script src="assets/js/inscription_validation.js"></script></body>
+    
+    <!-- Scripts JS -->
+    <script src="../../assets/js/notifications.js"></script>
+    <script src="../../assets/js/inscription_validation.js"></script>
+</body>
 </html>

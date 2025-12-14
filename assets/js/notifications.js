@@ -1,7 +1,8 @@
 /**
  * assets/js/notifications.js
- * 🎉 Système de notifications pour les validations et confirmations
- * Messages de succès, erreur, info et avertissement avec animations
+ * 🎉 Système de notifications universel pour tout le site
+ * Gère: succès, erreurs, validations, confirmations
+ * Compatible avec TOUTES les pages PHP du projet
  */
 
 // ============================================
@@ -111,7 +112,7 @@ class NotificationManager {
 }
 
 // ============================================
-// MESSAGES DE VALIDATION SPÉCIFIQUES
+// MESSAGES DE VALIDATION
 // ============================================
 const ValidationMessages = {
     // Événements
@@ -133,7 +134,8 @@ const ValidationMessages = {
         confirmed: '✅ Inscription confirmée !',
         validating: 'ℹ️ Validation de votre inscription...',
         emailSent: '📧 Email de confirmation envoyé !',
-        alreadyRegistered: '⚠️ Vous êtes déjà inscrit à cet événement'
+        alreadyRegistered: '⚠️ Vous êtes déjà inscrit à cet événement',
+        cancelled: 'Votre inscription a été annulée avec succès'
     },
     
     // Validation formulaire
@@ -158,21 +160,17 @@ const ValidationMessages = {
         tooLong: '❌ Texte trop long (maximum autorisé: {max} caractères)',
         eventFull: '❌ Désolé, cet événement est complet !',
         networkError: '❌ Erreur de connexion. Veuillez réessayer.',
-        serverError: '❌ Erreur serveur. Contactez l\'administrateur.'
-    },
-    
-    // Actions utilisateur
-    user: {
-        saved: '💾 Données sauvegardées',
-        uploading: '⏳ Téléchargement en cours...',
-        processing: '⏳ Traitement en cours...',
-        loading: '⏳ Chargement...',
-        searching: '🔍 Recherche en cours...'
+        serverError: '❌ Erreur serveur. Contactez l\'administrateur.',
+        duplicate: '❌ Vous êtes déjà inscrit à cet événement avec cet email !',
+        notFound: '❌ Ressource introuvable',
+        unauthorized: '❌ Vous n\'avez pas l\'autorisation',
+        eventNotFound: '❌ Événement introuvable',
+        inscriptionNotFound: '❌ Inscription introuvable'
     }
 };
 
 // ============================================
-// VALIDATION EN TEMPS RÉEL AVEC NOTIFICATIONS
+// VALIDATION EN TEMPS RÉEL
 // ============================================
 class RealtimeValidator {
     constructor() {
@@ -230,6 +228,12 @@ class RealtimeValidator {
         const inscriptionForm = document.getElementById('inscription-form');
         if (inscriptionForm) {
             inscriptionForm.addEventListener('submit', (e) => this.validateInscriptionForm(e));
+        }
+        
+        // Modification inscription
+        const editInscriptionForm = document.getElementById('edit-inscription-form');
+        if (editInscriptionForm) {
+            editInscriptionForm.addEventListener('submit', (e) => this.validateInscriptionForm(e));
         }
     }
     
@@ -331,7 +335,6 @@ class RealtimeValidator {
     validateEventForm(e) {
         window.notificationManager.info(ValidationMessages.event.validating);
         
-        // Laisser la validation native se faire
         setTimeout(() => {
             if (e.defaultPrevented) return;
             window.notificationManager.success(ValidationMessages.form.allFieldsValid);
@@ -353,7 +356,6 @@ class RealtimeValidator {
         field.classList.add('valid');
         field.style.borderColor = '#28a745';
         
-        // Mini notification
         this.showFieldNotification(field, message, 'success');
     }
     
@@ -362,12 +364,10 @@ class RealtimeValidator {
         field.classList.remove('valid');
         field.style.borderColor = '#dc3545';
         
-        // Mini notification
         this.showFieldNotification(field, message, 'error');
     }
     
     showFieldNotification(field, message, type) {
-        // Supprimer ancienne notification
         this.clearFieldNotification(field);
         
         const notification = document.createElement('div');
@@ -376,7 +376,6 @@ class RealtimeValidator {
         
         field.parentNode.appendChild(notification);
         
-        // Auto-suppression après 3 secondes
         setTimeout(() => {
             notification.style.opacity = '0';
             setTimeout(() => notification.remove(), 300);
@@ -390,7 +389,7 @@ class RealtimeValidator {
 }
 
 // ============================================
-// CONFIRMATIONS AVEC CALLBACKS
+// CONFIRMATIONS
 // ============================================
 class ConfirmationDialog {
     show(message, onConfirm, onCancel = null) {
@@ -412,13 +411,11 @@ class ConfirmationDialog {
         overlay.appendChild(dialog);
         document.body.appendChild(overlay);
         
-        // Animation
         setTimeout(() => {
             overlay.classList.add('show');
             dialog.classList.add('show');
         }, 10);
         
-        // Événements
         dialog.querySelector('.btn-confirm').addEventListener('click', () => {
             this.close(overlay);
             if (onConfirm) onConfirm();
@@ -444,10 +441,94 @@ class ConfirmationDialog {
 }
 
 // ============================================
-// STYLES CSS
+// GESTIONNAIRE DE MESSAGES URL + SESSION
+// ============================================
+class MessageHandler {
+    constructor() {
+        this.handleMessages();
+    }
+    
+    handleMessages() {
+        // Attendre que notificationManager soit prêt
+        setTimeout(() => {
+            this.handleURLParams();
+            this.handleSessionMessages();
+        }, 500);
+    }
+    
+    handleURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        const currentPage = window.location.pathname;
+        
+        // Succès
+        const successType = params.get('success');
+        if (successType && window.notificationManager) {
+            const messages = {
+                'inscription': '🎊 Inscription réussie ! Vous recevrez une confirmation par email.',
+                'event_created': '🎉 Événement créé avec succès ! Il est maintenant visible sur le site.',
+                'event_updated': ' Événement modifié avec succès !',
+                'event_deleted': '🗑️ Événement supprimé avec succès.',
+                'inscription_updated': ' Vos informations ont été mises à jour avec succès !',
+                'inscription_cancelled': ' Votre inscription a été annulée avec succès.',
+                'inscription_confirmed': ' Inscription confirmée !'
+            };
+            
+            const message = messages[successType] || '✅ Opération réussie !';
+            window.notificationManager.success(message, 8000);
+            
+            this.cleanURL('success');
+        }
+        
+        // Erreurs
+        const errorType = params.get('error');
+        if (errorType && window.notificationManager) {
+            const messages = {
+                'duplicate': 'Vous êtes déjà inscrit à cet événement avec cet email !',
+                'full': 'Désolé, cet événement est complet ! Il n\'y a plus de places disponibles.',
+                'not_found': '❌ Ressource introuvable',
+                'unauthorized': '❌ Vous n\'avez pas l\'autorisation',
+                'event_not_found': '❌ Événement introuvable',
+                'inscription_not_found': '❌ Inscription introuvable'
+            };
+            
+            const message = messages[errorType] || '❌ Une erreur est survenue';
+            window.notificationManager.error(message, 8000);
+            
+            this.cleanURL('error');
+        }
+    }
+    
+    handleSessionMessages() {
+        // Messages de succès PHP
+        const successAlert = document.querySelector('.alert-success');
+        if (successAlert && window.notificationManager) {
+            const message = successAlert.textContent.trim();
+            window.notificationManager.success(message, 7000);
+            successAlert.style.display = 'none';
+        }
+        
+        // Messages d'erreur PHP (sans les listes de validation)
+        const errorAlert = document.querySelector('.alert-error');
+        if (errorAlert && window.notificationManager) {
+            if (!errorAlert.querySelector('ul')) {
+                const message = errorAlert.textContent.trim();
+                window.notificationManager.error(message, 8000);
+                errorAlert.style.display = 'none';
+            }
+        }
+    }
+    
+    cleanURL(param) {
+        const url = new URL(window.location);
+        url.searchParams.delete(param);
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    }
+}
+
+// ============================================
+// STYLES CSS INJECTÉS
 // ============================================
 const styles = `
-<style>
 /* Conteneur de notifications */
 .notification-container {
     position: fixed;
@@ -684,46 +765,37 @@ const styles = `
         transform: translateY(-100px);
     }
 }
-</style>
 `;
 
 // ============================================
-// INITIALISATION
+// INITIALISATION GLOBALE
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
     // Injecter les styles
     if (!document.getElementById('notification-styles')) {
-        const styleElement = document.createElement('div');
+        const styleElement = document.createElement('style');
         styleElement.id = 'notification-styles';
-        styleElement.innerHTML = styles;
-        document.head.appendChild(styleElement.firstElementChild);
+        styleElement.textContent = styles;
+        document.head.appendChild(styleElement);
     }
     
-    // Initialiser le gestionnaire de notifications
+    // Initialiser tous les composants
     window.notificationManager = new NotificationManager();
-    
-    // Initialiser le validateur temps réel
     window.realtimeValidator = new RealtimeValidator();
-    
-    // Initialiser les dialogs de confirmation
     window.confirmationDialog = new ConfirmationDialog();
+    window.messageHandler = new MessageHandler();
     
-    // Exposer les messages pour utilisation externe
+    // Exposer les messages
     window.ValidationMessages = ValidationMessages;
     
     console.log('🎉 Système de notifications complet initialisé');
-    
-    // Message de bienvenue (optionnel)
-    setTimeout(() => {
-        window.notificationManager.info('👋 Bienvenue ! tu doit complete se formulaire', 3000);
-    }, 500);
 });
 
 // ============================================
-// API PUBLIQUE POUR UTILISATION EXTERNE
+// API PUBLIQUE
 // ============================================
 
-// Fonction helper pour afficher rapidement une notification
+// Fonction helper pour afficher une notification
 function showNotification(message, type = 'info', duration = 5000) {
     if (window.notificationManager) {
         return window.notificationManager.show(message, type, duration);
@@ -736,7 +808,6 @@ function showConfirmation(message, onConfirm, onCancel) {
     if (window.confirmationDialog) {
         window.confirmationDialog.show(message, onConfirm, onCancel);
     } else {
-        // Fallback
         if (confirm(message)) {
             onConfirm();
         } else if (onCancel) {

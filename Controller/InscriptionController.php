@@ -1,7 +1,7 @@
 <?php
 /**
  * Controller/InscriptionController.php
- * ✅ VERSION CORRIGÉE - Variables passées correctement à la vue
+ * ✅ VERSION FINALE CORRIGÉE - Toutes les redirections fonctionnelles
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -31,7 +31,6 @@ class InscriptionController {
     
     /**
      * FRONTOFFICE - Afficher le formulaire d'inscription
-     * ✅ CORRECTION: Variables correctement passées à la vue
      */
     public function create() {
         if(!isset($_GET['id_event'])) {
@@ -60,15 +59,15 @@ class InscriptionController {
             exit;
         }
         
-        // ✅ CORRECTION: Passer les variables à la vue correctement
-        // La vue utilise $this->event, donc on doit le rendre disponible
-        $event = $this->event; // Pour compatibilité avec la vue
+        // Passer les variables à la vue
+        $event = $this->event;
         
         require_once __DIR__ . '/../View/FrontOffice/inscription_form.php';
     }
     
     /**
      * FRONTOFFICE - Enregistrer une inscription
+     * ✅ CORRECTION: Redirection error=duplicate vers le formulaire
      */
     public function store() {
         if($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -76,63 +75,69 @@ class InscriptionController {
             exit;
         }
         
-        if(!isset($_POST['id_event'])) {
-            $_SESSION['error'] = "Événement introuvable";
-            header('Location: index.php?controller=event&action=liste');
-            exit;
-        }
+        $id_event = $_POST['id_event'];
+        $email = trim($_POST['email']);
         
-        // Validation côté serveur
+        // Validation des données
         $errors = $this->validateInscriptionData($_POST);
         
         if(!empty($errors)) {
             $_SESSION['errors'] = $errors;
             $_SESSION['old_data'] = $_POST;
-            header('Location: index.php?controller=inscription&action=create&id_event=' . $_POST['id_event']);
+            header('Location: index.php?controller=inscription&action=create&id_event=' . $id_event);
             exit;
         }
         
-        // Vérifier si déjà inscrit
-        $this->inscription->setIdEvent($_POST['id_event']);
-        $this->inscription->setEmail($_POST['email']);
+        // ✅ VÉRIFIER SI EMAIL EXISTE DÉJÀ
+        $query = "SELECT COUNT(*) as count FROM inscriptions WHERE id_event = :id_event AND email = :email";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':id_event', $id_event);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        if($this->inscription->checkDuplicate()) {
-            $_SESSION['error'] = "❌ Vous êtes déjà inscrit à cet événement !";
-            header('Location: index.php?controller=event&action=detail&id=' . $_POST['id_event']);
+        if($result['count'] > 0) {
+            // ✅ CORRECTION: Redirige vers le FORMULAIRE avec error=duplicate
+            error_log("⚠️ Email déjà inscrit: $email pour événement $id_event");
+            $_SESSION['error'] = "❌ Vous êtes déjà inscrit à cet événement avec cet email !";
+            header('Location: index.php?controller=inscription&action=create&id_event=' . $id_event . '&error=duplicate');
             exit;
         }
         
-        // Vérifier les places disponibles
-        $this->event->setIdEvent($_POST['id_event']);
+        // ✅ VÉRIFIER LES PLACES
+        $this->event->setIdEvent($id_event);
         $this->event->readOne();
         $inscriptions_count = $this->event->countInscriptions();
         $places_restantes = $this->event->getNombrePlaces() - $inscriptions_count;
         
         if($places_restantes <= 0) {
-            $_SESSION['error'] = "❌ Désolé, cet événement est maintenant complet !";
-            header('Location: index.php?controller=event&action=detail&id=' . $_POST['id_event']);
+            error_log("⚠️ Événement complet: $id_event");
+            header('Location: index.php?controller=event&action=detail&id=' . $id_event . '&error=full');
             exit;
         }
         
-        // Sauvegarder l'inscription
+        // ✅ CRÉER L'INSCRIPTION
+        $this->inscription->setIdEvent($id_event);
         $this->inscription->setNom($_POST['nom']);
         $this->inscription->setPrenom($_POST['prenom']);
+        $this->inscription->setEmail($email);
         $this->inscription->setTelephone($_POST['telephone']);
         $this->inscription->setPourquoi($_POST['pourquoi']);
         
         if($this->inscription->create()) {
-            $_SESSION['success'] = "✅ Inscription réussie ! Vous recevrez une confirmation par email.";
+            unset($_SESSION['old_data']);
+            unset($_SESSION['errors']);
             
-            // TODO: Envoyer email de confirmation si PHPMailer est configuré
-            // $this->sendConfirmationEmail($_POST['email'], ...);
+            error_log("✅ Inscription créée avec succès pour: $email");
             
-            header('Location: index.php?controller=event&action=detail&id=' . $_POST['id_event']);
+            // ✅ REDIRECTION AVEC success=inscription
+            header('Location: index.php?controller=event&action=detail&id=' . $id_event . '&success=inscription');
+            exit;
         } else {
-            $_SESSION['error'] = "❌ Erreur lors de l'inscription";
-            $_SESSION['old_data'] = $_POST;
-            header('Location: index.php?controller=inscription&action=create&id_event=' . $_POST['id_event']);
+            $_SESSION['errors'] = ["Erreur lors de l'enregistrement"];
+            header('Location: index.php?controller=inscription&action=create&id_event=' . $id_event);
+            exit;
         }
-        exit;
     }
     
     /**
