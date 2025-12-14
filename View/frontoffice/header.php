@@ -13,6 +13,10 @@ $eventController = isset($_GET['controller']) ? $_GET['controller'] : '';
 $eventAction = isset($_GET['action']) ? $_GET['action'] : '';
 $isEventList = ($isEventPage && $eventController == 'event' && $eventAction == 'liste');
 $isMesInscriptions = ($isEventPage && $eventController == 'inscription' && $eventAction == 'mes_inscriptions');
+
+// Détecter si on est sur une page de réclamation
+$isReclamationPage = (in_array($current_page, ['reclamation.php', 'mes_reclamations.php']));
+$isMesReclamations = ($current_page == 'mes_reclamations.php');
 ?>
 <header class="header bg-white shadow-sm mb-4" id="mainHeader" style="position: relative; z-index: 1000; overflow: visible !important;">
     <div class="container-fluid" style="overflow: visible !important;">
@@ -81,6 +85,22 @@ $isMesInscriptions = ($isEventPage && $eventController == 'inscription' && $even
                             </a>
                             <a href="event.php?controller=inscription&action=mes_inscriptions" class="nav-dropdown-item <?php echo $isMesInscriptions ? 'active' : ''; ?>">
                                 <i class="ri-file-list-3-line me-2"></i> Mes Inscriptions
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Réclamations Dropdown -->
+                    <div class="nav-dropdown">
+                        <button class="btn btn-sm <?php echo ($isReclamationPage || $isMesReclamations) ? 'btn-primary' : 'btn-outline-primary'; ?> nav-dropdown-toggle" type="button">
+                            <i class="ri-mail-line me-1"></i> <span class="d-none d-sm-inline">Réclamations</span>
+                            <i class="ri-arrow-down-s-line ms-1"></i>
+                        </button>
+                        <div class="nav-dropdown-menu">
+                            <a href="reclamation.php" class="nav-dropdown-item <?php echo ($current_page == 'reclamation.php') ? 'active' : ''; ?>">
+                                <i class="ri-add-circle-line me-2"></i> Nouvelle réclamation
+                            </a>
+                            <a href="mes_reclamations.php" class="nav-dropdown-item <?php echo $isMesReclamations ? 'active' : ''; ?>">
+                                <i class="ri-mail-line me-2"></i> Mes réclamations
                             </a>
                         </div>
                     </div>

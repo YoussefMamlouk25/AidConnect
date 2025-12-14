@@ -46,7 +46,7 @@ ob_start();
                     Nous examinerons votre demande dans les plus brefs délais.
                 </p>
 
-                <form method="POST" action="../../Controller/reclamationcontroller.php" class="reclamation-form">
+                <form method="POST" action="../../Controller/reclamationcontroller.php" class="reclamation-form" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="add">
                     
                     <div class="mb-3">
@@ -67,14 +67,10 @@ ob_start();
 
                     <div class="mb-3">
                         <label class="form-label">
-                            <i class="ri-price-tag-3-line me-2"></i>Type de réclamation
+                            <i class="ri-attachment-line me-2"></i>Pièce jointe (optionnel)
                         </label>
-                        <select name="type" class="form-select">
-                            <option value="bug">Bug technique</option>
-                            <option value="content">Contenu inapproprié</option>
-                            <option value="user">Problème avec un utilisateur</option>
-                            <option value="other">Autre</option>
-                        </select>
+                        <input type="file" name="media" class="form-control" accept="image/*,video/*,application/pdf">
+                        <small class="text-muted">Formats acceptés: images, vidéos, PDF</small>
                     </div>
 
                     <div class="d-grid gap-2">
