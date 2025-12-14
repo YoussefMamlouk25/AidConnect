@@ -61,7 +61,7 @@ header .btn-outline-primary:hover {
     font-size: 18px;
 }
 
-/* Search Card */
+/* Search Card - Global (fixed overlay) */
 .search-card {
     position: fixed;
     top: 0;
@@ -80,6 +80,43 @@ header .btn-outline-primary:hover {
 
 .search-card.active {
     opacity: 1;
+}
+
+/* Search Card - Inline (for volunteer-view.php) */
+.search-card.mb-4 {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    background-color: #ffffff !important;
+    z-index: 1 !important;
+    display: block !important;
+    padding: 24px !important;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e4e6eb;
+    margin-bottom: 1rem;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: all 0.3s ease;
+}
+
+.search-card.mb-4.active {
+    opacity: 1 !important;
+    max-height: 2000px !important;
+    transform: scale(1);
+    overflow: visible;
+}
+
+.search-card.mb-4[style*="display: block"] {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    max-height: 2000px !important;
+    overflow: visible !important;
 }
 
 .search-card-content {
@@ -359,6 +396,119 @@ header .btn-outline-primary:hover {
     .advanced-filters-inner .row .col-6 {
         width: 100%;
         margin-bottom: 12px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE HEADER STYLES
+   ============================================ */
+
+/* Header Navigation */
+.header-nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.header-nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* Header Actions */
+.header-actions {
+    flex-wrap: wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+    .header {
+        padding: 12px 8px !important;
+    }
+    
+    .header .row {
+        margin: 0;
+    }
+    
+    .header .col-12 {
+        padding: 4px 0;
+    }
+    
+    /* Logo adjustments for mobile */
+    .logo-icon-header {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 16px !important;
+    }
+    
+    .header-logo h4,
+    .header-logo h5 {
+        font-size: 1rem !important;
+    }
+    
+    /* Button adjustments for mobile */
+    header .btn-sm {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        min-height: 36px !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Navigation adjustments */
+    .header-nav {
+        justify-content: flex-start !important;
+        padding: 4px 0;
+    }
+    
+    /* Actions adjustments */
+    .header-actions {
+        justify-content: flex-end !important;
+        padding: 4px 0;
+    }
+    
+    /* Dropdown menu adjustments for mobile */
+    .nav-dropdown-menu {
+        position: fixed !important;
+        top: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) translateY(10px) !important;
+        min-width: 200px !important;
+        z-index: 1050 !important;
+    }
+    
+    .nav-dropdown.active .nav-dropdown-menu {
+        transform: translateX(-50%) translateY(0) !important;
+    }
+    
+    /* Backoffice button mobile */
+    .btn-backoffice {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        min-height: 36px !important;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 575px) {
+    .header {
+        padding: 10px 4px !important;
+    }
+    
+    header .btn-sm {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+        min-height: 32px !important;
+    }
+    
+    .logo-icon-header {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 14px !important;
+    }
+    
+    .header-logo h5 {
+        font-size: 0.9rem !important;
     }
 }
 

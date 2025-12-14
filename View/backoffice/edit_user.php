@@ -73,26 +73,6 @@ ob_start();
                         </select>
                     </div>
 
-                    <div class="col-12">
-                        <hr class="my-3">
-                        <h5 class="mb-3"><i class="ri-lock-password-line me-2"></i>Changer le mot de passe</h5>
-                        <div class="alert alert-info">
-                            <i class="ri-information-line me-2"></i>
-                            <small>Laissez vide pour ne pas modifier le mot de passe.</small>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Nouveau mot de passe</label>
-                        <input type="password" name="password" class="form-control" placeholder="Laisser vide pour ne pas changer" autocomplete="new-password">
-                        <small class="text-muted">Minimum 6 caractères</small>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Confirmer le mot de passe</label>
-                        <input type="password" name="password_confirm" class="form-control" placeholder="Confirmer le nouveau mot de passe" autocomplete="new-password">
-                    </div>
-
                     <div class="col-12 d-flex justify-content-end gap-2">
                         <a href="users.php" class="btn btn-outline-secondary">Annuler</a>
                         <button type="submit" class="btn btn-primary">Enregistrer</button>

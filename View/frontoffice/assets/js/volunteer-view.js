@@ -82,7 +82,7 @@ function likeOffer(offerId) {
   btn.style.opacity = '0.6';
   
   // Make AJAX request
-  const apiUrl = '../../Model/offer_like.php';
+  const apiUrl = 'api/offer_like.php';
   
   console.log('Fetching from:', apiUrl);
   
@@ -213,9 +213,9 @@ document.addEventListener('DOMContentLoaded', function() {
     likeButtons.forEach(btn => {
       const offerId = btn.getAttribute('data-offer-id');
       
-    const apiUrl = '../../Model/offer_like.php';
-    
-    fetch(apiUrl, {
+      const apiUrl = 'api/offer_like.php';
+      
+      fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

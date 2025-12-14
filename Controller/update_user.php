@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+//ff
 require_once '../Model/user.php';
 
 // Only admin can access
@@ -19,6 +19,7 @@ $name   = trim($_POST['name'] ?? '');
 $email  = trim($_POST['email'] ?? '');
 $tel    = trim($_POST['tel'] ?? '');
 $region = trim($_POST['region'] ?? '');
+$role   = trim($_POST['role'] ?? 'volunteer');
 $role   = ($_POST['role'] ?? 'user') === 'admin' ? 'admin' : 'user';
 
 $password = trim($_POST['password'] ?? '');

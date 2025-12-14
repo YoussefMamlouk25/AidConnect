@@ -110,8 +110,8 @@ $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
 $showFullPage = !$embed && !$isAjax;
 ?>
-<link rel="stylesheet" href="dashboard.css">
-<link rel="stylesheet" href="offer_actions.css">
+<link rel="stylesheet" href="assets/css/dashboard.css">
+<link rel="stylesheet" href="assets/css/offer_actions.css">
 
 <?php if ($embed || $isAjax): ?>
 <div class="fragment-updateoffer-edit">
@@ -122,8 +122,8 @@ $showFullPage = !$embed && !$isAjax;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier la mise à jour</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="offer_actions.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/offer_actions.css">
 </head>
 <body>
 <div class="layout">
@@ -221,5 +221,5 @@ $showFullPage = !$embed && !$isAjax;
 }
 </style>
 
-<script src="updateoffer.js"></script>
+<script src="assets/js/updateoffer.js"></script>
 

@@ -33,12 +33,12 @@
                     </a>
                 </li>
                 <li class="">
-                    <a href="#" onclick="loadContent('/projet-web/AidConnect/Controller/reclamationcontroller.php?action=list'); return false;" class="">
+                    <a href="#" onclick="loadContent('../../Controller/reclamationcontroller.php?action=list&embed=1'); return false;" class="">
                         <i class="ri-mail-line"></i><span>Réclamations</span>
                     </a>
                 </li>
                 <li class="">
-                    <a href="#" onclick="loadContent('/projet-web/AidConnect/Controller/eventcontroller.php?action=list'); return false;" class="">
+                    <a href="#" onclick="loadContent('showevent.php'); return false;" class="">
                         <i class="ri-calendar-line"></i><span>Événements</span>
                     </a>
                 </li>

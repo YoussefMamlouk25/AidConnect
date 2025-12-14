@@ -1,754 +1,824 @@
 <?php
+require_once 'layout.php';
 require_once '../../config.php';
+require_once '../../Model/Event.php';
+require_once '../../Model/user.php';
 require_once '../../Controller/postcontroller.php';
 require_once '../../Controller/offercontroller.php';
-require_once '../../Controller/postlikecontroller.php';
-require_once '../../Controller/offerlikecontroller.php';
-require_once '../../Controller/postcommentcontroller.php';
-require_once '../../Controller/updateoffercontroller.php';
-require_once '../../Controller/postupdatecontroller.php';
 
-// Initialize controllers
+// Récupérer les statistiques
+$db = Config::getConnexion();
+
+// Compter les posts
 $postController = new PostController();
-$offerController = new OfferController();
-$postLikeController = new PostLikeController();
-$offerLikeController = new OfferLikeController();
-$postCommentController = new PostCommentController();
-$updateOfferController = new UpdateOfferController();
-$postUpdateController = new PostUpdateController();
-
-// Get all data
 $allPosts = $postController->getAllPosts();
+$totalPosts = count($allPosts);
+
+// Compter les offres
+$offerController = new OfferController();
 $allOffers = $offerController->getAllOffers();
+$totalOffers = count($allOffers);
 
-// ========== POSTS STATISTICS ==========
-$totalPosts = is_array($allPosts) ? count($allPosts) : 0;
-$totalPostLikes = 0;
-$totalComments = 0;
-$resolvedPosts = 0;
+// Compter les utilisateurs
+$userModel = new UserModel();
+$allUsers = $userModel->getAllUsers();
+$totalUsers = count($allUsers);
 
-if (is_array($allPosts)) {
-    foreach ($allPosts as $post) {
-        $totalPostLikes += isset($post['likes_count']) ? (int)$post['likes_count'] : 0;
-        $totalComments += isset($post['comments_count']) ? (int)$post['comments_count'] : 0;
-        $updates = $postUpdateController->getPostUpdatesByPostId($post['id_post']);
-        if (count($updates) > 0) {
-            $resolvedPosts++;
-        }
-    }
-}
+// Compter les événements
+$eventModel = new Event($db);
+$stmt = $eventModel->readAll();
+$allEvents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$totalEvents = count($allEvents);
 
-$activePosts = $totalPosts - $resolvedPosts;
-$resolutionRate = $totalPosts > 0 ? round(($resolvedPosts / $totalPosts) * 100, 1) : 0;
-
-// Posts time-based statistics (last 7 days)
-$last7DaysPosts = [];
-$last7DaysLabels = [];
-for ($i = 6; $i >= 0; $i--) {
-    $date = date('Y-m-d', strtotime("-$i days"));
-    $last7DaysLabels[] = date('d/m', strtotime("-$i days"));
-    $last7DaysPosts[$date] = 0;
-}
-
-if (is_array($allPosts)) {
-    foreach ($allPosts as $post) {
-        if (isset($post['date_creation'])) {
-            $postDate = date('Y-m-d', strtotime($post['date_creation']));
-            if (isset($last7DaysPosts[$postDate])) {
-                $last7DaysPosts[$postDate]++;
-            }
-        }
-    }
-}
-
-// Posts by region
+// Statistiques détaillées - Posts par région
 $postsByRegion = [];
-if (is_array($allPosts)) {
-    foreach ($allPosts as $post) {
-        $region = isset($post['region']) && !empty($post['region']) ? $post['region'] : 'Non spécifiée';
-        if (!isset($postsByRegion[$region])) {
-            $postsByRegion[$region] = 0;
-        }
-        $postsByRegion[$region]++;
-    }
+foreach ($allPosts as $post) {
+    $region = $post['region'] ?? 'Non spécifiée';
+    $postsByRegion[$region] = ($postsByRegion[$region] ?? 0) + 1;
 }
 
-$postsData = array_values($last7DaysPosts);
-$regionsLabels = array_keys($postsByRegion);
-$regionsData = array_values($postsByRegion);
-
-// ========== OFFERS STATISTICS ==========
-$totalOffers = is_array($allOffers) ? count($allOffers) : 0;
-$totalOfferLikes = 0;
-$totalOfferUpdates = 0;
-$offersWithUpdates = 0;
-
-if (is_array($allOffers)) {
-    foreach ($allOffers as $offer) {
-        $totalOfferLikes += isset($offer['likes_count']) ? (int)$offer['likes_count'] : 0;
-        $updates = $updateOfferController->getUpdateOffersByOfferId($offer['id_offer']);
-        $updateCount = count($updates);
-        $totalOfferUpdates += $updateCount;
-        if ($updateCount > 0) {
-            $offersWithUpdates++;
-        }
-    }
-}
-
-$offersWithoutUpdates = $totalOffers - $offersWithUpdates;
-$updateRate = $totalOffers > 0 ? round(($offersWithUpdates / $totalOffers) * 100, 1) : 0;
-
-// Offers time-based statistics (last 7 days) - using id_offer as proxy
-$last7DaysOffers = [];
-for ($i = 6; $i >= 0; $i--) {
-    $last7DaysOffers[] = 0; // Initialize with zeros
-}
-
-// Distribute offers across last 7 days (simple distribution)
-if (is_array($allOffers) && $totalOffers > 0) {
-    $offersPerDay = floor($totalOffers / 7);
-    $remaining = $totalOffers % 7;
-    for ($i = 0; $i < 7; $i++) {
-        $last7DaysOffers[$i] = $offersPerDay + ($i < $remaining ? 1 : 0);
-    }
-}
-
-// Offers by type
+// Statistiques détaillées - Offres par type de don
 $offersByType = [];
-if (is_array($allOffers)) {
-    foreach ($allOffers as $offer) {
-        $type = isset($offer['type_don']) ? $offerController->getTypeDonLabel($offer['type_don']) : 'Non spécifié';
-        if (!isset($offersByType[$type])) {
-            $offersByType[$type] = 0;
+foreach ($allOffers as $offer) {
+    $type = $offer['type_don'] ?? 'Non spécifié';
+    $offersByType[$type] = ($offersByType[$type] ?? 0) + 1;
+}
+
+// Statistiques détaillées - Utilisateurs par rôle
+$usersByRole = [];
+foreach ($allUsers as $user) {
+    $role = $user['role'] ?? 'volunteer';
+    $usersByRole[$role] = ($usersByRole[$role] ?? 0) + 1;
+}
+
+// Statistiques détaillées - Utilisateurs par région
+$usersByRegion = [];
+foreach ($allUsers as $user) {
+    $region = $user['region'] ?? 'Non spécifiée';
+    $usersByRegion[$region] = ($usersByRegion[$region] ?? 0) + 1;
+}
+
+// Statistiques temporelles - Posts par mois (6 derniers mois)
+$postsByMonth = [];
+$months = [];
+for ($i = 5; $i >= 0; $i--) {
+    $date = date('Y-m', strtotime("-$i months"));
+    $months[] = date('M Y', strtotime("-$i months"));
+    $postsByMonth[$date] = 0;
+}
+foreach ($allPosts as $post) {
+    if (isset($post['date_creation'])) {
+        $month = date('Y-m', strtotime($post['date_creation']));
+        if (isset($postsByMonth[$month])) {
+            $postsByMonth[$month]++;
         }
-        $offersByType[$type]++;
     }
 }
 
-$offersData = $last7DaysOffers;
-$typesLabels = array_keys($offersByType);
-$typesData = array_values($offersByType);
+// Statistiques temporelles - Offres par mois
+$offersByMonth = [];
+for ($i = 5; $i >= 0; $i--) {
+    $date = date('Y-m', strtotime("-$i months"));
+    $offersByMonth[$date] = 0;
+}
+// Note: Les offres n'ont pas de date_creation dans la structure actuelle, on utilisera id_offer comme approximation
+// ou on peut laisser à 0 si pas de date disponible
 
-require_once 'layout.php';
+// Statistiques temporelles - Utilisateurs par mois
+$usersByMonth = [];
+for ($i = 5; $i >= 0; $i--) {
+    $date = date('Y-m', strtotime("-$i months"));
+    $usersByMonth[$date] = 0;
+}
+foreach ($allUsers as $user) {
+    if (isset($user['date_creation'])) {
+        $month = date('Y-m', strtotime($user['date_creation']));
+        if (isset($usersByMonth[$month])) {
+            $usersByMonth[$month]++;
+        }
+    }
+}
+
+// Préparer les données JSON pour les graphiques
+$postsByRegionData = json_encode(array_values($postsByRegion));
+$postsByRegionLabels = json_encode(array_keys($postsByRegion));
+
+$offersByTypeData = json_encode(array_values($offersByType));
+$offersByTypeLabels = json_encode(array_keys($offersByType));
+
+$usersByRoleData = json_encode(array_values($usersByRole));
+$usersByRoleLabels = json_encode(array_keys($usersByRole));
+
+$usersByRegionData = json_encode(array_values($usersByRegion));
+$usersByRegionLabels = json_encode(array_keys($usersByRegion));
+
+$postsMonthlyData = json_encode(array_values($postsByMonth));
+$offersMonthlyData = json_encode(array_values($offersByMonth));
+$usersMonthlyData = json_encode(array_values($usersByMonth));
+$monthsLabels = json_encode($months);
+
+// Statistiques supplémentaires
+$totalLikesPosts = 0;
+$totalCommentsPosts = 0;
+foreach ($allPosts as $post) {
+    $totalLikesPosts += (int)($post['likes_count'] ?? 0);
+    $totalCommentsPosts += (int)($post['comments_count'] ?? 0);
+}
+
+$totalLikesOffers = 0;
+foreach ($allOffers as $offer) {
+    $totalLikesOffers += (int)($offer['likes_count'] ?? 0);
+}
+
+$postsWithMedia = 0;
+foreach ($allPosts as $post) {
+    if (!empty($post['media'])) {
+        $postsWithMedia++;
+    }
+}
+
+$offersWithMedia = 0;
+foreach ($allOffers as $offer) {
+    if (!empty($offer['media'])) {
+        $offersWithMedia++;
+    }
+}
 
 $content = '
-<div class="row mb-4">
+<div class="row">
     <div class="col-lg-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex justify-content-between">
                 <div class="header-title">
-                    <h4 class="card-title mb-0">📊 Dashboard Analytics - AidConnect</h4>
+                    <h4 class="card-title">Bienvenue dans le Dashboard AidConnect 👋</h4>
                 </div>
-                <div>
-                    <a href="addpost.php" class="btn btn-sm btn-primary">
-                        <i class="ri-add-line me-1"></i> Ajouter un Post
-                    </a>
-                    <a href="addoffer.php" class="btn btn-sm btn-primary">
-                        <i class="ri-add-line me-1"></i> Ajouter une Offre
-                    </a>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">Vue d\'ensemble complète des statistiques de la plateforme avec graphiques et analyses détaillées.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cartes de statistiques principales -->
+<div class="row mt-4">
+    <!-- Statistique Posts -->
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-primary">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="avatar avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="ri-file-list-3-line" style="font-size: 28px;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Posts</h6>
+                        <h3 class="mb-0">' . $totalPosts . '</h3>
+                        <small class="text-muted">
+                            <i class="ri-heart-line"></i> ' . $totalLikesPosts . ' likes | 
+                            <i class="ri-chat-3-line"></i> ' . $totalCommentsPosts . ' commentaires
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistique Offres -->
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-success">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="avatar avatar-md bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="ri-price-tag-3-line" style="font-size: 28px;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Offres</h6>
+                        <h3 class="mb-0">' . $totalOffers . '</h3>
+                        <small class="text-muted">
+                            <i class="ri-heart-line"></i> ' . $totalLikesOffers . ' likes
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistique Utilisateurs -->
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-info">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="avatar avatar-md bg-info text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="ri-user-line" style="font-size: 28px;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Utilisateurs</h6>
+                        <h3 class="mb-0">' . $totalUsers . '</h3>
+                        <small class="text-muted">
+                            ' . ($usersByRole['admin'] ?? 0) . ' admins | ' . ($usersByRole['volunteer'] ?? 0) . ' volunteers
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistique Événements -->
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-warning">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="avatar avatar-md bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="ri-calendar-line" style="font-size: 28px;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Événements</h6>
+                        <h3 class="mb-0">' . $totalEvents . '</h3>
+                        <small class="text-muted">Événements actifs</small>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ========== POSTS STATISTICS SECTION ========== -->
-<div class="row mb-4">
+<!-- Graphiques en courbes - Tendances temporelles -->
+<div class="row mt-4">
     <div class="col-lg-12">
-        <div class="section-header">
-            <h3 class="section-title"><i class="ri-file-list-3-line me-2"></i>Statistiques des Posts</h3>
-        </div>
-    </div>
-</div>
-
-<!-- Posts Key Metrics -->
-<div class="row mb-4">
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card stat-card-posts">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="stat-label mb-1">Total Posts</h6>
-                        <h2 class="stat-value mb-0">' . $totalPosts . '</h2>
-                        <small class="stat-subtext">' . $activePosts . ' actifs, ' . $resolvedPosts . ' résolus</small>
-                    </div>
-                    <div class="stat-icon-large">
-                        <i class="ri-file-list-3-line"></i>
-                    </div>
-                </div>
-                <div class="stat-progress mt-3">
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-white" style="width: ' . $resolutionRate . '%; opacity: 0.8;"></div>
-                    </div>
-                    <small class="text-white-50">Taux de résolution: ' . $resolutionRate . '%</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card stat-card-likes">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="stat-label mb-1">Likes Posts</h6>
-                        <h2 class="stat-value mb-0">' . $totalPostLikes . '</h2>
-                        <small class="stat-subtext">Total des likes</small>
-                    </div>
-                    <div class="stat-icon-large">
-                        <i class="ri-heart-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card stat-card-comments">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="stat-label mb-1">Commentaires</h6>
-                        <h2 class="stat-value mb-0">' . $totalComments . '</h2>
-                        <small class="stat-subtext">Total des commentaires</small>
-                    </div>
-                    <div class="stat-icon-large">
-                        <i class="ri-chat-3-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card stat-card-engagement">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="stat-label mb-1">Engagement Posts</h6>
-                        <h2 class="stat-value mb-0">' . ($totalPostLikes + $totalComments) . '</h2>
-                        <small class="stat-subtext">Likes + Commentaires</small>
-                    </div>
-                    <div class="stat-icon-large">
-                        <i class="ri-bar-chart-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Posts Charts -->
-<div class="row mb-5">
-    <div class="col-lg-8 mb-4">
-        <div class="card chart-card">
+        <div class="card">
             <div class="card-header">
-                <h5 class="card-title mb-0"><i class="ri-line-chart-line me-2"></i>Activité Posts - 7 derniers jours</h5>
+                <h5 class="card-title mb-0">
+                    <i class="ri-line-chart-line me-2"></i>Tendances temporelles (6 derniers mois)
+                </h5>
             </div>
             <div class="card-body">
-                <canvas id="postsActivityChart" height="80"></canvas>
+                <canvas id="trendsChart" height="80"></canvas>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="col-lg-4 mb-4">
-        <div class="card chart-card">
+<!-- Graphiques circulaires et statistiques détaillées -->
+<div class="row mt-4">
+    <!-- Posts par région -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
             <div class="card-header">
-                <h5 class="card-title mb-0"><i class="ri-pie-chart-line me-2"></i>Statut des Posts</h5>
+                <h5 class="card-title mb-0">
+                    <i class="ri-pie-chart-line me-2"></i>Répartition des Posts par Région
+                </h5>
             </div>
             <div class="card-body">
-                <canvas id="postsStatusChart"></canvas>
+                <canvas id="postsRegionChart"></canvas>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row mb-5">
-    <div class="col-lg-12 mb-4">
-        <div class="card chart-card">
+    <!-- Offres par type -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
             <div class="card-header">
-                <h5 class="card-title mb-0"><i class="ri-bar-chart-line me-2"></i>Posts par Région</h5>
+                <h5 class="card-title mb-0">
+                    <i class="ri-pie-chart-2-line me-2"></i>Répartition des Offres par Type de Don
+                </h5>
             </div>
             <div class="card-body">
-                <canvas id="postsRegionsChart" height="60"></canvas>
+                <canvas id="offersTypeChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ========== OFFERS STATISTICS SECTION ========== -->
-<div class="row mb-4">
-    <div class="col-lg-12">
-        <div class="section-header">
-            <h3 class="section-title"><i class="ri-price-tag-3-line me-2"></i>Statistiques des Offres</h3>
+<div class="row mt-4">
+    <!-- Utilisateurs par rôle -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-pie-chart-fill me-2"></i>Répartition des Utilisateurs par Rôle
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="usersRoleChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utilisateurs par région -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-pie-chart-box-line me-2"></i>Répartition des Utilisateurs par Région
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="usersRegionChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Offers Key Metrics -->
-<div class="row mb-4">
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card stat-card-offers">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="stat-label mb-1">Total Offres</h6>
-                        <h2 class="stat-value mb-0">' . $totalOffers . '</h2>
-                        <small class="stat-subtext">' . $offersWithUpdates . ' avec updates, ' . $offersWithoutUpdates . ' sans</small>
-                    </div>
-                    <div class="stat-icon-large">
-                        <i class="ri-price-tag-3-line"></i>
-                    </div>
-                </div>
-                <div class="stat-progress mt-3">
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-white" style="width: ' . $updateRate . '%; opacity: 0.8;"></div>
-                    </div>
-                    <small class="text-white-50">Taux d\'updates: ' . $updateRate . '%</small>
-                </div>
+<!-- Statistiques supplémentaires -->
+<div class="row mt-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-bar-chart-line me-2"></i>Statistiques des Posts
+                </h5>
             </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card stat-card-likes-offers">
             <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="stat-label mb-1">Likes Offres</h6>
-                        <h2 class="stat-value mb-0">' . $totalOfferLikes . '</h2>
-                        <small class="stat-subtext">Total des likes</small>
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="mb-0 text-primary">' . $postsWithMedia . '</h4>
+                            <small class="text-muted">Posts avec média</small>
+                        </div>
                     </div>
-                    <div class="stat-icon-large">
-                        <i class="ri-heart-3-fill"></i>
+                    <div class="col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="mb-0 text-primary">' . ($totalPosts - $postsWithMedia) . '</h4>
+                            <small class="text-muted">Posts sans média</small>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card stat-card-updates">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="stat-label mb-1">Updates Offres</h6>
-                        <h2 class="stat-value mb-0">' . $totalOfferUpdates . '</h2>
-                        <small class="stat-subtext">Total des mises à jour</small>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="mb-0 text-success">' . ($totalPosts > 0 ? round(($totalLikesPosts / $totalPosts), 1) : 0) . '</h4>
+                            <small class="text-muted">Likes moyen/post</small>
+                        </div>
                     </div>
-                    <div class="stat-icon-large">
-                        <i class="ri-edit-box-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card stat-card-engagement-offers">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="stat-label mb-1">Engagement Offres</h6>
-                        <h2 class="stat-value mb-0">' . ($totalOfferLikes + $totalOfferUpdates) . '</h2>
-                        <small class="stat-subtext">Likes + Updates</small>
-                    </div>
-                    <div class="stat-icon-large">
-                        <i class="ri-bar-chart-fill"></i>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="mb-0 text-info">' . ($totalPosts > 0 ? round(($totalCommentsPosts / $totalPosts), 1) : 0) . '</h4>
+                            <small class="text-muted">Commentaires moyen/post</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Offers Charts -->
-<div class="row mb-5">
-    <div class="col-lg-8 mb-4">
-        <div class="card chart-card">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
             <div class="card-header">
-                <h5 class="card-title mb-0"><i class="ri-line-chart-line me-2"></i>Activité Offres - 7 derniers jours</h5>
+                <h5 class="card-title mb-0">
+                    <i class="ri-bar-chart-box-line me-2"></i>Statistiques des Offres
+                </h5>
             </div>
             <div class="card-body">
-                <canvas id="offersActivityChart" height="80"></canvas>
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="mb-0 text-success">' . $offersWithMedia . '</h4>
+                            <small class="text-muted">Offres avec média</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="mb-0 text-success">' . ($totalOffers - $offersWithMedia) . '</h4>
+                            <small class="text-muted">Offres sans média</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="mb-0 text-warning">' . ($totalOffers > 0 ? round(($totalLikesOffers / $totalOffers), 1) : 0) . '</h4>
+                            <small class="text-muted">Likes moyen/offre</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <h4 class="mb-0 text-info">' . count($offersByType) . '</h4>
+                            <small class="text-muted">Types de dons différents</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="col-lg-4 mb-4">
-        <div class="card chart-card">
-            <div class="card-header">
-                <h5 class="card-title mb-0"><i class="ri-pie-chart-line me-2"></i>Statut des Offres</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="offersStatusChart"></canvas>
-            </div>
-        </div>
-    </div>
 </div>
-
-<div class="row mb-5">
-    <div class="col-lg-12 mb-4">
-        <div class="card chart-card">
-            <div class="card-header">
-                <h5 class="card-title mb-0"><i class="ri-donut-chart-line me-2"></i>Offres par Type de Don</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="offersTypeChart" height="60"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Chart.js Library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-<script>
-// ========== POSTS CHARTS ==========
-
-// Posts Activity Chart (Line)
-const postsActivityCtx = document.getElementById(\'postsActivityChart\').getContext(\'2d\');
-new Chart(postsActivityCtx, {
-    type: \'line\',
-    data: {
-        labels: ' . json_encode($last7DaysLabels) . ',
-        datasets: [{
-            label: \'Posts\',
-            data: ' . json_encode($postsData) . ',
-            borderColor: \'rgb(102, 126, 234)\',
-            backgroundColor: \'rgba(102, 126, 234, 0.1)\',
-            tension: 0.4,
-            fill: true,
-            pointRadius: 5,
-            pointHoverRadius: 7
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                display: true,
-                position: \'top\',
-            },
-            tooltip: {
-                mode: \'index\',
-                intersect: false,
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                }
-            }
-        }
-    }
-});
-
-// Posts Status Chart (Pie)
-const postsStatusCtx = document.getElementById(\'postsStatusChart\').getContext(\'2d\');
-new Chart(postsStatusCtx, {
-    type: \'pie\',
-    data: {
-        labels: [\'Actifs\', \'Résolus\'],
-        datasets: [{
-            data: [' . $activePosts . ', ' . $resolvedPosts . '],
-            backgroundColor: [
-                \'rgba(102, 126, 234, 0.8)\',
-                \'rgba(118, 75, 162, 0.8)\'
-            ],
-            borderWidth: 2,
-            borderColor: \'#fff\'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                position: \'bottom\',
-            }
-        }
-    }
-});
-
-// Posts Regions Chart (Bar)
-const postsRegionsCtx = document.getElementById(\'postsRegionsChart\').getContext(\'2d\');
-new Chart(postsRegionsCtx, {
-    type: \'bar\',
-    data: {
-        labels: ' . json_encode($regionsLabels) . ',
-        datasets: [{
-            label: \'Nombre de Posts\',
-            data: ' . json_encode($regionsData) . ',
-            backgroundColor: \'rgba(102, 126, 234, 0.8)\',
-            borderColor: \'rgb(102, 126, 234)\',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                }
-            }
-        }
-    }
-});
-
-// ========== OFFERS CHARTS ==========
-
-// Offers Activity Chart (Line)
-const offersActivityCtx = document.getElementById(\'offersActivityChart\').getContext(\'2d\');
-new Chart(offersActivityCtx, {
-    type: \'line\',
-    data: {
-        labels: ' . json_encode($last7DaysLabels) . ',
-        datasets: [{
-            label: \'Offres\',
-            data: ' . json_encode($offersData) . ',
-            borderColor: \'rgb(240, 91, 79)\',
-            backgroundColor: \'rgba(240, 91, 79, 0.1)\',
-            tension: 0.4,
-            fill: true,
-            pointRadius: 5,
-            pointHoverRadius: 7
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                display: true,
-                position: \'top\',
-            },
-            tooltip: {
-                mode: \'index\',
-                intersect: false,
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                }
-            }
-        }
-    }
-});
-
-// Offers Status Chart (Pie)
-const offersStatusCtx = document.getElementById(\'offersStatusChart\').getContext(\'2d\');
-new Chart(offersStatusCtx, {
-    type: \'pie\',
-    data: {
-        labels: [\'Avec Updates\', \'Sans Updates\'],
-        datasets: [{
-            data: [' . $offersWithUpdates . ', ' . $offersWithoutUpdates . '],
-            backgroundColor: [
-                \'rgba(240, 91, 79, 0.8)\',
-                \'rgba(240, 147, 251, 0.8)\'
-            ],
-            borderWidth: 2,
-            borderColor: \'#fff\'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                position: \'bottom\',
-            }
-        }
-    }
-});
-
-// Offers Type Chart (Doughnut)
-const offersTypeCtx = document.getElementById(\'offersTypeChart\').getContext(\'2d\');
-new Chart(offersTypeCtx, {
-    type: \'doughnut\',
-    data: {
-        labels: ' . json_encode($typesLabels) . ',
-        datasets: [{
-            data: ' . json_encode($typesData) . ',
-            backgroundColor: [
-                \'rgba(240, 91, 79, 0.8)\',
-                \'rgba(240, 147, 251, 0.8)\',
-                \'rgba(250, 112, 154, 0.8)\',
-                \'rgba(254, 225, 64, 0.8)\',
-                \'rgba(48, 207, 208, 0.8)\',
-                \'rgba(168, 237, 234, 0.8)\'
-            ],
-            borderWidth: 2,
-            borderColor: \'#fff\'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                position: \'bottom\',
-            }
-        }
-    }
-});
-
-</script>
-
-<style>
-.section-header {
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 3px solid #667eea;
-}
-
-.section-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #333;
-    margin: 0;
-}
-
-.stat-card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    overflow: hidden;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
-
-.stat-card-posts {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.stat-card-offers {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-}
-
-.stat-card-likes {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    color: white;
-}
-
-.stat-card-likes-offers {
-    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-    color: white;
-}
-
-.stat-card-comments {
-    background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-    color: white;
-}
-
-.stat-card-updates {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-}
-
-.stat-card-engagement {
-    background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-    color: white;
-}
-
-.stat-card-engagement-offers {
-    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-    color: white;
-}
-
-
-.stat-label {
-    font-size: 13px;
-    font-weight: 500;
-    opacity: 0.9;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.stat-value {
-    font-size: 36px;
-    font-weight: 700;
-    margin: 8px 0;
-}
-
-.stat-subtext {
-    font-size: 12px;
-    opacity: 0.8;
-    display: block;
-    margin-top: 5px;
-}
-
-.stat-icon-large {
-    font-size: 48px;
-    opacity: 0.3;
-}
-
-.stat-progress {
-    margin-top: 15px;
-}
-
-.chart-card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
-}
-
-.chart-card:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-}
-
-.chart-card .card-header {
-    background: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    padding: 15px 20px;
-}
-
-.chart-card .card-body {
-    padding: 20px;
-    min-height: 300px;
-}
-
-@media (max-width: 768px) {
-    .stat-value {
-        font-size: 28px;
-    }
-    
-    .stat-icon-large {
-        font-size: 36px;
-    }
-    
-    .chart-card .card-body {
-        min-height: 250px;
-    }
-    
-    .section-title {
-        font-size: 20px;
-    }
-}
-</style>
 ';
 
-renderBackofficeLayout('Dashboard Analytics', $content, [], ['offer.js', 'updateoffer.js']);
+renderBackofficeLayout('Dashboard', $content, [], []);
 ?>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Configuration des couleurs
+    const colors = {
+        primary: 'rgba(13, 110, 253, 0.8)',
+        success: 'rgba(25, 135, 84, 0.8)',
+        info: 'rgba(13, 202, 240, 0.8)',
+        warning: 'rgba(255, 193, 7, 0.8)',
+        danger: 'rgba(220, 53, 69, 0.8)',
+        secondary: 'rgba(108, 117, 125, 0.8)'
+    };
+
+    // Plugin personnalisé pour afficher les pourcentages dans les graphiques circulaires
+    const percentagePlugin = {
+        id: 'percentagePlugin',
+        afterDatasetsDraw: function(chart) {
+            if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+                const ctx = chart.ctx;
+                const data = chart.data.datasets[0].data;
+                const total = data.reduce((a, b) => a + b, 0);
+                
+                chart.data.datasets.forEach((dataset, i) => {
+                    const meta = chart.getDatasetMeta(i);
+                    meta.data.forEach((element, index) => {
+                        const value = dataset.data[index];
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        
+                        // Calculer la position au centre de chaque segment
+                        const arc = element;
+                        const angle = (arc.startAngle + arc.endAngle) / 2;
+                        const radius = (arc.innerRadius + arc.outerRadius) / 2;
+                        const x = arc.x + Math.cos(angle) * radius;
+                        const y = arc.y + Math.sin(angle) * radius;
+                        
+                        // Afficher le pourcentage seulement si le segment est assez grand
+                        if (percentage > 3) {
+                            ctx.save();
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                            ctx.shadowBlur = 3;
+                            ctx.fillText(percentage + '%', x, y);
+                            ctx.restore();
+                        }
+                    });
+                });
+            }
+        }
+    };
+
+    // Fonction pour calculer le pourcentage de croissance
+    function calculateGrowthRate(data) {
+        if (data.length < 2) return [];
+        const rates = [];
+        for (let i = 1; i < data.length; i++) {
+            const prev = data[i - 1];
+            const curr = data[i];
+            if (prev === 0) {
+                rates.push(curr > 0 ? 100 : 0);
+            } else {
+                rates.push(((curr - prev) / prev) * 100);
+            }
+        }
+        return [0, ...rates]; // Premier élément = 0 (pas de croissance)
+    }
+
+    // Graphique des tendances temporelles
+    const trendsCtx = document.getElementById("trendsChart");
+    if (trendsCtx) {
+        const postsData = <?php echo $postsMonthlyData; ?>;
+        const offersData = <?php echo $offersMonthlyData; ?>;
+        const usersData = <?php echo $usersMonthlyData; ?>;
+        
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: <?php echo $monthsLabels; ?>,
+                datasets: [
+                    {
+                        label: 'Posts',
+                        data: postsData,
+                        borderColor: colors.primary,
+                        backgroundColor: colors.primary.replace('0.8', '0.1'),
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Offres',
+                        data: offersData,
+                        borderColor: colors.success,
+                        backgroundColor: colors.success.replace('0.8', '0.1'),
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Utilisateurs',
+                        data: usersData,
+                        borderColor: colors.info,
+                        backgroundColor: colors.info.replace('0.8', '0.1'),
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y;
+                                
+                                // Ajouter le pourcentage de croissance
+                                const index = context.dataIndex;
+                                const data = context.dataset.data;
+                                if (index > 0 && data[index - 1] > 0) {
+                                    const growth = ((data[index] - data[index - 1]) / data[index - 1]) * 100;
+                                    label += ' (' + (growth >= 0 ? '+' : '') + growth.toFixed(1) + '%)';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Graphique circulaire - Posts par région
+    const postsRegionCtx = document.getElementById("postsRegionChart");
+    if (postsRegionCtx) {
+        const postsRegionData = <?php echo $postsByRegionData; ?>;
+        const postsRegionLabels = <?php echo $postsByRegionLabels; ?>;
+        const postsTotal = postsRegionData.reduce((a, b) => a + b, 0);
+        
+        new Chart(postsRegionCtx, {
+            type: 'doughnut',
+            plugins: [percentagePlugin],
+            data: {
+                labels: postsRegionLabels,
+                datasets: [{
+                    data: postsRegionData,
+                    backgroundColor: [
+                        colors.primary,
+                        colors.success,
+                        colors.info,
+                        colors.warning,
+                        colors.danger,
+                        colors.secondary,
+                        'rgba(102, 16, 242, 0.8)',
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = postsTotal > 0 ? ((value / postsTotal) * 100).toFixed(1) : 0;
+                                        return {
+                                            text: label + ' (' + value + ' - ' + percentage + '%)',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const percentage = postsTotal > 0 ? ((value / postsTotal) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Graphique circulaire - Offres par type
+    const offersTypeCtx = document.getElementById("offersTypeChart");
+    if (offersTypeCtx) {
+        const offersTypeData = <?php echo $offersByTypeData; ?>;
+        const offersTypeLabels = <?php echo $offersByTypeLabels; ?>;
+        const offersTotal = offersTypeData.reduce((a, b) => a + b, 0);
+        
+        new Chart(offersTypeCtx, {
+            type: 'pie',
+            plugins: [percentagePlugin],
+            data: {
+                labels: offersTypeLabels,
+                datasets: [{
+                    data: offersTypeData,
+                    backgroundColor: [
+                        colors.success,
+                        colors.primary,
+                        colors.info,
+                        colors.warning,
+                        colors.danger,
+                        colors.secondary,
+                        'rgba(102, 16, 242, 0.8)',
+                        'rgba(255, 99, 132, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = offersTotal > 0 ? ((value / offersTotal) * 100).toFixed(1) : 0;
+                                        return {
+                                            text: label + ' (' + value + ' - ' + percentage + '%)',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const percentage = offersTotal > 0 ? ((value / offersTotal) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Graphique circulaire - Utilisateurs par rôle
+    const usersRoleCtx = document.getElementById("usersRoleChart");
+    if (usersRoleCtx) {
+        const usersRoleData = <?php echo $usersByRoleData; ?>;
+        const usersRoleLabels = <?php echo $usersByRoleLabels; ?>;
+        const usersTotal = usersRoleData.reduce((a, b) => a + b, 0);
+        
+        new Chart(usersRoleCtx, {
+            type: 'doughnut',
+            plugins: [percentagePlugin],
+            data: {
+                labels: usersRoleLabels,
+                datasets: [{
+                    data: usersRoleData,
+                    backgroundColor: [
+                        colors.info,
+                        colors.warning,
+                        colors.secondary
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = usersTotal > 0 ? ((value / usersTotal) * 100).toFixed(1) : 0;
+                                        return {
+                                            text: label + ' (' + value + ' - ' + percentage + '%)',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const percentage = usersTotal > 0 ? ((value / usersTotal) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Graphique circulaire - Utilisateurs par région
+    const usersRegionCtx = document.getElementById("usersRegionChart");
+    if (usersRegionCtx) {
+        const usersRegionData = <?php echo $usersByRegionData; ?>;
+        const usersRegionLabels = <?php echo $usersByRegionLabels; ?>;
+        const usersRegionTotal = usersRegionData.reduce((a, b) => a + b, 0);
+        
+        new Chart(usersRegionCtx, {
+            type: 'pie',
+            plugins: [percentagePlugin],
+            data: {
+                labels: usersRegionLabels,
+                datasets: [{
+                    data: usersRegionData,
+                    backgroundColor: [
+                        colors.primary,
+                        colors.success,
+                        colors.info,
+                        colors.warning,
+                        colors.danger,
+                        colors.secondary,
+                        'rgba(102, 16, 242, 0.8)',
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = usersRegionTotal > 0 ? ((value / usersRegionTotal) * 100).toFixed(1) : 0;
+                                        return {
+                                            text: label + ' (' + value + ' - ' + percentage + '%)',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const percentage = usersRegionTotal > 0 ? ((value / usersRegionTotal) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
