@@ -44,7 +44,7 @@ ob_start();
             </div>
         <?php endif; ?>
 
-        <!-- Profile Edit Card -->
+        <!-- Profile Edit Cardd -->
         <div class="card iq-card shadow-sm border-0">
             <div class="card-header bg-white border-0 pb-3">
                 <div class="d-flex align-items-center justify-content-between">

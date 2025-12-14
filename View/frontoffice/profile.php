@@ -1,12 +1,12 @@
 <?php
 // Activer l'affichage des erreurs pour le débogage (temporaire)
 error_reporting(E_ALL);
-ini_set('display_errors', 0); // Désactiver l'affichage pour éviter les problèmes
+ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
 // Démarrer la session
 if (session_status() !== PHP_SESSION_ACTIVE) {
-session_start();
+    session_start();
 }
 
 // Vérifier la session AVANT tout traitement
@@ -37,6 +37,9 @@ if ($user === false || !is_array($user) || empty($user['id_user'])) {
     exit;
 }
 
+// Récupérer les statistiques de l'utilisateur depuis la base de données
+$stats = $model->getUserStats($_SESSION['id_user']);
+
 $success = $_GET['success'] ?? '';
 $storedProfile = trim($user['profile_pic'] ?? '');
 $profilePic = 'assets/images/default_profile.png';
@@ -45,21 +48,15 @@ $profilePic = 'assets/images/default_profile.png';
 // Utiliser l'adresse IP locale du réseau pour que le téléphone puisse y accéder
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
 
-// Obtenir l'adresse IP locale du serveur
+// Fonction pour obtenir l'adresse IP locale
 function getLocalIP() {
-    // Essayer différentes méthodes pour obtenir l'IP locale
     $ip = $_SERVER['SERVER_ADDR'] ?? '';
     
-    // Si c'est localhost ou 127.0.0.1, essayer de trouver l'IP du réseau
     if (empty($ip) || $ip === '127.0.0.1' || $ip === '::1') {
-        // Essayer d'obtenir l'IP depuis les interfaces réseau
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            // Windows - utiliser ipconfig
             $output = @shell_exec('ipconfig 2>nul');
             if ($output) {
-                // Chercher toutes les adresses IPv4
                 if (preg_match_all('/IPv4[^:]*:\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/', $output, $matches)) {
-                    // Prendre la première IP qui n'est pas 127.0.0.1 et qui commence par 192.168 ou 10. ou 172.
                     foreach ($matches[1] as $matchIP) {
                         if ($matchIP !== '127.0.0.1' && 
                             (strpos($matchIP, '192.168.') === 0 || 
@@ -69,7 +66,6 @@ function getLocalIP() {
                             break;
                         }
                     }
-                    // Si aucune IP privée trouvée, prendre la première non-localhost
                     if ($ip === '127.0.0.1' || $ip === '::1') {
                         foreach ($matches[1] as $matchIP) {
                             if ($matchIP !== '127.0.0.1') {
@@ -81,13 +77,11 @@ function getLocalIP() {
                 }
             }
         } else {
-            // Linux/Mac
             $output = @shell_exec('hostname -I 2>/dev/null');
             if ($output) {
                 $ips = explode(' ', trim($output));
                 foreach ($ips as $testIP) {
                     if (filter_var($testIP, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-                        // C'est une IP privée
                         $ip = trim($testIP);
                         break;
                     }
@@ -96,10 +90,8 @@ function getLocalIP() {
         }
     }
     
-    // Si toujours pas d'IP valide, essayer de récupérer depuis HTTP_HOST
     if (empty($ip) || $ip === '127.0.0.1' || $ip === '::1') {
         $host = $_SERVER['HTTP_HOST'] ?? '';
-        // Extraire l'IP si HTTP_HOST contient une IP
         if (preg_match('/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/', $host, $hostMatches)) {
             $ip = $hostMatches[1];
         }
@@ -112,20 +104,11 @@ $localIP = getLocalIP();
 $port = $_SERVER['SERVER_PORT'] ?? '80';
 
 // Construire le chemin correct depuis la racine du serveur web
-// Utiliser $_SERVER['SCRIPT_NAME'] qui contient le chemin complet depuis la racine
 $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
-
-// Obtenir le répertoire de base (sans profile.php)
-// dirname() donne: /aaaaaaaaaaaaaaaaaaaaaaa/aidconnect!!/View/frontoffice
 $baseDir = dirname($scriptPath);
-
-// Construire le chemin vers index.php dans le même répertoire
 $pathToIndex = $baseDir . '/index.php';
-
-// Normaliser les séparateurs de chemin (Windows utilise \)
 $pathToIndex = str_replace('\\', '/', $pathToIndex);
 
-// S'assurer que le chemin commence par /
 if (substr($pathToIndex, 0, 1) !== '/') {
     $pathToIndex = '/' . $pathToIndex;
 }
@@ -195,7 +178,7 @@ ob_start();
         </div>
 
         <!-- Profile Details Card -->
-        <div class="card iq-card shadow-sm border-0">
+        <div class="card iq-card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-0 pb-0">
                 <h5 class="mb-0 fw-bold">
                     <i class="ri-user-line me-2 text-primary"></i>Informations personnelles
@@ -261,7 +244,103 @@ ob_start();
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Statistiques d'activité Card -->
+        <div class="card iq-card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pb-0">
+                <h5 class="mb-0 fw-bold">
+                    <i class="ri-bar-chart-line me-2 text-primary"></i>Statistiques d'activité
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4 mb-4">
+                    <!-- Posts publics -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stats-item text-center p-3 rounded-3 border h-100 bg-light">
+                            <div class="stats-number display-6 fw-bold text-primary mb-2"><?= htmlspecialchars($stats['public_posts']) ?></div>
+                            <p class="text-muted mb-0 small">Posts publics</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Offres publiques -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stats-item text-center p-3 rounded-3 border h-100 bg-light">
+                            <div class="stats-number display-6 fw-bold text-success mb-2"><?= htmlspecialchars($stats['public_offers']) ?></div>
+                            <p class="text-muted mb-0 small">Offres publiques</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Niveau d'activité -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stats-item text-center p-3 rounded-3 border h-100 bg-light">
+                            <div class="stats-level mb-2">
+                                <?php 
+                                $badgeClass = 'bg-warning';
+                                if ($stats['activity_level'] === 'Moyen') $badgeClass = 'bg-info';
+                                if ($stats['activity_level'] === 'Élevé') $badgeClass = 'bg-success';
+                                ?>
+                                <span class="badge <?= $badgeClass ?>">
+                                    <?= htmlspecialchars($stats['activity_level']) ?>
+                                </span>
+                            </div>
+                            <p class="text-muted mb-0 small">Niveau d'activité</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Jours actifs -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stats-item text-center p-3 rounded-3 border h-100 bg-light">
+                            <div class="stats-number display-6 fw-bold text-info mb-2"><?= htmlspecialchars($stats['active_days']) ?></div>
+                            <p class="text-muted mb-0 small">Jours actifs</p>
+                        </div>
+                    </div>
                 </div>
+                
+                <!-- Progression d'activité totale -->
+                <div class="activity-progress-section p-4 rounded-3 border bg-light">
+                    <h6 class="fw-bold mb-3 text-center">
+                        <i class="ri-progress-4-line me-2 text-primary"></i>Progression d'activité totale
+                    </h6>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="current-activity">
+                            <span class="text-muted small">Actuel : </span>
+                            <span class="fw-bold text-primary"><?= htmlspecialchars($stats['total_activities']) ?> activités</span>
+                        </div>
+                        <div class="activity-goal">
+                            <span class="text-muted small">Objectif : </span>
+                            <span class="fw-bold text-success"><?= htmlspecialchars($stats['activity_goal']) ?> activités</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Barre de progression -->
+                    <div class="progress mb-3" style="height: 20px; border-radius: 10px;">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: <?= $stats['activity_progress'] ?>%; border-radius: 10px;" 
+                             aria-valuenow="<?= $stats['activity_progress'] ?>" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            <?= $stats['activity_progress'] ?>%
+                        </div>
+                    </div>
+                    
+                    <!-- Message d'encouragement -->
+                    <div class="text-center mt-3">
+                        <p class="text-muted mb-0">
+                            <i class="ri-megaphone-line me-1 text-warning"></i>
+                            <?php if ($stats['activity_progress'] < 30): ?>
+                                <strong>Commencez votre parcours !</strong> Publiez votre premier post ou offre.
+                            <?php elseif ($stats['activity_progress'] < 70): ?>
+                                <strong>Continuez comme ça !</strong> Vous êtes sur la bonne voie.
+                            <?php else: ?>
+                                <strong>Excellent travail !</strong> Vous êtes très actif sur la plateforme.
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- QR Code Card -->
         <div class="card iq-card shadow-sm border-0 mt-4">
@@ -328,14 +407,6 @@ ob_start();
                                         Si l'URL ne fonctionne pas, vérifiez l'adresse IP de votre serveur (ex: 192.168.1.XXX).
                                     </small>
                                 </div>
-                                <div class="alert alert-warning mt-2 mb-0 p-2">
-                                    <small>
-                                        <i class="ri-error-warning-line me-1"></i>
-                                        <strong>Débogage :</strong> Si l'URL ne fonctionne pas, vérifiez que le chemin est correct. 
-                                        Le chemin attendu devrait être : <code><?= htmlspecialchars($pathToIndex) ?></code>
-                                        <br>Essayez d'accéder à cette URL directement depuis votre navigateur sur l'ordinateur pour vérifier qu'elle fonctionne.
-                                    </small>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -344,6 +415,59 @@ ob_start();
         </div>
     </div>
 </div>
+
+<style>
+.stats-item {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%);
+}
+
+.stats-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    line-height: 1;
+}
+
+.activity-progress-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+}
+
+.progress {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 0.6s ease;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .stats-item {
+        margin-bottom: 1rem;
+    }
+}
+</style>
 <?php
 $content = ob_get_clean();
 renderLayout('Mon Profil', $content, ['assets/css/profile.css'], ['assets/js/profile-fix.js']);

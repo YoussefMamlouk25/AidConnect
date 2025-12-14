@@ -385,5 +385,263 @@ class UserModel
         
         return $user && $user['email_verified'] == 1;
     }
-    
+
+    /**
+     * Compte les posts publics de l'utilisateur
+     * @param int $userId
+     * @return int
+     */
+    public function getUserPublicPostsCount($userId) {
+        try {
+            // Vérifier si la table 'post' existe d'abord
+            $tableExists = $this->db->query("SHOW TABLES LIKE 'post'")->fetch();
+            
+            if (!$tableExists) {
+                return 0;
+            }
+            
+            // Vérifier la structure de la table 'post'
+            $stmt = $this->db->prepare("SHOW COLUMNS FROM post");
+            $stmt->execute();
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // Déterminer les noms de colonnes possibles
+            $statusColumn = in_array('status', $columns) ? 'status' : 
+                           (in_array('etat', $columns) ? 'etat' : 
+                           (in_array('state', $columns) ? 'state' : null));
+            
+            $idColumn = in_array('id_user', $columns) ? 'id_user' : 
+                       (in_array('user_id', $columns) ? 'user_id' : 
+                       (in_array('userId', $columns) ? 'userId' : 'id_user'));
+            
+            // Construire la requête en fonction des colonnes disponibles
+            if ($statusColumn) {
+                $sql = "SELECT COUNT(*) as count FROM post WHERE $idColumn = ? AND $statusColumn = 'public'";
+            } else {
+                // Si pas de colonne status, compter tous les posts
+                $sql = "SELECT COUNT(*) as count FROM post WHERE $idColumn = ?";
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$userId]);
+            $result = $stmt->fetch();
+            return (int)($result['count'] ?? 0);
+        } catch (Exception $e) {
+            error_log("Error counting posts: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Compte les offres publiques de l'utilisateur
+     * @param int $userId
+     * @return int
+     */
+    public function getUserPublicOffersCount($userId) {
+        try {
+            // Vérifier si la table 'offer' existe d'abord
+            $tableExists = $this->db->query("SHOW TABLES LIKE 'offer'")->fetch();
+            
+            if (!$tableExists) {
+                return 0;
+            }
+            
+            // Vérifier la structure de la table 'offer'
+            $stmt = $this->db->prepare("SHOW COLUMNS FROM offer");
+            $stmt->execute();
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // Déterminer les noms de colonnes possibles
+            $statusColumn = in_array('status', $columns) ? 'status' : 
+                           (in_array('etat', $columns) ? 'etat' : 
+                           (in_array('state', $columns) ? 'state' : 
+                           (in_array('is_active', $columns) ? 'is_active' : null)));
+            
+            $idColumn = in_array('id_user', $columns) ? 'id_user' : 
+                       (in_array('user_id', $columns) ? 'user_id' : 
+                       (in_array('userId', $columns) ? 'userId' : 'id_user'));
+            
+            // Construire la requête en fonction des colonnes disponibles
+            if ($statusColumn) {
+                // Vérifier les valeurs possibles pour le statut
+                $valueCheck = $this->db->prepare("SELECT DISTINCT $statusColumn FROM offer LIMIT 5");
+                $valueCheck->execute();
+                $values = $valueCheck->fetchAll(PDO::FETCH_COLUMN);
+                
+                if (in_array('active', $values) || in_array('Active', $values)) {
+                    $sql = "SELECT COUNT(*) as count FROM offer WHERE $idColumn = ? AND $statusColumn = 'active'";
+                } elseif (in_array('public', $values) || in_array('Public', $values)) {
+                    $sql = "SELECT COUNT(*) as count FROM offer WHERE $idColumn = ? AND $statusColumn = 'public'";
+                } else {
+                    // Si pas de valeur standard, compter toutes les offres
+                    $sql = "SELECT COUNT(*) as count FROM offer WHERE $idColumn = ?";
+                }
+            } else {
+                // Si pas de colonne status, compter tous les posts
+                $sql = "SELECT COUNT(*) as count FROM offer WHERE $idColumn = ?";
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$userId]);
+            $result = $stmt->fetch();
+            return (int)($result['count'] ?? 0);
+        } catch (Exception $e) {
+            error_log("Error counting offers: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Compte les jours actifs de l'utilisateur
+     * @param int $userId
+     * @return int
+     */
+    public function getUserActiveDays($userId) {
+        try {
+            $days = 1; // Minimum 1 jour (inscription)
+            
+            // Vérifier les tables existantes
+            $tables = ['post', 'offer', 'activity', 'user_activity'];
+            $dateQueries = [];
+            
+            // Ajouter la date d'inscription de l'utilisateur
+            $stmt = $this->db->prepare("SELECT date_creation FROM user WHERE id_user = ?");
+            $stmt->execute([$userId]);
+            $userDate = $stmt->fetch();
+            if ($userDate && $userDate['date_creation']) {
+                $days = 1;
+            }
+            
+            // Vérifier les posts
+            $postTable = $this->db->query("SHOW TABLES LIKE 'post'")->fetch();
+            if ($postTable) {
+                // Vérifier les colonnes de date dans la table post
+                $stmt = $this->db->prepare("SHOW COLUMNS FROM post");
+                $stmt->execute();
+                $postColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                
+                $dateColumn = '';
+                foreach (['created_at', 'date_creation', 'date', 'creation_date', 'timestamp'] as $col) {
+                    if (in_array($col, $postColumns)) {
+                        $dateColumn = $col;
+                        break;
+                    }
+                }
+                
+                if ($dateColumn) {
+                    $dateQueries[] = "SELECT $dateColumn as activity_date FROM post WHERE id_user = ?";
+                }
+            }
+            
+            // Vérifier les offres
+            $offerTable = $this->db->query("SHOW TABLES LIKE 'offer'")->fetch();
+            if ($offerTable) {
+                // Vérifier les colonnes de date dans la table offer
+                $stmt = $this->db->prepare("SHOW COLUMNS FROM offer");
+                $stmt->execute();
+                $offerColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                
+                $dateColumn = '';
+                foreach (['created_at', 'date_creation', 'date', 'creation_date', 'timestamp'] as $col) {
+                    if (in_array($col, $offerColumns)) {
+                        $dateColumn = $col;
+                        break;
+                    }
+                }
+                
+                if ($dateColumn) {
+                    $dateQueries[] = "SELECT $dateColumn as activity_date FROM offer WHERE id_user = ?";
+                }
+            }
+            
+            // Si nous avons des requêtes, exécuter l'union
+            if (!empty($dateQueries)) {
+                $unionQuery = implode(" UNION ALL ", $dateQueries);
+                $unionQuery = "SELECT COUNT(DISTINCT DATE(activity_date)) as days FROM ($unionQuery) as activities";
+                
+                $stmt = $this->db->prepare($unionQuery);
+                
+                // Préparer les paramètres (même userId pour chaque requête UNION)
+                $params = [];
+                for ($i = 0; $i < count($dateQueries); $i++) {
+                    $params[] = $userId;
+                }
+                
+                $stmt->execute($params);
+                $result = $stmt->fetch();
+                $activityDays = (int)($result['days'] ?? 0);
+                
+                // Prendre le maximum entre 1 et les jours d'activité
+                $days = max($days, $activityDays);
+            }
+            
+            return $days;
+        } catch (Exception $e) {
+            error_log("Error counting active days: " . $e->getMessage());
+            return 1; // Retourner au moins 1 jour
+        }
+    }
+
+    /**
+     * Calcule le niveau d'activité de l'utilisateur
+     * @param int $userId
+     * @return string
+     */
+    public function getUserActivityLevel($userId) {
+        $posts = $this->getUserPublicPostsCount($userId);
+        $offers = $this->getUserPublicOffersCount($userId);
+        $total = $posts + $offers;
+        
+        if ($total >= 10) return 'Élevé';
+        if ($total >= 3) return 'Moyen';
+        return 'Faible';
+    }
+
+    /**
+     * Calcule le nombre total d'activités
+     * @param int $userId
+     * @return int
+     */
+    public function getUserTotalActivities($userId) {
+        return $this->getUserPublicPostsCount($userId) + $this->getUserPublicOffersCount($userId);
+    }
+
+    /**
+     * Calcule la progression d'activité
+     * @param int $userId
+     * @return array ['progress' => int, 'goal' => int]
+     */
+    public function getUserActivityProgress($userId) {
+        $goal = 15; // Objectif de 15 activités
+        $total = $this->getUserTotalActivities($userId);
+        $progress = $total > 0 ? round(($total / $goal) * 100) : 0;
+        
+        // Limiter à 100%
+        if ($progress > 100) $progress = 100;
+        
+        return [
+            'progress' => $progress,
+            'goal' => $goal,
+            'total' => $total
+        ];
+    }
+
+    /**
+     * Récupère toutes les statistiques de l'utilisateur
+     * @param int $userId
+     * @return array
+     */
+    public function getUserStats($userId) {
+        $activityProgress = $this->getUserActivityProgress($userId);
+        
+        return [
+            'public_posts' => $this->getUserPublicPostsCount($userId),
+            'public_offers' => $this->getUserPublicOffersCount($userId),
+            'activity_level' => $this->getUserActivityLevel($userId),
+            'active_days' => $this->getUserActiveDays($userId),
+            'total_activities' => $activityProgress['total'],
+            'activity_goal' => $activityProgress['goal'],
+            'activity_progress' => $activityProgress['progress']
+        ];
+    }
 }

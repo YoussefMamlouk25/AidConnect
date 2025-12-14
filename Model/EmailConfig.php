@@ -14,7 +14,7 @@ return [
     'from_name' => 'AidConnect',
     
     // ============================================
-    // CONFIGURATION SMTP
+    // CONFIGURATION SMTPdz
     // ============================================
     
     // Méthode d'envoi : 'smtp' ou 'mail'

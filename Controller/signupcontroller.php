@@ -68,7 +68,7 @@ if ($result['success']) {
     $_SESSION['verification_email'] = $email;
     $_SESSION['verification_name'] = $name;
     
-    // Rediriger vers la page de vérification
+    // Rediriger vers la page de vérificationee
     $message = $emailSent 
         ? 'Compte créé avec succès ! Un code de vérification a été envoyé à votre email.'
         : 'Compte créé avec succès ! Code de vérification : ' . $result['verification_code'] . ' (Email non envoyé - mode développement)';

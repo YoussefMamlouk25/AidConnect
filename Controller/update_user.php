@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+//ff
 require_once '../Model/user.php';
 
 if (!isset($_SESSION['id_user']) || ($_SESSION['role'] ?? '') !== 'admin') {
