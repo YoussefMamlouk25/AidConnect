@@ -6,16 +6,7 @@ require_once '../../Controller/offercontroller.php';
 
 $updateCtrl = new UpdateOfferController();
 $offerCtrl  = new OfferController();
-
-// Filter by offer ID if provided
-$id_offer = isset($_GET['id_offer']) ? (int)$_GET['id_offer'] : 0;
-if ($id_offer > 0) {
-    $updates = $updateCtrl->getUpdateOffersByOfferId($id_offer);
-    $offer = $offerCtrl->getOfferById($id_offer);
-} else {
-    $updates = $updateCtrl->getAllUpdateOffers();
-    $offer = null;
-}
+$updates    = $updateCtrl->getAllUpdateOffers();
 
 $embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 // Détecter si c'est une requête AJAX (pour dashboard.php) ou une page directe
@@ -31,9 +22,9 @@ if ($showFullPage):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mises à jour des Offres</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="showofferback.css">
-    <link rel="stylesheet" href="offer_actions.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/showofferback.css">
+    <link rel="stylesheet" href="assets/css/offer_actions.css">
 </head>
 <body>
 <div class="layout">
@@ -42,9 +33,9 @@ if ($showFullPage):
 <?php
 endif;
 ?>
-<link rel="stylesheet" href="showofferback.css">
+<link rel="stylesheet" href="assets/css/showofferback.css">
 <div class="offers-fragment">
-  <h2>Mises à jour / Réponses<?php if ($id_offer > 0 && $offer): ?> - Offre #<?= htmlspecialchars($id_offer) ?> (<?= htmlspecialchars($offer['nom']) ?>)<?php endif; ?></h2>
+  <h2>Mises à jour / Réponses</h2>
   <div class="container">
     <table class="post-table">
       <thead>
@@ -59,12 +50,12 @@ endif;
       </thead>
       <tbody>
         <?php foreach ($updates as $update): 
-          $updateOffer = ($id_offer > 0 && $offer) ? $offer : ($update['id_offer'] ? $offerCtrl->getOfferById($update['id_offer']) : null); ?>
+          $offer = $update['id_offer'] ? $offerCtrl->getOfferById($update['id_offer']) : null; ?>
         <tr>
           <td><?= htmlspecialchars($update['id_update_offer']) ?></td>
           <td>
             <?= htmlspecialchars($update['id_offer'] ?? '—') ?>
-            <?php if ($updateOffer): ?><br><small><?= htmlspecialchars($updateOffer['nom']) ?></small><?php endif; ?>
+            <?php if ($offer): ?><br><small><?= htmlspecialchars($offer['nom']) ?></small><?php endif; ?>
           </td>
           <td><?= $update['id_user'] ? 'User #'.(int)$update['id_user'] : 'Anonyme' ?></td>
           <td><?= nl2br(htmlspecialchars(mb_strimwidth($update['texte'],0,120,'…'))) ?></td>

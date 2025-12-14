@@ -35,9 +35,9 @@ if ($showFullPage):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AidConnect - Liste des Posts Résolus</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="showofferback.css">
-    <link rel="stylesheet" href="offer_actions.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/showofferback.css">
+    <link rel="stylesheet" href="assets/css/offer_actions.css">
 </head>
 <body>
 <div class="layout">
@@ -46,7 +46,7 @@ if ($showFullPage):
 <?php
 endif;
 ?>
-<link rel="stylesheet" href="showofferback.css">
+<link rel="stylesheet" href="assets/css/showofferback.css">
 <div class="offers-fragment">
   <h2>Mises à jour / Résolutions</h2>
   <div class="container">

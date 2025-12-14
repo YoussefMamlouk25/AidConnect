@@ -215,9 +215,9 @@ function toggleAddPostForm() {
 <?php
 if ($showFullPage) {
     $content = ob_get_clean();
-    renderBackofficeLayout('Liste des Posts', $content, ['showofferback.css']);
+    renderBackofficeLayout('Liste des Posts', $content, ['assets/css/showofferback.css']);
 } else {
     // Si AJAX, inclure le CSS inline
-    echo '<link rel="stylesheet" href="showofferback.css">';
+    echo '<link rel="stylesheet" href="assets/css/showofferback.css">';
 }
 ?>

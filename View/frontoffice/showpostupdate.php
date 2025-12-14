@@ -7,8 +7,16 @@ require_once '../../Model/postupdate.php';
 require_once '../../Controller/postupdatecontroller.php';
 require_once 'layout.php';
 
+// Démarrer la session si elle n'est pas déjà active
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 $postUpdateController = new PostUpdateController();
 $list = $postUpdateController->getAllPostUpdates();
+
+// Récupérer l'ID de l'utilisateur connecté
+$currentUserId = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : null;
 
 // Fonction pour obtenir les initiales d'un nom
 function getInitials($name) {
@@ -21,6 +29,21 @@ function getInitials($name) {
         }
     }
     return substr($initials, 0, 2);
+}
+
+// Fonction pour obtenir le chemin de la photo de profil
+function getProfilePic($storedProfile) {
+    $defaultPic = 'assets/images/default_profile.png';
+    if (empty($storedProfile)) {
+        return $defaultPic;
+    }
+    $normalized = ltrim(trim($storedProfile), '/');
+    $relativePath = '../../' . $normalized;
+    $absolutePath = realpath(__DIR__ . '/../../' . $normalized);
+    if ($absolutePath !== false && file_exists($absolutePath)) {
+        return $relativePath;
+    }
+    return $defaultPic;
 }
 
 ob_start();
@@ -44,13 +67,28 @@ ob_start();
                     $hasImage = !empty($row['media']);
                     $imagePath = $hasImage ? '../../public/uploads/' . htmlspecialchars($row['media']) : '';
                     $idUpdatePost = $row['id_update_post'];
+                    $updateUserId = isset($row['id_user']) ? (int)$row['id_user'] : null;
+                    
+                    // Vérifier si l'utilisateur connecté est l'auteur de l'update
+                    $isOwner = ($currentUserId !== null && $updateUserId !== null && $currentUserId === $updateUserId);
+                    
+                    // Récupérer la photo de profil
+                    $storedProfile = trim($row['profile_pic'] ?? '');
+                    $profilePic = getProfilePic($storedProfile);
                     ?>
                     <div class="card mb-3 border-success">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
+                                <?php if ($profilePic !== 'assets/images/default_profile.png' && file_exists(realpath(__DIR__ . '/../../' . ltrim($storedProfile, '/')))): ?>
+                                    <img src="<?php echo htmlspecialchars($profilePic); ?>" 
+                                         alt="<?php echo htmlspecialchars($authorName); ?>" 
+                                         class="rounded-circle me-3" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #28a745;">
+                                <?php else: ?>
                                 <div class="avatar avatar-md bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-weight: 600;">
                                     <?php echo $initials; ?>
                                 </div>
+                                <?php endif; ?>
                                 <div>
                                     <h6 class="mb-0"><?php echo $authorName; ?></h6>
                                     <small class="text-muted">
@@ -97,6 +135,7 @@ ob_start();
                                 <?php endif; ?>
                             </div>
 
+                            <?php if ($isOwner): ?>
                             <div class="d-flex gap-2 flex-wrap">
                                 <form method="POST" action="updatepostupdate.php" class="d-inline">
                                     <input type="hidden" name="id" value="<?php echo $idUpdatePost; ?>">
@@ -108,6 +147,7 @@ ob_start();
                                     <i class="ri-delete-bin-line me-1"></i> Supprimer
                                 </a>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php

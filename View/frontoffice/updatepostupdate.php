@@ -4,6 +4,14 @@ ini_set('display_errors', 1);
 
 session_start();
 
+if (!isset($_SESSION['id_user'])) {
+    header('Location: login.php?error=' . urlencode('Veuillez vous connecter pour modifier une mise à jour de post.'));
+    exit;
+}
+
+$currentUserId = (int) $_SESSION['id_user'];
+$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
+
 require_once '../../config.php';
 require_once '../../Model/postupdate.php';
 require_once '../../Controller/postupdatecontroller.php';
@@ -30,6 +38,14 @@ $postUpdateData = $postUpdateC->getPostUpdateById($id);
 if (!$postUpdateData) {
     $error = "Entrée introuvable.";
 } else {
+    // Vérifier les permissions : seul le propriétaire ou l'admin peut modifier
+    $updateOwnerId = isset($postUpdateData['id_user']) ? (int)$postUpdateData['id_user'] : null;
+    if (!$isAdmin && ($updateOwnerId === null || $updateOwnerId !== $currentUserId)) {
+        $_SESSION['flash_error'] = "Vous ne pouvez modifier que vos propres mises à jour.";
+        header('Location: showpostupdate.php');
+        exit();
+    }
+    
     // Charger le post parent si besoin
     $postData = $postController->getPostById($postUpdateData['id_post']);
 
@@ -52,7 +68,8 @@ if (!$postUpdateData) {
                 move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $mediaName);
             }
 
-            $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : null;
+            // Utiliser l'ID utilisateur de la session (comme pour les posts)
+            $id_user = $currentUserId;
 
             // Créer l'objet PostUpdate (ordre selon le constructeur: id_post, texte, id_update_post, id_user, media, realiser, temp_reponse, temp_resolue)
             $postUpdate = new PostUpdate(
@@ -66,7 +83,7 @@ if (!$postUpdateData) {
                 $_POST['joursResolution'] // temp_resolue
             );
 
-            $result = $postUpdateC->updatePostUpdate($postUpdate);
+            $result = $postUpdateC->updatePostUpdate($postUpdate, $id, $isAdmin ? null : $currentUserId);
             if ($result) {
                 header('Location: showpostupdate.php');
                 exit();

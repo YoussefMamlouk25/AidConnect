@@ -107,8 +107,8 @@ if (!$isAjax) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Modifier une résolution</title>
-  <link rel="stylesheet" href="dashboard.css">
-  <link rel="stylesheet" href="addpostupdate.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/addpostupdate.css">
 </head>
 <body>
 <div class="layout">
@@ -191,9 +191,9 @@ if (!$isAjax) {
 <?php if (!$isAjax): ?>
   </div>
 </div>
-  <script src="dashboard.js"></script>
+  <script src="assets/js/dashboard.js"></script>
 <?php endif; ?>
-  <script src="jsentiter2.js"></script>
+  <script src="assets/js/jsentiter2.js"></script>
 <?php if (!$isAjax): ?>
 </body>
 </html>

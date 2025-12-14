@@ -6,12 +6,10 @@ require_once '../../config.php';
 require_once '../../Model/offer.php';
 require_once '../../Controller/offercontroller.php';
 require_once '../../Controller/offerlikecontroller.php';
-require_once '../../Controller/updateoffercontroller.php';
 require_once 'layout.php';
-
+// no updateoffercontroller here; we only list offers
 $offerController = new OfferController();
 $likeController = new OfferLikeController();
-$updateOfferController = new UpdateOfferController();
 // Créer la table si elle n'existe pas
 $likeController->createTableIfNotExists();
 $list = $offerController->getAllOffers();
@@ -49,14 +47,13 @@ if ($showFullPage) {
 			<thead>
 				<tr>
 					<th>ID</th>
-					<th>Type de Don</th>
 					<th>Nom</th>
 					<th>Email</th>
 					<th>Téléphone</th>
+					<th>Type de Don</th>
 					<th>Description</th>
 					<th>Média</th>
 					<th>Likes</th>
-					<th>Updates</th>
 					<th>Actions</th>
 				</tr>
 			</thead>
@@ -73,44 +70,34 @@ if ($showFullPage) {
 					
 					// Récupérer le nombre de likes pour cette offre
 					$likesCount = $likeController->getLikeCount($idOffer);
-					
-					// Récupérer le nombre d'updates pour cette offre
-					$updatesCount = count($updateOfferController->getUpdateOffersByOfferId($idOffer));
 				?>
 				<tr>
 					<td><?= htmlspecialchars($idOffer) ?></td>
-					<td><strong><?= $typeDon ?></strong></td>
 					<td><?= $nom ?></td>
 					<td><?= $email ?></td>
 					<td><?= $num ?></td>
+					<td><strong><?= $typeDon ?></strong></td>
 					<td><?= $description ?></td>
 					<td class="media-cell">
 					<?php
-						$mediaRaw = isset($offer['media']) ? $offer['media'] : '';
-						if (!empty($mediaRaw)) {
-							$mediaFiles = json_decode($mediaRaw, true);
-							if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
-								// Format JSON (multiple fichiers)
-								foreach ($mediaFiles as $mediaFile) {
-									if (!empty($mediaFile)) {
-										$mediaUrl = '../../public/uploads/' . htmlspecialchars($mediaFile);
-										$ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
-										if (in_array($ext, ['mp4','mov','webm'])) {
-											echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
-										} else {
-											echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
-										}
-									}
-								}
-							} else {
-								// Ancien format: chaîne simple (un seul fichier)
-								$mediaUrl = '../../public/uploads/' . htmlspecialchars($mediaRaw);
-								$ext = strtolower(pathinfo($mediaRaw, PATHINFO_EXTENSION));
+						$mediaFiles = json_decode($offer['media'], true);
+						if (json_last_error() === JSON_ERROR_NONE && is_array($mediaFiles)) {
+							foreach ($mediaFiles as $mediaFile) {
+								$mediaUrl = '../../public/uploads/' . $mediaFile;
+								$ext = strtolower(pathinfo($mediaFile, PATHINFO_EXTENSION));
 								if (in_array($ext, ['mp4','mov','webm'])) {
 									echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
 								} else {
 									echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
 								}
+							}
+						} elseif (!empty($offer['media'])) {
+							$mediaUrl = '../../public/uploads/' . $offer['media'];
+							$ext = strtolower(pathinfo($offer['media'], PATHINFO_EXTENSION));
+							if (in_array($ext, ['mp4','mov','webm'])) {
+								echo '<video src="'.htmlspecialchars($mediaUrl).'" controls class="media-thumb"></video>';
+							} else {
+								echo '<img src="'.htmlspecialchars($mediaUrl).'" alt="Media image" class="media-thumb">';
 							}
 						} else {
 							echo 'Aucun';
@@ -122,17 +109,9 @@ if ($showFullPage) {
 							<i class="ri-heart-fill me-1"></i><?= $likesCount ?>
 						</span>
 					</td>
-					<td class="text-center">
-						<span class="badge bg-primary">
-							<i class="ri-edit-box-fill me-1"></i><?= $updatesCount ?>
-						</span>
-					</td>
 					<td class="table-actions">
 						<a href="offer_likes.php?id_offer=<?= urlencode($idOffer) ?>&embed=1" class="btn btn-sm btn-info" onclick="if(typeof loadContent==='function'){ loadContent('offer_likes.php?id_offer=<?= urlencode($idOffer) ?>&embed=1'); return false; }" title="Voir les likes">
 							<i class="ri-heart-fill me-1"></i> Likes (<?= $likesCount ?>)
-						</a>
-						<a href="showupdateoffer.php?id_offer=<?= urlencode($idOffer) ?>&embed=1" class="btn btn-sm btn-primary" onclick="if(typeof loadContent==='function'){ loadContent('showupdateoffer.php?id_offer=<?= urlencode($idOffer) ?>&embed=1'); return false; }" title="Voir les updates">
-							<i class="ri-edit-box-fill me-1"></i> Updates (<?= $updatesCount ?>)
 						</a>
 						<a href="updateoffer.php?id_offer=<?= urlencode($idOffer) ?>" class="btn btn-sm btn-primary" onclick="openEditOffer(<?= (int)$idOffer ?>); return false;">
 							<i class="ri-edit-line me-1"></i> Éditer
@@ -144,7 +123,7 @@ if ($showFullPage) {
 				</tr>
 				<?php endforeach; ?>
 			<?php else: ?>
-				<tr><td colspan="10" class="no-data">Aucune offre trouvée</td></tr>
+				<tr><td colspan="9" class="no-data">Aucune offre trouvée</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>
@@ -155,12 +134,21 @@ if ($showFullPage) {
     </div>
 </div>
 <style>
+.media-cell {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-auto-rows: 60px;
+	gap: 4px;
+	justify-items: center;
+	align-items: center;
+}
 .media-thumb {
-	width: 60px;
-	height: 60px;
+	width: 45px;
+	height: 45px;
 	object-fit: cover;
 	border-radius: 4px;
-	margin: 2px;
+	margin: 0;
+	display: block;
 }
 </style>
 <script>
@@ -239,11 +227,11 @@ function openEditOffer(idOffer) {
 <?php
 if ($showFullPage) {
     $content = ob_get_clean();
-	renderBackofficeLayout('Liste des Offres', $content, ['showofferback.css', 'addform.css']);
+	renderBackofficeLayout('Liste des Offres', $content, ['assets/css/showofferback.css', 'assets/css/addform.css']);
 } else {
     // Si AJAX, inclure le CSS inline
-    echo '<link rel="stylesheet" href="showofferback.css">';
-	echo '<link rel="stylesheet" href="addform.css">';
+    echo '<link rel="stylesheet" href="assets/css/showofferback.css">';
+	echo '<link rel="stylesheet" href="assets/css/addform.css">';
 }
 ?>
 

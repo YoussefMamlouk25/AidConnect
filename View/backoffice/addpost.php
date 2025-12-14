@@ -219,8 +219,8 @@ $content = ob_get_clean();
 
 if ($isAjax) {
     echo $content;
-    echo '<script src="media-dropzone.js"></script>';
+    echo '<script src="assets/js/media-dropzone.js"></script>';
 } else {
-    renderBackofficeLayout('Ajouter un Post', $content, ['addform.css'], ['addpost.js', 'media-dropzone.js']);
+    renderBackofficeLayout('Ajouter un Post', $content, ['assets/css/addform.css'], ['assets/js/addpost.js', 'assets/js/media-dropzone.js']);
 }
 ?>

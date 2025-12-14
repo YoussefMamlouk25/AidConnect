@@ -117,7 +117,7 @@ if (!$embed && !$isAjax) {
 <?php
 if (!$embed && !$isAjax) {
     $content = ob_get_clean();
-    renderBackofficeLayout('Commentaires du Post', $content, ['showofferback.css']);
+    renderBackofficeLayout('Commentaires du Post', $content, ['assets/css/showofferback.css']);
 }
 ?>
 

@@ -63,9 +63,12 @@ class PostController {
         $bd = Config::getConnexion();
         try {
             $q = $bd->prepare("SELECT p.*, 
+                    u.profile_pic,
                     (SELECT COUNT(*) FROM post_like WHERE id_post = p.id_post) as likes_count,
                     (SELECT COUNT(*) FROM post_comment WHERE id_post = p.id_post) as comments_count
-                    FROM post p ORDER BY p.id_post DESC");
+                    FROM post p 
+                    LEFT JOIN user u ON p.id_user = u.id_user
+                    ORDER BY p.id_post DESC");
             $q->execute();
             return $q->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
@@ -114,8 +117,11 @@ class PostController {
         $bd = Config::getConnexion();
         try {
             $sql = "SELECT p.*, 
+                    u.profile_pic,
                     (SELECT COUNT(*) FROM postupdate WHERE id_post = p.id_post) as updates_count
-                    FROM post p WHERE 1=1";
+                    FROM post p 
+                    LEFT JOIN user u ON p.id_user = u.id_user
+                    WHERE 1=1";
             $params = [];
             
             // Search query

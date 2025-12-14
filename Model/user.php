@@ -57,12 +57,19 @@ class UserModel
         return null;
     }
 
-    private function normalizeProfileField(array $user = null)
+    private function normalizeProfileField($user = null)
     {
-        if ($user === null || $this->profileColumn === null) {
+        // Si $user est null, false, ou pas un tableau, retourner tel quel
+        if ($user === null || $user === false || !is_array($user)) {
             return $user;
         }
 
+        // Si pas de colonne profile, retourner tel quel
+        if ($this->profileColumn === null) {
+            return $user;
+        }
+
+        // Normaliser le champ profile_pic
         $user['profile_pic'] = $user[$this->profileColumn] ?? ($user['profile_pic'] ?? null);
 
         return $user;
@@ -81,33 +88,50 @@ class UserModel
         return $users;
     }
 
+    /* 🔍 Check if email exists */
+    public function emailExists($email)
+    {
+        $sql = "SELECT COUNT(*) FROM user WHERE email = :email";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':email' => $email]);
+        return $stmt->fetchColumn() > 0;
+    }
+
     public function signup($name, $email, $password, $cin, $date_naissance, $tel, $region)
     {
         // Vérifier si email existe déjà
-        $check = $this->db->prepare("SELECT id_user FROM user WHERE email = :email");
-        $check->execute([':email' => $email]);
-        if ($check->fetch()) {
+        if ($this->emailExists($email)) {
             return ['success' => false, 'error' => 'Email déjà utilisé'];
         }
 
         $hash = password_hash($password, PASSWORD_BCRYPT);
 
+        // Générer le code de vérification
+        $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $codeExpires = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+
         $stmt = $this->db->prepare(sprintf("
-            INSERT INTO user (name, email, %s, cin, date_naissance, tel, region, date_creation, role)
-            VALUES (:name, :email, :hash, :cin, :date_naissance, :tel, :region, NOW(), 'volunteer')
+            INSERT INTO user (name, email, %s, cin, date_naissance, tel, region, date_creation, role, verification_code, email_verified, verification_code_expires)
+            VALUES (:name, :email, :hash, :cin, :date_naissance, :tel, :region, NOW(), 'volunteer', :verification_code, 0, :code_expires)
         ", $this->passwordColumn));
 
         $stmt->execute([
-            ':name'           => $name,
-            ':email'          => $email,
-            ':hash'           => $hash,
-            ':cin'            => $cin ?: null,
-            ':date_naissance' => $date_naissance ?: null,
-            ':tel'            => $tel ?: null,
-            ':region'         => $region ?: null
+            ':name'            => $name,
+            ':email'           => $email,
+            ':hash'            => $hash,
+            ':cin'             => $cin ?: null,
+            ':date_naissance'  => $date_naissance ?: null,
+            ':tel'             => $tel ?: null,
+            ':region'          => $region ?: null,
+            ':verification_code' => $verificationCode,
+            ':code_expires'    => $codeExpires
         ]);
 
-        return ['success' => true];
+        return [
+            'success' => true,
+            'user_id' => $this->db->lastInsertId(),
+            'verification_code' => $verificationCode
+        ];
     }
 
     public function login($email, $password)
@@ -121,23 +145,14 @@ class UserModel
         }
 
         $passwordField = $this->passwordColumn;
-        $storedPassword = $user[$passwordField] ?? '';
 
-        if (empty($storedPassword)) {
+        if (empty($user[$passwordField]) || !password_verify($password, $user[$passwordField])) {
             return ['success' => false, 'error' => 'Mot de passe incorrect'];
         }
 
-        // Check if password is hashed (starts with $2y$) or plain text
-        if (strpos($storedPassword, '$2y$') === 0) {
-            // Hashed password - verify using password_verify
-            if (!password_verify($password, $storedPassword)) {
-                return ['success' => false, 'error' => 'Mot de passe incorrect'];
-            }
-        } else {
-            // Plain text password - direct comparison
-            if ($password !== $storedPassword) {
-                return ['success' => false, 'error' => 'Mot de passe incorrect'];
-            }
+        // Normaliser le champ email_verified (peut être 0/1 ou true/false)
+        if (isset($user['email_verified'])) {
+            $user['email_verified'] = (int)$user['email_verified'];
         }
 
         return ['success' => true, 'user' => $user];
@@ -210,21 +225,6 @@ class UserModel
         ]);
     }
 
-    // Store password in plain text (for admin viewing)
-    public function changePasswordPlainText($id, $password)
-    {
-        $stmt = $this->db->prepare(sprintf("
-            UPDATE user
-            SET %s = :password
-            WHERE id_user = :id
-        ", $this->passwordColumn));
-
-        return $stmt->execute([
-            ':id'       => $id,
-            ':password' => $password
-        ]);
-    }
-
     public function updateUserByAdmin($id, $name, $email, $tel, $region, $role)
     {
         $stmt = $this->db->prepare("
@@ -253,8 +253,136 @@ class UserModel
         return $stmt->execute([':id' => $id]);
     }
 
-    public function getPasswordColumn()
+    /* ✏ Update user (simpler version without role) */
+    public function updateUser($id, $name, $email, $cin, $tel, $region)
     {
-        return $this->passwordColumn;
+        $stmt = $this->db->prepare("
+            UPDATE user SET 
+                name = :name,
+                email = :email,
+                cin = :cin,
+                tel = :tel,
+                region = :region
+            WHERE id_user = :id
+        ");
+
+        return $stmt->execute([
+            ':id'     => $id,
+            ':name'   => $name,
+            ':email'  => $email,
+            ':cin'    => $cin ?: null,
+            ':tel'    => $tel ?: null,
+            ':region' => $region ?: null
+        ]);
+    }
+
+    /**
+     * Vérifie le code de vérification email
+     * 
+     * @param string $email Email de l'utilisateur
+     * @param string $code Code de vérification
+     * @return array Résultat de la vérification
+     */
+    public function verifyEmail($email, $code)
+    {
+        $stmt = $this->db->prepare("
+            SELECT id_user, verification_code, verification_code_expires, email_verified 
+            FROM user 
+            WHERE email = :email 
+            LIMIT 1
+        ");
+        $stmt->execute([':email' => $email]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            return ['success' => false, 'error' => 'Email introuvable'];
+        }
+
+        if ($user['email_verified'] == 1) {
+            return ['success' => false, 'error' => 'Email déjà vérifié'];
+        }
+
+        if (empty($user['verification_code'])) {
+            return ['success' => false, 'error' => 'Aucun code de vérification trouvé'];
+        }
+
+        if ($user['verification_code'] !== $code) {
+            return ['success' => false, 'error' => 'Code de vérification incorrect'];
+        }
+
+        // Vérifier si le code a expiré
+        if (strtotime($user['verification_code_expires']) < time()) {
+            return ['success' => false, 'error' => 'Code de vérification expiré. Veuillez demander un nouveau code.'];
+        }
+
+        // Marquer l'email comme vérifié
+        $updateStmt = $this->db->prepare("
+            UPDATE user 
+            SET email_verified = 1, 
+                verification_code = NULL, 
+                verification_code_expires = NULL 
+            WHERE id_user = :id
+        ");
+        $updateStmt->execute([':id' => $user['id_user']]);
+
+        return ['success' => true, 'message' => 'Email vérifié avec succès'];
+    }
+
+    /**
+     * Régénère un nouveau code de vérification
+     * 
+     * @param string $email Email de l'utilisateur
+     * @return array Nouveau code de vérification
+     */
+    public function resendVerificationCode($email)
+    {
+        $stmt = $this->db->prepare("SELECT id_user, name, email_verified FROM user WHERE email = :email LIMIT 1");
+        $stmt->execute([':email' => $email]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            return ['success' => false, 'error' => 'Email introuvable'];
+        }
+
+        if ($user['email_verified'] == 1) {
+            return ['success' => false, 'error' => 'Email déjà vérifié'];
+        }
+
+        // Générer un nouveau code
+        $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $codeExpires = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+
+        $updateStmt = $this->db->prepare("
+            UPDATE user 
+            SET verification_code = :code, 
+                verification_code_expires = :expires 
+            WHERE id_user = :id
+        ");
+        $updateStmt->execute([
+            ':code' => $verificationCode,
+            ':expires' => $codeExpires,
+            ':id' => $user['id_user']
+        ]);
+
+        return [
+            'success' => true,
+            'verification_code' => $verificationCode,
+            'name' => $user['name']
+        ];
+    }
+
+    /**
+     * Vérifie si l'email est vérifié (pour la connexion)
+     * 
+     * @param string $email Email de l'utilisateur
+     * @return bool True si vérifié
+     */
+    public function isEmailVerified($email)
+    {
+        $stmt = $this->db->prepare("SELECT email_verified FROM user WHERE email = :email LIMIT 1");
+        $stmt->execute([':email' => $email]);
+        $user = $stmt->fetch();
+        
+        return $user && $user['email_verified'] == 1;
     }
 }

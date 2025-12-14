@@ -239,7 +239,7 @@ $content = ob_get_clean();
 
 if ($isAjax) {
     echo $content;
-    echo '<script src="media-dropzone.js"></script>';
+    echo '<script src="assets/js/media-dropzone.js"></script>';
 } else {
-    renderBackofficeLayout('Modifier une Offre', $content, ['addform.css'], ['media-dropzone.js']);
+    renderBackofficeLayout('Modifier une Offre', $content, ['assets/css/addform.css'], ['assets/js/media-dropzone.js']);
 }

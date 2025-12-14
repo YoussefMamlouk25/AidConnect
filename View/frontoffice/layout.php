@@ -25,6 +25,7 @@ function renderLayout($page_title, $content, $additional_styles = [], $additiona
         <link rel="stylesheet" href="assets/css/header.css" />
         <link rel="stylesheet" href="assets/css/style.css" />
         <link rel="stylesheet" href="assets/css/footer.css" />
+        <link rel="stylesheet" href="assets/css/dark-mode.css" />
         
         <!-- CSS additionnels -->
         <?php foreach ($additional_styles as $style): ?>
@@ -42,6 +43,11 @@ function renderLayout($page_title, $content, $additional_styles = [], $additiona
                 min-height: 100vh;
                 display: flex;
                 flex-direction: column;
+                transition: background-color 0.3s ease, color 0.3s ease;
+            }
+            
+            body.dark-mode {
+                background-image: linear-gradient(rgba(24, 25, 26, 0.85), rgba(24, 25, 26, 0.85)), url('assets/images/small/background.jpg');
             }
             
             .wrapper {
@@ -73,6 +79,9 @@ function renderLayout($page_title, $content, $additional_styles = [], $additiona
         <!-- SocialV-Lite JS -->
         <script src="assets/js/libs.min.js"></script>
         <script src="assets/js/app.js"></script>
+        
+        <!-- Dark Mode Toggle -->
+        <script src="assets/js/dark-mode.js"></script>
         
         <!-- Validation JavaScript -->
         <script src="assets/js/form-validation.js"></script>

@@ -116,8 +116,29 @@ if (
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="stylesheet" href="assets/css/volunteer-form.css" />
   <link rel="stylesheet" href="assets/css/media-lightbox.css" />
+  <style>
+    .volunteer-form-body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .wrapper {
+      position: relative;
+      z-index: 1;
+    }
+    .volunteer-form-container {
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(10px);
+    }
+  </style>
 </head>
-<body class="volunteer-form-body">
+<body class="volunteer-form-body" style="background-image: url('assets/images/small/background.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; min-height: 100vh;">
   <?php include 'header.php'; ?>
 
   <div class="wrapper">

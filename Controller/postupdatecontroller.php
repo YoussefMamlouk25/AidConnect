@@ -48,9 +48,10 @@ class PostUpdateController {
     }
 
     public function getAllPostUpdates() {
-        $sql = "SELECT up.*, p.titre, p.nom, p.region 
+        $sql = "SELECT up.*, p.titre, p.nom, p.region, u.profile_pic 
                 FROM update_post up
                 INNER JOIN post p ON up.id_post = p.id_post
+                LEFT JOIN user u ON up.id_user = u.id_user
                 ORDER BY up.id_update_post DESC";
         $bd = Config::getConnexion();
         try {
@@ -66,7 +67,11 @@ class PostUpdateController {
     }
     
     public function getPostUpdatesByPostId($id_post) {
-        $sql = "SELECT * FROM update_post WHERE id_post = :id_post ORDER BY id_update_post DESC";
+        $sql = "SELECT up.*, u.profile_pic 
+                FROM update_post up
+                LEFT JOIN user u ON up.id_user = u.id_user
+                WHERE up.id_post = :id_post 
+                ORDER BY up.id_update_post DESC";
         $bd = Config::getConnexion();
         try {
             $stmt = $bd->prepare($sql);
@@ -115,7 +120,7 @@ class PostUpdateController {
         }
     }
 
-    public function updatePostUpdate(PostUpdate $postUpdate, $id = null) {
+    public function updatePostUpdate(PostUpdate $postUpdate, $id = null, $ownerId = null) {
         $sql = "UPDATE update_post 
                 SET id_post = :id_post,
                     id_user = :id_user,
@@ -125,6 +130,9 @@ class PostUpdateController {
                     temp_reponse = :temp_reponse, 
                     temp_resolue = :temp_resolue 
                 WHERE id_update_post = :id";
+        if ($ownerId !== null) {
+            $sql .= " AND id_user = :owner_id";
+        }
 
         $bd = Config::getConnexion();
 
@@ -138,7 +146,7 @@ class PostUpdateController {
             if ($id === null) {
                 $id = $postUpdate->getIdUpdatePost();
             }
-            $result = $query->execute([
+            $params = [
                 ':id_post' => $postUpdate->getIdPost(),
                 ':id_user' => $postUpdate->getIdUser(),
                 ':texte' => $postUpdate->getTexte(),
@@ -147,9 +155,15 @@ class PostUpdateController {
                 ':temp_reponse' => $postUpdate->getTempReponse(),
                 ':temp_resolue' => $postUpdate->getTempResolue(),
                 ':id' => $id
-            ]);
+            ];
             
-            return $result;
+            if ($ownerId !== null) {
+                $params[':owner_id'] = (int) $ownerId;
+            }
+            
+            $result = $query->execute($params);
+            
+            return $result && $query->rowCount() > 0;
         } catch (PDOException $e) {
             error_log("Erreur PDO lors de la mise à jour du post update : " . $e->getMessage());
             if (ini_get('display_errors')) {

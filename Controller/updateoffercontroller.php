@@ -81,7 +81,11 @@ class UpdateOfferController
     {
         $bd = Config::getConnexion();
         try {
-            $q = $bd->prepare("SELECT * FROM update_offer WHERE id_offer = :id_offer ORDER BY id_update_offer DESC");
+            $q = $bd->prepare("SELECT uo.*, u.profile_pic 
+                               FROM update_offer uo 
+                               LEFT JOIN user u ON uo.id_user = u.id_user 
+                               WHERE uo.id_offer = :id_offer 
+                               ORDER BY uo.id_update_offer DESC");
             $q->bindValue(':id_offer', (int)$id_offer, PDO::PARAM_INT);
             $q->execute();
             return $q->fetchAll(PDO::FETCH_ASSOC);

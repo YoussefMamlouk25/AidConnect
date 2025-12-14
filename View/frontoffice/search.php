@@ -79,6 +79,21 @@ function getInitials($name) {
     return substr($initials, 0, 2);
 }
 
+// Fonction pour obtenir le chemin de la photo de profil
+function getProfilePic($storedProfile) {
+    $defaultPic = 'assets/images/default_profile.png';
+    if (empty($storedProfile)) {
+        return $defaultPic;
+    }
+    $normalized = ltrim(trim($storedProfile), '/');
+    $relativePath = '../../' . $normalized;
+    $absolutePath = realpath(__DIR__ . '/../../' . $normalized);
+    if ($absolutePath !== false && file_exists($absolutePath)) {
+        return $relativePath;
+    }
+    return $defaultPic;
+}
+
 function formatDate($date) {
     if (empty($date)) return '';
     $dateObj = new DateTime($date);
@@ -170,13 +185,24 @@ ob_start();
                     $region = htmlspecialchars($row['region'] ?? '');
                     $dateFormatted = formatDate($row['date_creation'] ?? '');
                     $idPost = $row['id_post'];
+                    
+                    // Récupérer la photo de profil
+                    $storedProfile = trim($row['profile_pic'] ?? '');
+                    $profilePic = getProfilePic($storedProfile);
                     ?>
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="d-flex align-items-start mb-3">
+                                <?php if ($profilePic !== 'assets/images/default_profile.png' && file_exists(realpath(__DIR__ . '/../../' . ltrim($storedProfile, '/')))): ?>
+                                    <img src="<?php echo htmlspecialchars($profilePic); ?>" 
+                                         alt="<?php echo htmlspecialchars($authorName); ?>" 
+                                         class="rounded-circle me-3" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #e0e0e0;">
+                                <?php else: ?>
                                 <div class="avatar-circle me-3">
                                     <span><?php echo $initials; ?></span>
                                 </div>
+                                <?php endif; ?>
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1"><?php echo $authorName; ?></h6>
                                     <small class="text-muted"><?php echo $dateFormatted; ?></small>
@@ -204,10 +230,25 @@ ob_start();
                     $email = htmlspecialchars($offer['email'] ?? '');
                     $num = htmlspecialchars($offer['num'] ?? '');
                     $idOffer = $offer['id_offer'];
+                    
+                    // Récupérer la photo de profil
+                    $storedProfile = trim($offer['profile_pic'] ?? '');
+                    $profilePic = getProfilePic($storedProfile);
+                    $initials = getInitials($nom);
                     ?>
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="d-flex align-items-start mb-3">
+                                <?php if ($profilePic !== 'assets/images/default_profile.png' && file_exists(realpath(__DIR__ . '/../../' . ltrim($storedProfile, '/')))): ?>
+                                    <img src="<?php echo htmlspecialchars($profilePic); ?>" 
+                                         alt="<?php echo htmlspecialchars($nom); ?>" 
+                                         class="rounded-circle me-3" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #e0e0e0;">
+                                <?php else: ?>
+                                    <div class="avatar-circle me-3">
+                                        <span><?php echo $initials; ?></span>
+                                    </div>
+                                <?php endif; ?>
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1"><?php echo $nom; ?></h6>
                                     <span class="badge bg-primary"><?php echo $typeDon; ?></span>
