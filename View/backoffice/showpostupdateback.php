@@ -27,105 +27,101 @@ $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP
           || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
 $showFullPage = !$embed && !$isAjax;
 
-if ($showFullPage):
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AidConnect - Liste des Posts Résolus</title>
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/showofferback.css">
-    <link rel="stylesheet" href="assets/css/offer_actions.css">
-</head>
-<body>
-<div class="layout">
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-<?php
-endif;
-?>
-<link rel="stylesheet" href="assets/css/showofferback.css">
-<div class="offers-fragment">
-  <h2>Mises à jour / Résolutions</h2>
-  <div class="container">
-    <table class="post-table">
-      <thead>
-        <tr>
-          <th>ID update</th>
-          <th>ID post</th>
-          <th>Auteur (user)</th>
-          <th>Texte</th>
-          <th>Média</th>
-          <th>Intervention réalisée par</th>
-          <th>Temps réponse (jours)</th>
-          <th>Temps résolution (jours)</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($updates as $update): 
-          $post = $update['id_post'] ? $postController->getPostById($update['id_post']) : null; ?>
-        <tr>
-          <td><?= htmlspecialchars($update['id_update_post'] ?? '—') ?></td>
-          <td>
-            <?= htmlspecialchars($update['id_post'] ?? '—') ?>
-            <?php if ($post): ?><br><small><?= htmlspecialchars($post['titre'] ?? '') ?></small><?php endif; ?>
-          </td>
-          <td><?= $update['id_user'] ? 'User #'.(int)$update['id_user'] : 'Anonyme' ?></td>
-          <td><?= nl2br(htmlspecialchars(mb_strimwidth($update['texte'] ?? '',0,120,'…'))) ?></td>
-          <td>
-          <?php
-            if (!empty($update['media'])) {
-                $mediaUrl = '../../public/uploads/' . $update['media'];
-                $ext = strtolower(pathinfo($update['media'], PATHINFO_EXTENSION));
-                if (in_array($ext, ['mp4','mov','webm'])) {
-                    echo '<video src="' . htmlspecialchars($mediaUrl) . '" controls class="media-thumb"></video>';
-                } else {
-                    echo '<img src="' . htmlspecialchars($mediaUrl) . '" alt="Media image" class="media-thumb">';
-                }
-            } else {
-                echo 'Aucun';
-            }
-          ?>
-          </td>
-          <td><?= !empty($update['realiser']) ? nl2br(htmlspecialchars($update['realiser'])) : '<em>Non spécifié</em>' ?></td>
-          <td><?= htmlspecialchars($update['temp_reponse'] ?? '—') ?></td>
-          <td><?= htmlspecialchars($update['temp_resolue'] ?? '—') ?></td>
-          <td class="table-actions">
-            <a class="btn-action btn-edit"
-               href="updatepostupdate.php?id=<?= (int)($update['id_update_post'] ?? 0) ?>"
-               onclick="return typeof loadContent==='function' ? (loadContent('updatepostupdate.php?id=<?= (int)($update['id_update_post'] ?? 0) ?>&ajax=1'), false) : true;">
-               ✎ Éditer
-            </a>
-            <a class="btn-action btn-delete"
-               href="deletepostupdate.php?id=<?= (int)($update['id_update_post'] ?? 0) ?>"
-               onclick="return typeof loadContent==='function' ? (loadContent('deletepostupdate.php?id=<?= (int)($update['id_update_post'] ?? 0) ?>&ajax=1'), false) : confirm('Supprimer cette mise à jour ?');">
-               🗑 Supprimer
-            </a>
-          </td>
-        </tr>
-        <?php endforeach; ?>
-        <?php if (empty($updates)): ?>
-          <tr><td colspan="9" class="no-data">Aucune mise à jour</td></tr>
-        <?php endif; ?>
-      </tbody>
-    </table>
-  </div>
-</div>
-<style>
-.media-thumb {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 6px;
-    margin: 2px;
+// Si c'est une page complète, utiliser le layout
+if ($showFullPage) {
+    require_once 'layout.php';
+    ob_start();
 }
-</style>
-<?php if ($showFullPage): ?>
+?>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="header-title">
+                    <h4 class="card-title mb-0">Posts Résolus</h4>
+                    <p class="text-muted mb-0">Liste complète des posts résolus AidConnect.</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">ID update</th>
+                                <th scope="col">ID post</th>
+                                <th scope="col">Auteur</th>
+                                <th scope="col">Texte</th>
+                                <th scope="col">Média</th>
+                                <th scope="col">Intervention</th>
+                                <th scope="col">Temps réponse</th>
+                                <th scope="col">Temps résolution</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($updates)): ?>
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        Aucune mise à jour pour le moment.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($updates as $update): 
+                                    $post = $update['id_post'] ? $postController->getPostById($update['id_post']) : null; 
+                                ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($update['id_update_post'] ?? '—') ?></td>
+                                    <td>
+                                        <?= htmlspecialchars($update['id_post'] ?? '—') ?>
+                                        <?php if ($post): ?><br><small class="text-muted"><?= htmlspecialchars($post['titre'] ?? '') ?></small><?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            <?= $update['id_user'] ? 'User #'.(int)$update['id_user'] : 'Anonyme' ?>
+                                        </span>
+                                    </td>
+                                    <td><?= nl2br(htmlspecialchars(mb_strimwidth($update['texte'] ?? '',0,120,'…'))) ?></td>
+                                    <td>
+                                        <?php
+                                            if (!empty($update['media'])) {
+                                                $mediaUrl = '../../public/uploads/' . $update['media'];
+                                                $ext = strtolower(pathinfo($update['media'], PATHINFO_EXTENSION));
+                                                if (in_array($ext, ['mp4','mov','webm'])) {
+                                                    echo '<video src="' . htmlspecialchars($mediaUrl) . '" controls style="width:52px;height:52px;object-fit:cover;border-radius:4px;"></video>';
+                                                } else {
+                                                    echo '<img src="' . htmlspecialchars($mediaUrl) . '" alt="Media" style="width:52px;height:52px;object-fit:cover;border-radius:4px;">';
+                                                }
+                                            } else {
+                                                echo '—';
+                                            }
+                                        ?>
+                                    </td>
+                                    <td><?= !empty($update['realiser']) ? nl2br(htmlspecialchars($update['realiser'])) : '<em class="text-muted">Non spécifié</em>' ?></td>
+                                    <td><?= htmlspecialchars($update['temp_reponse'] ?? '—') ?></td>
+                                    <td><?= htmlspecialchars($update['temp_resolue'] ?? '—') ?></td>
+                                    <td class="text-end">
+                                        <a href="updatepostupdate.php?id=<?= (int)($update['id_update_post'] ?? 0) ?>&ajax=1" class="btn btn-sm btn-outline-primary me-1" onclick="if(typeof loadContent==='function'){ loadContent('updatepostupdate.php?id=<?= (int)($update['id_update_post'] ?? 0) ?>&ajax=1'); return false; }" title="Éditer">
+                                            <i class="ri-edit-line"></i>
+                                        </a>
+                                        <a href="deletepostupdate.php?id=<?= (int)($update['id_update_post'] ?? 0) ?>&ajax=1" class="btn btn-sm btn-outline-danger" onclick="if(typeof loadContent==='function'){ loadContent('deletepostupdate.php?id=<?= (int)($update['id_update_post'] ?? 0) ?>&ajax=1'); return false; }" title="Supprimer">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-</body>
-</html>
-<?php endif; ?>
+<?php
+if ($showFullPage) {
+    $content = ob_get_clean();
+    renderBackofficeLayout('Posts Résolus', $content);
+} else {
+    // Si AJAX, inclure le CSS si nécessaire
+    echo '<link rel="stylesheet" href="assets/css/showofferback.css">';
+}
