@@ -638,7 +638,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 Pour toute question ou problème :
 
-- 📧 Email : support@aidconnect.com
+- 📧 Email : youssefmamlouk72@gmail.com
 - 🐛 Issues : [GitHub Issues](https://github.com/aidconnect/issues)
 - 📖 Documentation : Voir ce README
 
